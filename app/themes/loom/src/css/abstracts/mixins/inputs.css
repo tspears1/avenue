@@ -1,0 +1,24 @@
+@define-mixin input-reset {
+    appearance: none;
+    background: none;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    color: unset;
+    font: inherit;
+    line-height: inherit;
+    margin: 0;
+    outline: none;
+    padding: 0;
+    text-align: inherit;
+    text-decoration: none;
+    width: auto;
+}
+
+/* Note: input-checkbox, input-radio, and input-select mixins are very complex */
+/* with nested styles and media query dependencies. */
+/* These should be implemented as component-specific CSS classes instead. */
+
+/* Example checkbox implementation would be in a dedicated component file */
+/* Example radio implementation would be in a dedicated component file */
+/* Example select implementation would be in a dedicated component file */

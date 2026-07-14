@@ -1,0 +1,50 @@
+/* Grid mixins - complex SCSS logic requires manual implementation */
+
+/**
+ * Grid Variable Setup
+ * These should be defined in your base CSS file or component-specific styles
+ *
+ * Example grid variables:
+ * :root {
+ *   --grid-columns: 12;
+ *   --grid-column-gap: var(--column-gap, 0px);
+ *   --grid-row-gap: var(--section-gap, var(--row-gap, 1.5rem));
+ *   --grid-gutter-width: var(--global-spacing, var(--breakpoint-gap));
+ *   --grid-column-width: calc((100vw - 2 * var(--grid-gutter-width) - 11 * var(--grid-column-gap)) / 12);
+ *   --grid-max-width-main: calc(var(--breakpoint-max-width) - var(--grid-gutter-width, 0px) * 2);
+ * }
+ */
+
+/**
+ * Fluid Container Grid
+ * Define this directly in your container class
+ *
+ * Example:
+ * .container {
+ *   column-gap: var(--grid-column-gap);
+ *   display: grid;
+ *   row-gap: var(--grid-row-gap);
+ *   grid-template-columns:
+ *     [wide-start] var(--grid-gutter-width)
+ *     [main-start] repeat(6, 1fr) [center] repeat(6, 1fr)
+ *     [main-end] var(--grid-gutter-width) [wide-end];
+ * }
+ */
+
+/**
+ * Inner Grid
+ * For nested grids without gutters
+ *
+ * Example:
+ * .inner-grid {
+ *   column-gap: var(--grid-column-gap);
+ *   display: grid;
+ *   row-gap: var(--grid-row-gap);
+ *   grid-template-columns:
+ *     [main-start] repeat(6, minmax(0, var(--grid-max-width-column)))
+ *     [center] repeat(6, minmax(0, var(--grid-max-width-column)))
+ *     [main-end];
+ * }
+ */
+
+/* TODO: Implement grid layouts directly in component CSS files */

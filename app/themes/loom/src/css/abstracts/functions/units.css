@@ -1,0 +1,20 @@
+/**
+ * UNIT CONVERSION
+ *
+ * SCSS unit conversion functions are not needed in modern CSS.
+ * Use CSS `calc()` directly for unit conversions.
+ *
+ * Converting px to rem:
+ * Instead of: rem(24)
+ * Use: calc(24 / 16 * 1rem) or just write 1.5rem
+ *
+ * Converting px to em:
+ * Instead of: em(24, 16)
+ * Use: calc(24 / 16 * 1em) or just write 1.5em
+ *
+ * Stripping units:
+ * Not possible in CSS. Structure your calculations to avoid needing this.
+ *
+ * Note: Most modern tools support rem values directly, so manual conversion
+ * is often unnecessary. Consider using rem values directly in your code.
+ */

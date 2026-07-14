@@ -1,0 +1,23 @@
+@define-mixin focus-style {
+    outline: var(--outline-width, 3px) solid
+        var(--outline-color, var(--color-red, currentColor));
+    outline-offset: var(--outline-offset, 4px);
+}
+
+@define-mixin focus {
+    &:focus {
+        [data-whatintent='keyboard'] & {
+            @mixin focus-style;
+            @mixin-content;
+        }
+    }
+}
+
+@define-mixin focus-within {
+    &:focus-within {
+        [data-whatintent='keyboard'] & {
+            @mixin focus-style;
+            @mixin-content;
+        }
+    }
+}

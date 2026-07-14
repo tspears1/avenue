@@ -1,0 +1,71 @@
+@define-mixin heading-1 $leading {
+    font-family: var(--font-heading);
+    font-weight: var(--font-weight-heading-bold);
+    font-size: var(--heading-size-1);
+    line-height: $(leading);
+}
+
+@define-mixin heading-2 $leading {
+    font-family: var(--font-heading);
+    font-weight: var(--font-weight-heading-bold);
+    font-size: var(--heading-size-2);
+    line-height: $(leading);
+}
+
+@define-mixin heading-3 $leading {
+    font-family: var(--font-heading);
+    font-weight: var(--font-weight-heading-bold);
+    font-size: var(--heading-size-3);
+    line-height: $(leading);
+}
+
+@define-mixin heading-4 $leading {
+    font-family: var(--font-heading);
+    font-weight: var(--font-weight-heading-bold);
+    font-size: var(--heading-size-4);
+    line-height: $(leading);
+}
+
+@define-mixin heading-5 $leading {
+    font-family: var(--font-heading);
+    font-weight: var(--font-weight-heading-bold);
+    font-size: var(--heading-size-5);
+    line-height: $(leading);
+}
+
+@define-mixin heading-6 $leading {
+    font-family: var(--font-heading);
+    font-weight: var(--font-weight-heading-bold);
+    font-size: var(--heading-size-6);
+    line-height: $(leading);
+}
+
+@define-mixin text-xs {
+    font-family: var(--font-text);
+    font-size: var(--text-size-xs);
+    line-height: var(--leading-paragraph);
+}
+
+@define-mixin text-sm {
+    font-family: var(--font-text);
+    font-size: var(--text-size-sm);
+    line-height: var(--leading-paragraph);
+}
+
+@define-mixin text-md {
+    font-family: var(--font-text);
+    font-size: var(--text-size-md);
+    line-height: var(--leading-paragraph);
+}
+
+@define-mixin text-lg {
+    font-family: var(--font-text);
+    font-size: var(--text-size-lg);
+    line-height: var(--leading-paragraph);
+}
+
+@define-mixin text-tight {
+    font-family: var(--font-text);
+    font-size: var(--text-size-md);
+    line-height: var(--leading-normal);
+}

@@ -1,0 +1,108 @@
+/* a mound is a stack on the z-axis.
+ * a mound is made up of elevations.
+ * the bottom of the mound is the surface (0).
+ * The top of the mound is the summit (highest elevation).
+ * elevations are relative to the surface (0), not the global z-index.
+ * elevations are whole numbers (no decimals).
+ * elevations are non-negative (0 or greater).
+ */
+
+:where([class*='use--mound']) {
+    align-items: var(--mound-align-items, normal);
+    display: grid;
+    grid-template-areas: var(--mound-grid-template-areas, 'mound');
+    justify-items: var(--mound-justify-items, normal);
+    position: relative;
+
+    /* Grid mods for mound */
+    &[class*='\:start-start'] {
+        --mound-align-items: start;
+        --mound-justify-items: start;
+    }
+
+    &[class*='\:start-center'] {
+        --mound-align-items: start;
+        --mound-justify-items: center;
+    }
+
+    &[class*='\:start-end'] {
+        --mound-align-items: start;
+        --mound-justify-items: end;
+    }
+
+    &[class*='\:center-start'] {
+        --mound-align-items: center;
+        --mound-justify-items: start;
+    }
+
+    &[class*='\:center-center'] {
+        --mound-align-items: center;
+        --mound-justify-items: center;
+    }
+
+    &[class*='\:center-end'] {
+        --mound-align-items: center;
+        --mound-justify-items: end;
+    }
+
+    &[class*='\:end-start'] {
+        --mound-align-items: end;
+        --mound-justify-items: start;
+    }
+
+    &[class*='\:end-center'] {
+        --mound-align-items: end;
+        --mound-justify-items: center;
+    }
+
+    &[class*='\:end-end'] {
+        --mound-align-items: end;
+        --mound-justify-items: end;
+    }
+
+    &[class*='\:start-space-between'] {
+        --mound-align-items: start;
+        --mound-justify-items: space-between;
+    }
+
+    &[class*='\:center-space-between'] {
+        --mound-align-items: center;
+        --mound-justify-items: space-between;
+    }
+
+    &[class*='\:end-space-between'] {
+        --mound-align-items: end;
+        --mound-justify-items: space-between;
+    }
+
+    &[class*='\:children'] {
+        > * {
+            grid-area: mound;
+        }
+    }
+}
+
+:where([class*='use--on-mound']) {
+    grid-area: var(--mound-grid-area, mound);
+    position: relative;
+    z-index: var(--mound-elevation, 0);
+
+    &[class*='\:elevation-0'] {
+        --mound-elevation: 0;
+    }
+    &[class*='\:elevation-1'] {
+        --mound-elevation: 1;
+    }
+    &[class*='\:elevation-2'] {
+        --mound-elevation: 2;
+    }
+    &[class*='\:elevation-3'] {
+        --mound-elevation: 3;
+    }
+    &[class*='\:elevation-4'] {
+        --mound-elevation: 4;
+    }
+    &[class*='\:elevation-5'] {
+        --mound-elevation: 5;
+    }
+}

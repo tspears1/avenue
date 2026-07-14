@@ -1,0 +1,7 @@
+:where(a) {
+    color: inherit;
+}
+
+:where(hr) {
+    border-style: solid;
+}

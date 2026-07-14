@@ -1,0 +1,9 @@
+[class*='use--stack'] {
+    align-items: var(--stack-align-items, start);
+    display: grid;
+    gap: var(--stack-gap, var(--size-fluid-2));
+    justify-items: var(--stack-justify-items, start);
+    text-align: var(--stack-justify-items, start);
+
+    @add-mixin util-mods stack-;
+}

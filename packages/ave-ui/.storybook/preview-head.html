@@ -1,0 +1,33 @@
+<style>
+    * {
+        font-family: var(--font-monospace-code);
+    }
+
+    /* Canvas view - main story container */
+    .sb-show-main.sb-main-padded {
+        max-width: 1440px !important;
+        margin: 0 auto !important;
+        padding: 2rem !important;
+    }
+
+    /* Docs view - override Emotion CSS-in-JS styles */
+    .sb.sbdocs.sbdocs-wrapper > div[class*='css-'],
+    .sb.sbdocs > div[class*='css-'] {
+        max-width: 1440px !important;
+    }
+
+    /* More specific targeting */
+    div.sb.sbdocs div[class*='css-'] {
+        max-width: 1440px !important;
+    }
+
+    /* Story previews within docs */
+    .sbdocs .sbdocs-preview {
+        max-width: 100% !important;
+    }
+
+    /* Nuclear option - target by attribute selector */
+    div[class*='css-'][class*='sbdocs'] {
+        max-width: 1440px !important;
+    }
+</style>

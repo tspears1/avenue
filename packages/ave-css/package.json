@@ -1,0 +1,55 @@
+{
+   "name": "ave-css",
+   "version": "0.0.1",
+   "type": "module",
+   "description": "Shared CSS foundations and PostCSS tooling for Avenue projects",
+   "main": "index.js",
+   "scripts": {
+      "clean": "node -e \"import('node:fs').then(({rmSync})=>rmSync('dist',{recursive:true,force:true}))\"",
+      "build:styles": "postcss src/styles/*.css --base src/styles --dir dist/styles --syntax postcss-scss",
+      "build": "pnpm run clean && pnpm run build:styles",
+      "prepack": "pnpm run build",
+      "watch:styles": "postcss src/styles/*.css --base src/styles --dir dist/styles --syntax postcss-scss --watch"
+   },
+   "exports": {
+      ".": "./index.js",
+      "./styles": "./dist/styles/core.css",
+      "./styles/core": "./dist/styles/core.css",
+      "./styles/layers": "./dist/styles/layers.css",
+      "./styles/breakpoints": "./dist/styles/breakpoints.css",
+      "./styles/variables": "./dist/styles/variables.css",
+      "./styles/utils": "./dist/styles/utils.css",
+      "./styles/utils/*": "./src/styles/utilities/*",
+      "./mixins": "./src/mixins/index.css",
+      "./functions": "./src/functions/index.js",
+      "./postcss": "./postcss.config.js",
+      "./browserslist": "./.browserslistrc",
+      "./vite": "./vite.config.js"
+   },
+   "files": [
+      ".browserslistrc",
+      "dist",
+      "index.js",
+      "postcss.config.js",
+      "vite.config.js",
+      "src"
+   ],
+   "dependencies": {
+      "browserslist": "^4.28.2",
+      "lightningcss": "^1.32.0",
+      "postcss": "^8.5.15",
+      "postcss-advanced-variables": "^5.0.0",
+      "postcss-functions": "^4.0.2",
+      "postcss-import": "^16.1.1",
+      "postcss-lightningcss": "^1.1.0",
+      "postcss-mixins": "^12.1.2",
+      "postcss-nesting": "^14.0.0"
+   },
+   "devDependencies": {
+      "postcss-cli": "^11.0.1",
+      "postcss-scss": "^4.0.9"
+   },
+   "peerDependencies": {
+      "vite": "^8.0.0"
+   }
+}

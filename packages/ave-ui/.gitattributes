@@ -1,0 +1,2 @@
+# Mark generated files as such in GitHub
+src/generated/* linguist-generated=true

@@ -1,0 +1,17 @@
+/* Container query mixin - simplified for PostCSS */
+/* Note: PostCSS doesn't support complex conditional logic like SCSS @if statements */
+/* Container queries should be written directly with specific breakpoint values */
+
+/**
+ * Example usage - write container queries directly:
+ *
+ * @container (min-width: 768px) {
+ *   ...styles...
+ * }
+ *
+ * @container my-container (min-width: 992px) {
+ *   ...styles...
+ * }
+ */
+
+/* For named breakpoint values, reference them from your breakpoint config */

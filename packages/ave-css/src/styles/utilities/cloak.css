@@ -1,0 +1,4 @@
+.use--cloak:where(:not([data-component-loaded])) {
+	opacity: 0;
+	visibility: hidden;
+}

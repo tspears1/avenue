@@ -1,0 +1,3 @@
+:where(.sr-only, .visually-hidden, [visually-hidden], .u-visually-hidden) {
+    @mixin visually-hidden;
+}

@@ -1,0 +1,17 @@
+/**
+ * @define-mixin generate-color-variables
+ *
+ * Generates CSS variables for each color.
+ * Note: PostCSS doesn't support @each loops - needs manual implementation
+ * or use a different approach with custom properties
+ *
+ * Usage: Define colors directly in CSS instead of using this mixin
+ */
+
+/* TODO: This mixin requires manual color variable definition or PostCSS plugin for iteration */
+/* Example manual approach:
+ * :root {
+ *   --color-primary: #007bff;
+ *   --color-secondary: #6c757d;
+ * }
+ */

@@ -1,0 +1,30 @@
+{
+   "name": "button",
+   "displayName": "Button",
+   "description": "Interactive button component with multiple theme variants",
+   "version": "1.0.0",
+   "tag": "ave-button",
+   "schema": "./button.schema.json",
+   "dependencies": {
+      "required": [],
+      "optional": []
+   },
+   "exports": {
+      "php": [
+         "button.class.php",
+         "button.props.php"
+      ],
+      "acf": [
+         "button.acf.php"
+      ]
+   },
+   "provides": {
+      "render": "render_button",
+      "props": "ButtonProps",
+      "acfGroup": "group_button_component"
+   },
+   "supports": {
+      "block": false,
+      "acf": true
+   }
+}

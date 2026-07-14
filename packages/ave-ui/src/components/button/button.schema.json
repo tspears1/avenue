@@ -1,0 +1,45 @@
+{
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "$id": "https://github.com/bostonuniversity/avenue/packages/ave-ui/src/components/button/button.schema.json",
+   "title": "Button",
+   "type": "object",
+   "props": {
+      "root": {
+         "label": {
+            "type": "string",
+            "required": true
+         },
+         "variant": {
+            "type": "enum",
+            "values": ["primary", "secondary", "outline"],
+            "default": "primary"
+         },
+         "href": {
+            "type": "string",
+            "required": false
+         },
+         "icon": {
+            "type": "string",
+            "required": false
+         }
+      }
+   },
+   "attributes": {
+
+   },
+   "slots": {
+      "root": {
+         "prefix": {
+            "allowed": ["html"],
+            "optional": true
+         },
+         "suffix": {
+            "allowed": ["html"],
+            "optional": true
+         }
+      }
+   },
+   "classes": {
+      "root": {}
+   }
+}

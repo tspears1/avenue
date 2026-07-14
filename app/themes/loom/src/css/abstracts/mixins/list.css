@@ -1,0 +1,81 @@
+@define-mixin list {
+    --list-row-gap: var(--size-1);
+    --list-offset: 1.8em;
+    --list-maker-size: 0.5em;
+    --list-mark-inset-block-start: calc(0.5lh - (var(--list-maker-size) * 0.5));
+    --list-mark-inset-inline-start: calc(
+        (var(--list-maker-size) * -1) - (var(--list-offset) * 0.5)
+    );
+    display: grid;
+    gap: var(--list-row-gap);
+    list-style: none;
+    margin: 0;
+    padding: 0 0 0 var(--list-offset);
+
+    :where(li) {
+        position: relative;
+
+        &::before {
+            content: '';
+            display: block;
+            inset-block-start: var(--list-mark-inset-block-start);
+            inset-inline-start: var(--list-mark-inset-inline-start);
+            position: absolute;
+        }
+
+        > :where(ul, ol) {
+            padding-block-start: var(--list-row-gap);
+            padding-inline-start: var(--list-offset);
+        }
+    }
+
+    &:where(ul) {
+        :where(li) {
+            &::before {
+                background-color: var(--color-mono-500);
+                block-size: var(--list-maker-size);
+                border-radius: var(--radius-round);
+                inline-size: var(--list-maker-size);
+            }
+
+            > :where(ul) {
+                > :where(li) {
+                    &::before {
+                        background-color: transparent;
+                        border: var(--border-size-1) solid var(--color-mono-500);
+                    }
+                }
+            }
+        }
+    }
+
+    &:where(ol) {
+        --list-maker-size: 1em;
+        --list-mark-inset-block-start: 0;
+        counter-reset: list-item;
+
+        :where(li) {
+            &::before {
+                color: var(--color-mono-500);
+                content: counters(list-item, '') '.';
+                font-weight: var(--font-weight-bold);
+            }
+
+            > :where(ol) {
+                counter-reset: list-sub-item;
+                > :where(li) {
+                    &::before {
+                        content: counters(list-sub-item, '') '.';
+                        counter-increment: list-sub-item;
+                    }
+                }
+            }
+        }
+    }
+}
+
+@define-mixin list-reset {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}

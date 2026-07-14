@@ -1,0 +1,66 @@
+:where([class*='use--layer']) {
+    align-items: var(--layer-align-items, normal);
+    display: grid;
+    justify-items: var(--layer-justify-items, normal);
+
+    /* Grid mods for layer */
+    &[class*='\:start-start'] {
+        --layer-align-items: start;
+        --layer-justify-items: start;
+    }
+
+    &[class*='\:start-center'] {
+        --layer-align-items: start;
+        --layer-justify-items: center;
+    }
+
+    &[class*='\:start-end'] {
+        --layer-align-items: start;
+        --layer-justify-items: end;
+    }
+
+    &[class*='\:center-start'] {
+        --layer-align-items: center;
+        --layer-justify-items: start;
+    }
+
+    &[class*='\:center-center'] {
+        --layer-align-items: center;
+        --layer-justify-items: center;
+    }
+
+    &[class*='\:center-end'] {
+        --layer-align-items: center;
+        --layer-justify-items: end;
+    }
+
+    &[class*='\:end-start'] {
+        --layer-align-items: end;
+        --layer-justify-items: start;
+    }
+
+    &[class*='\:end-center'] {
+        --layer-align-items: end;
+        --layer-justify-items: center;
+    }
+
+    &[class*='\:end-end'] {
+        --layer-align-items: end;
+        --layer-justify-items: end;
+    }
+
+    &[class*='\:start-space-between'] {
+        --layer-align-items: start;
+        --layer-justify-items: space-between;
+    }
+
+    &[class*='\:center-space-between'] {
+        --layer-align-items: center;
+        --layer-justify-items: space-between;
+    }
+
+    &[class*='\:end-space-between'] {
+        --layer-align-items: end;
+        --layer-justify-items: space-between;
+    }
+}

@@ -1,0 +1,103 @@
+[class*='if--show-'] {
+    display: none;
+}
+
+[class*='if--hide-'] {
+    display: var(--element-display, block);
+}
+
+.if--show-xxs {
+    @media (--bp-xxs) {
+        display: var(--element-display, block);
+    }
+}
+
+.if--show-xs {
+    @media (--bp-xs) {
+        display: var(--element-display, block);
+    }
+}
+
+.if--show-sm {
+    @media (--bp-sm) {
+        display: var(--element-display, block);
+    }
+}
+
+.if--show-md {
+    @media (--bp-md) {
+        display: var(--element-display, block);
+    }
+}
+
+.if--show-lg {
+    @media (--bp-lg) {
+        display: var(--element-display, block);
+    }
+}
+
+.if--show-xl {
+    @media (--bp-xl) {
+        display: var(--element-display, block);
+    }
+}
+
+.if--show-xxl {
+    @media (--bp-xxl) {
+        display: var(--element-display, block);
+    }
+}
+
+.if--hide-xxs {
+    @media (--bp-xxs) {
+        display: none;
+    }
+}
+
+.if--hide-xs {
+    @media (--bp-xs) {
+        display: none;
+    }
+}
+
+.if--hide-sm {
+    @media (--bp-sm) {
+        display: none;
+    }
+}
+
+.if--hide-md {
+    @media (--bp-md) {
+        display: none;
+    }
+}
+
+.if--hide-lg {
+    @media (--bp-lg) {
+        display: none;
+    }
+}
+
+.if--hide-xl {
+    @media (--bp-xl) {
+        display: none;
+    }
+}
+
+.if--hide-xxl {
+    @media (--bp-xxl) {
+        display: none;
+    }
+}
+
+.if--show-mobile {
+    @media (--bp-md) {
+        display: var(--element-display, block);
+    }
+}
+
+.if--hide-mobile {
+    @media (--bp-md) {
+        display: none;
+    }
+}

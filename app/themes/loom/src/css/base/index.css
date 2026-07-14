@@ -1,0 +1,10 @@
+/* Establish layer order. */
+@layer reset, variables, setup;
+
+/* Load partials into layers. */
+@import './reset.css' layer(reset);
+@import './primitive-variables.css' layer(variables);
+@import './theme-variables.css' layer(variables);
+@import './setup.css' layer(setup);
+@import './fonts.css' layer(setup);
+@import './typography.css' layer(setup);

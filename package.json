@@ -1,0 +1,20 @@
+{
+    "name": "avenue",
+    "description": "not a foundation but sort of a framework.",
+    "version": "0.0.1",
+    "main": "index.js",
+    "scripts": {
+        "local-symlink": "bash ./bin/localdev-symlink.sh"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devEngines": {
+        "packageManager": {
+            "name": "pnpm",
+            "version": "^11.5.2",
+            "onFail": "download"
+        }
+    },
+    "type": "module"
+}

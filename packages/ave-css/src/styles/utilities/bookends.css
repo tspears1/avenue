@@ -1,0 +1,30 @@
+:where([class*='use--bookends']) {
+	align-items: center;
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--bookends-gap, var(--size-fluid-2));
+	justify-content: space-between;
+
+	> * {
+		margin-block: 0;
+		margin-inline: 0;
+	}
+}
+
+:where([class*='use--bookends']),
+:where([class*='use--bookends'][class*='\:row']) {
+	block-size: auto;
+	flex-direction: row;
+	inline-size: 100%;
+}
+
+:where([class*='use--bookends']:not([class*='\:column']) > :first-child) {
+    flex: 0 1 auto;
+}
+
+:where([class*='use--bookends'][class*='\:column']) {
+	align-self: stretch;
+	block-size: auto;
+	flex-direction: column;
+	inline-size: auto;
+}

@@ -1,0 +1,20 @@
+:where(html) {
+    color-scheme: light dark;
+}
+
+:where(html, .swatch--light, [data-swatch='light']) {
+    --color-surface-oklch: var(--color-1-oklch, var(--color-white-oklch));
+    --color-text-oklch: var(--color-2-oklch, var(--color-black-oklch));
+}
+
+:where(.swatch--dark, [data-swatch='dark']) {
+    --color-surface-oklch: var(--color-2-oklch, var(--color-black-oklch));
+    --color-text-oklch: var(--color-1-oklch, var(--color-white-oklch));
+}
+
+@media (prefers-color-scheme: dark) {
+    :where(html) {
+        --color-surface-oklch: var(--color-2-oklch, var(--color-black-oklch));
+        --color-text-oklch: var(--color-1-oklch, var(--color-white-oklch));
+    }
+}

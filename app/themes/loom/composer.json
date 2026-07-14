@@ -1,0 +1,50 @@
+{
+    "name": "bostonuniversity/loom",
+    "autoload": {
+        "psr-4": {
+            "Loom\\": [
+                "config/ACF/",
+                "config/Core/",
+                "config/"
+            ]
+        }
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://connect.advancedcustomfields.com"
+        },
+        {
+            "type": "composer",
+            "url": "https://wpackagist.org"
+        }
+    ],
+    "require": {
+        "timber/timber": "^2.5",
+        "wpengine/advanced-custom-fields-pro": "^6.8.4"
+    },
+    "require-dev": {
+        "phpstan/extension-installer": "^1.4",
+        "szepeviktor/phpstan-wordpress": "^2.0"
+    },
+    "extra": {
+        "installer-paths": {
+            "vendor/{$name}/": [
+                "wpengine/advanced-custom-fields-pro"
+            ]
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "allow-plugins": {
+            "composer/installers": true,
+            "phpstan/extension-installer": true
+        }
+    },
+    "suggest": {},
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "scripts": {}
+}

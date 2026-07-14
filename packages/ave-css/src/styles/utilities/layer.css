@@ -1,0 +1,7 @@
+:where([class*='use--layer']) {
+    align-items: var(--layer-align-items, normal);
+    display: grid;
+    justify-items: var(--layer-justify-items, normal);
+
+    @add-mixin util-mods layer-;
+}

@@ -1,0 +1,23 @@
+/**
+ * LIST OPERATIONS
+ *
+ * SCSS list manipulation functions are not needed in CSS.
+ * CSS does not have list data structures or iteration.
+ *
+ * These SCSS functions were used for:
+ * - first() - Get first item in a list
+ * - last() - Get last item in a list
+ * - prepend() - Add item to start of list
+ * - slice() - Get subset of list
+ * - reverse() - Reverse list order
+ * - next-key() - Get next item in list
+ * - join-lists() - Combine multiple lists
+ *
+ * In CSS, structure your values directly:
+ * - Use space-separated values where needed: margin: 1rem 2rem 1rem 2rem;
+ * - Use custom properties for individual values: var(--spacing-1), var(--spacing-2)
+ * - Use nth-child() selectors for list-like DOM operations
+ *
+ * If you need list-like operations, handle them in your build process
+ * or use CSS Grid/Flexbox for layout-based sequencing.
+ */

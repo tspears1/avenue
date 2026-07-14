@@ -1,0 +1,18 @@
+# pnpm-workspace.yaml
+packages:
+  - 'packages/*'
+  - 'extensions/*'
+  - 'app/themes/*'
+allowBuilds:
+  '@parcel/watcher': true
+  esbuild: true
+minimumReleaseAgeExclude:
+  - '@storybook/addon-a11y@10.5.0'
+  - '@storybook/addon-docs@10.5.0'
+  - '@storybook/addon-vitest@10.5.0'
+  - '@storybook/builder-vite@10.5.0'
+  - '@storybook/csf-plugin@10.5.0'
+  - '@storybook/react-dom-shim@10.5.0'
+  - '@storybook/web-components-vite@10.5.0'
+  - '@storybook/web-components@10.5.0'
+  - storybook@10.5.0

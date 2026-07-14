@@ -1,0 +1,29 @@
+/**
+ * TYPE CHECKING
+ *
+ * SCSS type checking functions are not needed in CSS.
+ * CSS is dynamically typed and does not have type validation.
+ *
+ * These SCSS functions were used for validation:
+ * - is-number(), is-string(), is-color()
+ * - is-time(), is-angle(), is-frequency()
+ * - is-relative-length(), is-absolute-length(), is-percentage()
+ * - is-position(), is-breakpoint()
+ * - is-hex(), is-rgb(), is-hsl(), etc.
+ *
+ * In CSS:
+ * - Values are validated by the browser at parse time
+ * - Invalid values fall back to initial or inherited values
+ * - Use @supports for feature detection, not type checking
+ * - Use @container or @media for breakpoint/viewport checks
+ *
+ * Example feature detection:
+ * @supports (display: grid) {
+ *   .element { display: grid; }
+ * }
+ *
+ * Example container query:
+ * @container (min-width: 768px) {
+ *   .element { font-size: 1.5rem; }
+ * }
+ */

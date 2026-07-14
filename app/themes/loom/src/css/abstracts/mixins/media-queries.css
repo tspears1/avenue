@@ -1,0 +1,36 @@
+/* === Hover @media query mixin ============================================ */
+/* $any (boolean): True will query 'any-hover', false will query 'hover'. Default is true. */
+/* $value (string): The value to query. Options: 'hover' or 'none'. Default is 'hover'. */
+
+@define-mixin hover {
+    @media (any-hover: hover) {
+        &:hover {
+            @mixin-content;
+        }
+    }
+}
+
+/* === Pointer @media query mixin ============================================ */
+/* $any (boolean): True will query 'any-pointer', false will query 'pointer'. Default is false. */
+/* $value (string): The value to query. Options: 'fine', 'coarse', or 'none'. Default is 'coarse'. */
+
+@define-mixin pointer-coarse {
+    @media (pointer: coarse) {
+        @mixin-content;
+    }
+}
+
+@define-mixin pointer-fine {
+    @media (pointer: fine) {
+        @mixin-content;
+    }
+}
+
+/* === Prefers Reduced Motion @media query mixin ============================================ */
+/* $value (string): The value to query. Options: 'reduce' or 'no-preference'. Default is 'reduce'. */
+
+@define-mixin prefers-reduced-motion $value {
+    @media (prefers-reduced-motion: $(value)) {
+        @mixin-content;
+    }
+}

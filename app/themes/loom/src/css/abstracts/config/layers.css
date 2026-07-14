@@ -1,0 +1,2 @@
+/* Establish layer order. */
+@layer base, utilities, vendor, components, blocks, templates, pages, theme, break-glass;

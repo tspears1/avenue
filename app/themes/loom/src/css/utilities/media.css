@@ -1,0 +1,25 @@
+:where(.use--image-fit) {
+    block-size: 100%;
+    display: block;
+    inline-size: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+:where([class*='use--image-fit']) {
+    &[class*='\:contain'] {
+        block-size: 100%;
+        display: block;
+        inline-size: 100%;
+        object-fit: contain;
+        object-position: center;
+    }
+
+    &[class*='\:cover'] {
+        block-size: 100%;
+        display: block;
+        inline-size: 100%;
+        object-fit: cover;
+        object-position: center;
+    }
+}

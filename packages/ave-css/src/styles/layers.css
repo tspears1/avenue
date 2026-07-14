@@ -1,0 +1,2 @@
+/* Establish shared cascade layer order across all consumers. */
+@layer reset, base, utilities, plugins, components, blocks, templates, pages, theme, break-glass;

@@ -1,0 +1,34 @@
+/**
+ * MATH OPERATIONS
+ *
+ * SCSS math functions are not needed in modern CSS.
+ * Use CSS `calc()` and math functions directly.
+ *
+ * Basic arithmetic:
+ * Use calc() for addition, subtraction, multiplication, division
+ * Example: calc(100% - 2rem), calc(var(--size) * 1.5)
+ *
+ * Rounding to fixed decimals:
+ * Not directly possible in CSS. Use rounded values or let the browser handle precision.
+ *
+ * Aspect ratio calculations:
+ * Instead of: get-ratio-h($ratio, $width)
+ * Use: aspect-ratio: 16 / 9; (let CSS calculate height)
+ * Or: height: calc(100% / var(--ratio));
+ *
+ * Advanced math functions (Browser support: Chrome 111+, Safari 15.4+, Firefox 118+):
+ * - round(nearest|up|down|to-zero, value, step)
+ * - mod(dividend, divisor)
+ * - rem(dividend, divisor)
+ * - sin(), cos(), tan()
+ * - asin(), acos(), atan(), atan2()
+ * - pow(base, exponent)
+ * - sqrt(value)
+ * - hypot(values...)
+ * - abs(value)
+ * - sign(value)
+ * - min(values...), max(values...), clamp(min, value, max)
+ *
+ * Decimal to hex conversion:
+ * Not needed in CSS. Use hex values directly: #ff0000
+ */

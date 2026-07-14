@@ -1,0 +1,5 @@
+:where(html) {
+    --color-surface-oklch: var(--color-1-oklch, 1 0 0);
+    --color-text-oklch: var(--color-2-oklch, 0 0 0);
+    font-family: var(--font-family, var(--font-monospace-code));
+}

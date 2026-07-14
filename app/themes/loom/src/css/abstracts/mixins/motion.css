@@ -1,0 +1,15 @@
+/**
+ * @define-mixin toggle-stagger
+ * creates a reversable stagger for a group of items.
+ *
+ * @param {string} $toggle - A toggle value (0 or 1) to reverse the stagger direction.
+ * @param {string} $delay - The base delay duration for the transition.
+ * @param {string} $count - The total number of items in the group.
+ * @param {string} $index - The index of the current item.
+ */
+@define-mixin toggle-stagger $toggle, $delay, $count, $index {
+    transition-delay: calc(
+        $(delay) *
+            ($(toggle) * $(index) + (1 - $(toggle)) * ($(count) - 1 - $(index)))
+    );
+}

@@ -1,0 +1,20 @@
+:where(html) {
+    color-scheme: light dark;
+}
+
+:where(html, .swatch--light, [data-swatch='light']) {
+    --color-surface-oklch: var(--color-neutral-0-oklch);
+    --color-text-oklch: var(--color-neutral-1000-oklch);
+}
+
+:where(.swatch--dark, [data-swatch='dark']) {
+    --color-surface-oklch: var(--color-neutral-1000-oklch);
+    --color-text-oklch: var(--color-neutral-0-oklch);
+}
+
+@media (prefers-color-scheme: dark) {
+    :where(html) {
+        --color-surface-oklch: var(--color-neutral-1000-oklch);
+        --color-text-oklch: var(--color-neutral-0-oklch);
+    }
+}

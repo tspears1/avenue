@@ -1,0 +1,17 @@
+/**
+ * Block Editor Styles
+ *
+ * This file loads design tokens (CSS custom properties) into the block editor
+ * so that ACF block previews render with the correct theme styling.
+ *
+ * Import your design system's primitive and theme variables here.
+ */
+
+/* Import design tokens */
+@import './base/primitive-variables.css';
+@import './base/theme-variables.css';
+
+/* Optional: Add any editor-specific overrides or adjustments here */
+body {
+    /* Editor canvas inherits these variables */
+}

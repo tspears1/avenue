@@ -1,0 +1,72 @@
+[class*='use--stack'] {
+    align-items: var(--stack-align-items, start);
+    display: grid;
+    gap: var(--stack-gap, var(--size-fluid-2));
+    justify-items: var(--stack-justify-items, start);
+    text-align: var(--stack-justify-items, start);
+
+    /* Grid mods for stack */
+    &[class*='\:start-start'] {
+        --stack-align-items: start;
+        --stack-justify-items: start;
+    }
+
+    &[class*='\:start-center'] {
+        --stack-align-items: start;
+        --stack-justify-items: center;
+    }
+
+    &[class*='\:start-end'] {
+        --stack-align-items: start;
+        --stack-justify-items: end;
+    }
+
+    &[class*='\:center-start'] {
+        --stack-align-items: center;
+        --stack-justify-items: start;
+    }
+
+    &[class*='\:center-center'] {
+        --stack-align-items: center;
+        --stack-justify-items: center;
+    }
+
+    &[class*='\:center-end'] {
+        --stack-align-items: center;
+        --stack-justify-items: end;
+    }
+
+    &[class*='\:end-start'] {
+        --stack-align-items: end;
+        --stack-justify-items: start;
+    }
+
+    &[class*='\:end-center'] {
+        --stack-align-items: end;
+        --stack-justify-items: center;
+    }
+
+    &[class*='\:end-end'] {
+        --stack-align-items: end;
+        --stack-justify-items: end;
+    }
+
+    &[class*='\:start-space-between'] {
+        --stack-align-items: start;
+        --stack-justify-items: space-between;
+    }
+
+    &[class*='\:center-space-between'] {
+        --stack-align-items: center;
+        --stack-justify-items: space-between;
+    }
+
+    &[class*='\:end-space-between'] {
+        --stack-align-items: end;
+        --stack-justify-items: space-between;
+    }
+
+    &[class*='\:card'] {
+        grid-template-areas: 'MEDIA' 'CONTENT';
+    }
+}

@@ -1,0 +1,74 @@
+@define-mixin bg-gradient {
+    &::before {
+        background-attachment: fixed;
+        background-image: linear-gradient(
+            -45deg,
+            var(--color-mono-50),
+            var(--color-mono-100),
+            var(--color-mono-200),
+            var(--color-mono-300),
+            var(--color-mono-400),
+            var(--color-mono-500),
+            var(--color-mono-600),
+            var(--color-mono-700),
+            var(--color-mono-800),
+            var(--color-mono-900),
+            var(--color-mono-950)
+        );
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        content: '';
+        inset: 0;
+        opacity: 0.1;
+        position: fixed;
+        z-index: 0;
+    }
+}
+
+@define-mixin progressive-blur $direction {
+    backdrop-filter: blur(24px);
+    mask-image: linear-gradient(
+        $(direction),
+        hsl(0, 0%, 2%) 0%,
+        hsla(0, 0%, 2%, 0.987) 9.9%,
+        hsla(0, 0%, 2%, 0.952) 18.5%,
+        hsla(0, 0%, 2%, 0.897) 26%,
+        hsla(0, 0%, 2%, 0.826) 32.5%,
+        hsla(0, 0%, 2%, 0.743) 38.4%,
+        hsla(0, 0%, 2%, 0.651) 43.7%,
+        hsla(0, 0%, 2%, 0.553) 48.7%,
+        hsla(0, 0%, 2%, 0.454) 53.5%,
+        hsla(0, 0%, 2%, 0.356) 58.5%,
+        hsla(0, 0%, 2%, 0.264) 63.6%,
+        hsla(0, 0%, 2%, 0.18) 69.2%,
+        hsla(0, 0%, 2%, 0.108) 75.5%,
+        hsla(0, 0%, 2%, 0.052) 82.6%,
+        hsla(0, 0%, 2%, 0.014) 90.7%,
+        hsla(0, 0%, 2%, 0) 100%
+    );
+}
+
+@define-mixin progressive-radial-gradient $direction, $bg {
+    background-image: radial-gradient(rgba(0, 0, 0, 0) 1px, $(bg) 1px);
+    background-size: 4px 4px;
+    mask-image: linear-gradient(
+        $(direction),
+        hsl(0, 0%, 2%) 0%,
+        hsla(0, 0%, 2%, 0.987) 9.9%,
+        hsla(0, 0%, 2%, 0.952) 18.5%,
+        hsla(0, 0%, 2%, 0.897) 26%,
+        hsla(0, 0%, 2%, 0.826) 32.5%,
+        hsla(0, 0%, 2%, 0.743) 38.4%,
+        hsla(0, 0%, 2%, 0.651) 43.7%,
+        hsla(0, 0%, 2%, 0.553) 48.7%,
+        hsla(0, 0%, 2%, 0.454) 53.5%,
+        hsla(0, 0%, 2%, 0.356) 58.5%,
+        hsla(0, 0%, 2%, 0.264) 63.6%,
+        hsla(0, 0%, 2%, 0.18) 69.2%,
+        hsla(0, 0%, 2%, 0.108) 75.5%,
+        hsla(0, 0%, 2%, 0.052) 82.6%,
+        hsla(0, 0%, 2%, 0.014) 90.7%,
+        hsla(0, 0%, 2%, 0) 100%
+    );
+}

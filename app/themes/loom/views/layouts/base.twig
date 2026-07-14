@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html {{ site.language_attributes }}>
+    {% block head %}
+        {% include 'partials/head.twig' %}
+    {% endblock %}
+
+    <body class="{{ body_class }}" style="padding-block:var(--size-fluid-6); max-inline-size: 100vi;">
+        {{ function('wp_body_open') }}
+
+        {% block content %}{% endblock %}
+
+        {{ function('wp_footer') }}
+        {% do action('get_footer') %}
+    </body>
+</html>

@@ -1,0 +1,18 @@
+:where([class*='use--cluster']) {
+    align-items: var(--cluster-align-items, center);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--cluster-gap, var(--size-fluid-2));
+    justify-content: var(--cluster-justify-items, start);
+
+    &[class*='\:overflow'] {
+        flex-wrap: nowrap;
+    }
+
+    @add-mixin util-mods cluster-;
+
+    > * {
+        margin-block: 0;
+        margin-inline: 0;
+    }
+}

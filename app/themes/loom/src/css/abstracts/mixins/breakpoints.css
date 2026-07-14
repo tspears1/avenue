@@ -1,0 +1,14 @@
+/**
+ * Simple breakpoint mixins using @custom-media
+ *
+ * Usage: @media (--bp-md) { ... }
+ *
+ * Available breakpoints:
+ * --bp-xxs, --bp-xs, --bp-sm, --bp-md, --bp-lg, --bp-xl, --bp-xxl
+ */
+
+/* Note: With @custom-media support, you don't need mixins for basic breakpoints.
+ * Just use: @media (--bp-md) { ... } directly in your CSS.
+ *
+ * The breakpoint definitions are in: abstracts/config/breakpoints.css
+ */

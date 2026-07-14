@@ -1,0 +1,165 @@
+/*
+ * @utility Split
+ * @selector .split
+ * @description A utility for splitting a container into two sections and controlling their layout for stacked and columnar layouts.
+ *
+ * @modifier { class } .split--flip - Flip the order of the sections in both vertical (mobile) and horizontal (desktop) layouts.
+ * @modifier { class } .split--flip-x - Flip the order of the sections only in horizontal (desktop) layouts.
+ * @modifier { class } .split--flip-y - Flip the order of the sections only in vertical (mobile) layouts.
+ *
+ * @variable { (unit|function)[] } --split-columns=repeat(2, 1fr) - The grid columns template for the horizontal (desktop) layout.
+ * @variable { unit } --split-gap=var(--size-fluid-2) - The grid gap for the horizontal (desktop) layout.
+ * @variable { string } --split-area-align=start - The vertical (mobile) alignment of the child element.
+ * @variable { unit } --split-area-margin-outer=0 - The margin for the outer side of the child element.
+ * @variable { unit } --split-area-margin-inner=0 - The margin for the inner side of the child element.
+ * @variable { unit } --split-area-padding-outer=0 - The padding for the outer side of the child element.
+ * @variable { unit } --split-area-padding-inner=0 - The padding for the inner side of the child element.
+ *
+ * @markup
+    <div class="split">
+        <div>
+            <p>Area 1</p>
+        </div>
+        <div>
+            <p>Area 2</p>
+        </div>
+    </div>
+ *
+ */
+:where([class*='split']) {
+    @add-mixin util-mods split-;
+}
+
+.use--split {
+    --_split-columns: var(--split-columns, repeat(2, 1fr));
+    --_split-gap: var(--split-gap, var(--size-fluid-2));
+    --_split-rows: var(--split-rows, repeat(2, auto));
+
+    --_split-area-1-align: start;
+    --_split-area-2-align: start;
+
+    align-items: var(--split-align-items, normal);
+    display: grid;
+    gap: var(--_split-gap);
+    grid-template-areas: 'AREA-1' 'AREA-2';
+    grid-template-columns: 1fr;
+    grid-template-rows: var(--_split-rows);
+    justify-items: var(--split-justify-items, normal);
+
+    @media (--bp-lg) {
+        --_split-area-2-align: end;
+        grid-template-areas: 'AREA-1 AREA-2';
+        grid-template-columns: var(--_split-columns);
+        grid-template-rows: auto;
+    }
+
+    &.split--flip,
+    &.split--flip-y {
+        --_split-area-1-align: end;
+        --_split-area-2-align: start;
+        grid-template-areas: 'AREA-2' 'AREA-1';
+    }
+
+    &.split--flip-y {
+        @media (--bp-lg) {
+            --_split-area-1-align: start;
+            --_split-area-2-align: end;
+            grid-template-areas: 'AREA-1 AREA-2';
+        }
+    }
+
+    &.split--flip,
+    &.split--flip-x {
+        @media (--bp-lg) {
+            --_split-area-1-align: end;
+            --_split-area-2-align: start;
+            grid-template-areas: 'AREA-2 AREA-1';
+        }
+    }
+
+    > *:where(:first-child, .split-child--first) {
+        --split-area-align: var(--_split-area-1-align);
+        grid-area: AREA-1;
+        margin-inline: var(--_split-area-1-margin, 0);
+        padding-inline: var(--_split-area-1-padding, 0);
+    }
+
+    > *:where(:last-child, .split-child--last) {
+        --split-area-align: var(--_split-area-2-align);
+        grid-area: AREA-2;
+        margin-inline: var(--_split-area-2-margin, 0);
+        padding-inline: var(--_split-area-2-padding, 0);
+    }
+
+    > * {
+        --_split-area-1-margin: var(--split-area-margin-outer, 0);
+        --_split-area-2-margin: var(--split-area-margin-outer, 0);
+        --_split-area-1-padding: var(--split-area-padding-outer, 0);
+        --_split-area-2-padding: var(--split-area-padding-outer, 0);
+
+        @media (--bp-lg) {
+            --_split-area-1-margin: var(--split-area-margin-outer, 0)
+                var(--split-area-margin-inner, 0);
+            --_split-area-2-margin: var(--split-area-margin-inner, 0)
+                var(--split-area-margin-outer, 0);
+            --_split-area-1-padding: var(--split-area-padding-outer, 0)
+                var(--split-area-padding-inner, 0);
+            --_split-area-2-padding: var(--split-area-padding-inner, 0)
+                var(--split-area-padding-outer, 0);
+        }
+    }
+
+    &.split--flip,
+    &.split--flip-x {
+        > * {
+            @media (--bp-lg) {
+                --_split-area-1-margin: var(--split-area-margin-inner, 0)
+                    var(--split-area-margin-outer, 0);
+                --_split-area-2-margin: var(--split-area-margin-outer, 0)
+                    var(--split-area-margin-inner, 0);
+                --_split-area-1-padding: var(--split-area-padding-inner, 0)
+                    var(--split-area-padding-outer, 0);
+                --_split-area-2-padding: var(--split-area-padding-outer, 0)
+                    var(--split-area-padding-inner, 0);
+            }
+        }
+    }
+
+    &:where(
+        .split--columns-half,
+        .split--columns-quarter-three-quarter,
+        .split--columns-three-quarter-quarter,
+        .split--columns-third-two-thirds,
+        .split--columns-two-thirds-third,
+        .split--columns-golden-flipped,
+        .split--columns-golden
+    ) {
+        --_split-columns: var(--split-columns, repeat(2, 1fr));
+    }
+
+    @media (--bp-lg) {
+        &.split--columns-quarter-three-quarter {
+            --_split-columns: var(--split-columns, 1fr 3fr);
+        }
+
+        &.split--columns-three-quarter-quarter {
+            --_split-columns: var(--split-columns, 3fr 1fr);
+        }
+
+        &.split--columns-third-two-thirds {
+            --_split-columns: var(--split-columns, 1fr 2fr);
+        }
+
+        &.split--columns-two-thirds-third {
+            --_split-columns: var(--split-columns, 2fr 1fr);
+        }
+
+        &.split--columns-golden-flipped {
+            --_split-columns: var(--split-columns, 4fr 6fr);
+        }
+
+        &.split--columns-golden {
+            --_split-columns: var(--split-columns, 6fr 4fr);
+        }
+    }
+}

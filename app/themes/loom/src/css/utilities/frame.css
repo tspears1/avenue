@@ -1,0 +1,27 @@
+[class*='use--frame'] {
+    display: flex;
+    aspect-ratio: var(--frame-ratio, auto);
+    justify-content: center;
+    overflow: clip;
+}
+
+[class*='use--frame'] > img,
+[class*='use--frame'] > video {
+    block-size: 100%;
+    inline-size: 100%;
+    object-fit: cover;
+}
+
+[class*='use--frame'][class*='\:square'] {
+    aspect-ratio: var(--ratio-square);
+}
+[class*='use--frame'][class*='\:landscape'] {
+    aspect-ratio: var(--ratio-widescreen);
+}
+[class*='use--frame'][class*='\:portrait'] {
+    aspect-ratio: var(--ratio-widescreen-y);
+}
+
+:where([class*='use--frame']) {
+    align-items: center;
+}

@@ -1,0 +1,62 @@
+@define-mixin util-mods $prefix: '' {
+
+	&[class*="\:start-start"] {
+		--$(prefix)align-items: start;
+		--$(prefix)justify-items: start;
+	}
+
+	&[class*="\:start-center"] {
+		--$(prefix)align-items: start;
+		--$(prefix)justify-items: center;
+	}
+
+	&[class*="\:start-end"] {
+		--$(prefix)align-items: start;
+		--$(prefix)justify-items: end;
+	}
+
+	&[class*="\:center-start"] {
+		--$(prefix)align-items: center;
+		--$(prefix)justify-items: start;
+	}
+
+	&[class*="\:center-center"] {
+		--$(prefix)align-items: center;
+		--$(prefix)justify-items: center;
+	}
+
+	&[class*="\:center-end"] {
+		--$(prefix)align-items: center;
+		--$(prefix)justify-items: end;
+	}
+
+	&[class*="\:end-start"] {
+		--$(prefix)align-items: end;
+		--$(prefix)justify-items: start;
+	}
+
+	&[class*="\:end-center"] {
+		--$(prefix)align-items: end;
+		--$(prefix)justify-items: center;
+	}
+
+	&[class*="\:end-end"] {
+		--$(prefix)align-items: end;
+		--$(prefix)justify-items: end;
+	}
+
+	&[class*="\:start-space-between"] {
+		--$(prefix)align-items: start;
+		--$(prefix)justify-items: space-between;
+	}
+
+	&[class*="\:center-space-between"] {
+		--$(prefix)align-items: center;
+		--$(prefix)justify-items: space-between;
+	}
+
+	&[class*="\:end-space-between"] {
+		--$(prefix)align-items: end;
+		--$(prefix)justify-items: space-between;
+	}
+}

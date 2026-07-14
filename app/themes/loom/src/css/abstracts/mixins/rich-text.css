@@ -1,0 +1,57 @@
+/* Rich text mixin - complex with nested dependencies */
+/* This should be implemented as a component class instead */
+
+/**
+ * Example rich text implementation:
+ *
+ * .rich-text {
+ *   --_text-max-inline-size: var(--text-max-inline-size, var(--size-content-4));
+ *   --_text-color: var(--text-color, var(--color-text));
+ *   --_text-color-heading: var(--text-color-heading, var(--_text-color));
+ *   --_text-font-family: var(--text-font-family, var(--font-text));
+ *   --_text-font-size: var(--text-font-size, var(--text-size-md));
+ *   --_text-font-weight: var(--text-font-weight, var(--font-weight-regular));
+ *   --_text-line-height: var(--text-line-height, var(--leading-paragraph));
+ *
+ *   color: var(--_text-color);
+ *   font-family: var(--_text-font-family);
+ *   font-size: var(--_text-font-size);
+ *   font-weight: var(--_text-font-weight);
+ *   line-height: var(--_text-line-height);
+ *   max-inline-size: var(--_text-max-inline-size);
+ *   overflow-wrap: break-word;
+ *   word-break: break-word;
+ * }
+ *
+ * .rich-text :where(h1, h2, h3, h4, h5, h6) {
+ *   color: var(--_text-color-heading);
+ * }
+ *
+ * .rich-text :where(p) {
+ *   font-family: inherit;
+ *   font-size: inherit;
+ *   font-weight: inherit;
+ *   line-height: inherit;
+ *   margin: 0;
+ * }
+ *
+ * .rich-text :where(a:where(:not(.button))) {
+ *   /* Apply article-link styles */
+ * }
+ *
+ * .rich-text :where(ul, ol):where(:not(.reset-list)) {
+ *   /* Apply list styles */
+ * }
+ *
+ * .rich-text :where(p, ul, ol, dl, a, blockquote, pre) + *:where(:not(h1, h2, h3, h4, h5, h6)) {
+ *   margin-block-start: 1.6em;
+ * }
+ *
+ * .rich-text :where(p, ul, ol, dl, a, blockquote, pre) + :where(h1, h2, h3, h4, h5, h6) {
+ *   margin-block-start: 0.8em;
+ * }
+ *
+ * /* Add code blocks, hr, pre styles, etc. */
+ */
+
+/* TODO: Implement rich text as a component class in a dedicated file */

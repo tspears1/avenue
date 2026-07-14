@@ -1,0 +1,31 @@
+/**
+ * FLUID TYPOGRAPHY & SPACING
+ *
+ * SCSS functions for fluid calculations are not needed in modern CSS.
+ * Use the CSS `clamp()` function directly instead.
+ *
+ * Formula for fluid values:
+ * clamp([min]rem, [slope]vw + [intercept]rem, [max]rem)
+ *
+ * Where:
+ * - slope = (max-px - min-px) / (max-viewport-px - min-viewport-px) * 100
+ * - intercept = (min-px - (slope/100 * min-viewport-px)) / 16
+ *
+ * Example - Fluid font size from 16px to 24px between 375px and 1440px viewports:
+ *
+ * Step 1: Calculate slope
+ * slope = (24 - 16) / (1440 - 375) * 100 = 0.75vw
+ *
+ * Step 2: Calculate intercept
+ * intercept = (16 - (0.75 * 375 / 100)) / 16 = 0.82rem
+ *
+ * Step 3: Create clamp
+ * font-size: clamp(1rem, 0.75vw + 0.82rem, 1.5rem);
+ *
+ * Quick reference - Common viewport ranges:
+ * - Mobile to Desktop: 375px (23.4375rem) to 1440px (90rem)
+ * - Tablet to Desktop: 768px (48rem) to 1440px (90rem)
+ * - Small to Large: 320px (20rem) to 1920px (120rem)
+ *
+ * For container query based fluid values, replace 'vw' with 'cqw'
+ */

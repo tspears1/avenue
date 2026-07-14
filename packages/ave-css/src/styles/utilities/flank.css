@@ -1,0 +1,38 @@
+[class*="use--flank"] {
+	--content-percentage: initial;
+	--flank-size: initial;
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--flank-gap, var(--size-fluid-2));
+
+	> * {
+		margin-block: 0;
+		margin-inline: 0;
+	}
+}
+
+[class*="use--flank"]:not([class*="\:end"]) > :first-child,
+[class*="use--flank"][class*="\:start"] > :first-child {
+	flex-basis: var(--flank-size, auto);
+	flex-grow: 1;
+}
+[class*="use--flank"]:not([class*="\:end"]) > :last-child,
+[class*="use--flank"][class*="\:start"] > :last-child {
+	flex-basis: 0;
+	flex-grow: 999;
+	min-inline-size: var(--content-percentage, 50%);
+}
+
+[class*="use--flank"][class*="\:end"] > :last-child {
+	flex-basis: var(--flank-size, auto);
+	flex-grow: 1;
+}
+[class*="use--flank"][class*="\:end"] > :first-child {
+	flex-basis: 0;
+	flex-grow: 999;
+	min-inline-size: var(--content-percentage, 50%);
+}
+
+:where([class*="use--flank"]) {
+	align-items: center;
+}

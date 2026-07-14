@@ -1,0 +1,28 @@
+@define-mixin hide-scrollbars {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+@define-mixin scroll-offset $offset, $pseudo {
+    --offset: calc(
+        var(--header-block-size, 0px) + var(--sticky-offset, 0px) + $(offset)
+    );
+    margin-block-start: calc(var(--offset) * -1);
+    padding-block-start: var(--offset);
+}
+
+@define-mixin scroll-offset-pseudo $offset {
+    --offset: calc(
+        var(--header-block-size, 0px) + var(--sticky-offset, 0px) + $(offset)
+    );
+    &::before {
+        content: '';
+        display: block;
+        margin-block-start: calc(var(--offset) * -1);
+        padding-block-start: var(--offset);
+    }
+}

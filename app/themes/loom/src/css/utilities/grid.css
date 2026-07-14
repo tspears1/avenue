@@ -1,0 +1,101 @@
+/* TODO: grid - fixed, fill, fit, wrap. */
+
+[class*='use--grid'],
+[class*='use--open-grid'] {
+    align-items: var(--grid-align-items, start);
+    gap: var(--grid-gap, var(--size-fluid-2));
+    justify-items: var(--grid-justify-items, start);
+
+    /* Grid mods */
+    &[class*='\:start-start'] {
+        --grid-align-items: start;
+        --grid-justify-items: start;
+    }
+
+    &[class*='\:start-center'] {
+        --grid-align-items: start;
+        --grid-justify-items: center;
+    }
+
+    &[class*='\:start-end'] {
+        --grid-align-items: start;
+        --grid-justify-items: end;
+    }
+
+    &[class*='\:center-start'] {
+        --grid-align-items: center;
+        --grid-justify-items: start;
+    }
+
+    &[class*='\:center-center'] {
+        --grid-align-items: center;
+        --grid-justify-items: center;
+    }
+
+    &[class*='\:center-end'] {
+        --grid-align-items: center;
+        --grid-justify-items: end;
+    }
+
+    &[class*='\:end-start'] {
+        --grid-align-items: end;
+        --grid-justify-items: start;
+    }
+
+    &[class*='\:end-center'] {
+        --grid-align-items: end;
+        --grid-justify-items: center;
+    }
+
+    &[class*='\:end-end'] {
+        --grid-align-items: end;
+        --grid-justify-items: end;
+    }
+
+    &[class*='\:start-space-between'] {
+        --grid-align-items: start;
+        --grid-justify-items: space-between;
+    }
+
+    &[class*='\:center-space-between'] {
+        --grid-align-items: center;
+        --grid-justify-items: space-between;
+    }
+
+    &[class*='\:end-space-between'] {
+        --grid-align-items: end;
+        --grid-justify-items: space-between;
+    }
+
+    :where([class*='\:grid-span']) {
+        grid-column: 1 / -1;
+    }
+
+    &:where([class*='\:wide-inline']) {
+        inline-size: var(--canvas-inline-size);
+    }
+}
+
+[class*='use--grid'] {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fit,
+        minmax(min(var(--min-column-size, 20ch), 100%), 1fr)
+    );
+
+    --min-column-size: initial;
+}
+
+[class*='use--open-grid'] {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+
+    --grid-item-column-start: 1;
+    --grid-item-column-span: -1;
+
+    > * {
+        grid-column: var(--grid-item-column-start) /
+            var(--grid-item-column-span);
+        grid-row: var(--grid-item-row, auto);
+    }
+}

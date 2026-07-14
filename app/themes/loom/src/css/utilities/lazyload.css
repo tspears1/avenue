@@ -1,0 +1,8 @@
+:where(.lazyload, .lazyloading) {
+    opacity: 0;
+}
+
+:where(.lazyloaded) {
+    opacity: 1;
+    transition: opacity var(--duration-moderate) var(--ease-out-expo);
+}
