@@ -11,6 +11,13 @@
     },
     "repositories": [
         {
+            "type": "path",
+            "url": "../../../packages/ave-acf",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
             "type": "composer",
             "url": "https://connect.advancedcustomfields.com"
         },
@@ -20,6 +27,7 @@
         }
     ],
     "require": {
+        "bostonuniversity/ave-acf": "dev-main",
         "timber/timber": "^2.5",
         "wpengine/advanced-custom-fields-pro": "^6.8.4"
     },

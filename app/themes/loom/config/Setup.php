@@ -3,6 +3,7 @@
 namespace Loom;
 
 use Timber\Site;
+use Loom\ACF;
 use Loom\Vite;
 use Loom\Utils;
 
@@ -63,24 +64,7 @@ class Setup extends Site
      */
     public function load_acf_pro()
     {
-        // Check if another plugin or theme has bundled ACF
-        if (defined('MY_ACF_PATH')) {
-            return;
-        }
-
-        // Define path and URL to the ACF plugin.
-        define( 'MY_ACF_PATH', get_template_directory() . '/vendor/advanced-custom-fields-pro/' );
-        define( 'MY_ACF_URL', get_template_directory_uri() . '/vendor/advanced-custom-fields-pro/' );
-
-        // Include the ACF plugin.
-        include_once MY_ACF_PATH . 'acf.php';
-
-        // Customize the URL setting to fix incorrect asset URLs.
-        add_filter('acf/settings/url', function ($url) {
-            return MY_ACF_URL;
-        });
-
-        // Load ACF config
+        // Delegate ACF setup/loading to the ave-acf package bootstrap.
         ACF::init();
     }
 

@@ -1,0 +1,16 @@
+{
+   "name": "bostonuniversity/ave-acf",
+   "description": "Reusable ACF helpers for Avenue projects.",
+   "type": "library",
+   "license": "MIT",
+   "require": {
+      "php": ">=8.0"
+   },
+   "autoload": {
+      "psr-4": {
+         "Avenue\\ACF\\": "src/"
+      }
+   },
+   "minimum-stability": "stable",
+   "prefer-stable": true
+}

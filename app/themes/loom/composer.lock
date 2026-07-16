@@ -4,8 +4,34 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e9620979fb0b9d2ea2b064bc1c59618e",
+    "content-hash": "2d940bf3daace4b51cc8e65339139f17",
     "packages": [
+        {
+            "name": "bostonuniversity/ave-acf",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "../../../packages/ave-acf",
+                "reference": "195b7a2154b9e99c40541b86f7b68b71b8e3b7d7"
+            },
+            "require": {
+                "php": ">=8.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Avenue\\ACF\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Reusable ACF helpers for Avenue projects.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
         {
             "name": "composer/installers",
             "version": "v2.3.0",
@@ -590,10 +616,10 @@
         },
         {
             "name": "wpengine/advanced-custom-fields-pro",
-            "version": "6.8.5",
+            "version": "6.8.6",
             "dist": {
                 "type": "zip",
-                "url": "https://connect.advancedcustomfields.com/v2/plugins/composer_download?s=composer&p=pro&t=6.8.5"
+                "url": "https://connect.advancedcustomfields.com/v2/plugins/composer_download?s=composer&p=pro&t=6.8.6"
             },
             "require": {
                 "composer/installers": "~1.0 || ~2.0"
@@ -836,7 +862,9 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {},
+    "stability-flags": {
+        "bostonuniversity/ave-acf": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {},
