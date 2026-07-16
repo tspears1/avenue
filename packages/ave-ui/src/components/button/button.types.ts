@@ -14,8 +14,8 @@ export interface ButtonProps {
 
 export interface ButtonACFField {
    label: string
-   href: string
-   target: string
+   href?: string
+   target?: string
    variant?: string
    icon?: string
 }

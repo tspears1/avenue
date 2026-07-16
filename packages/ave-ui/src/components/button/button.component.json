@@ -15,7 +15,8 @@
          "button.props.php"
       ],
       "acf": [
-         "button.acf.php"
+         "button.acf.php",
+         "button.block.php"
       ]
    },
    "provides": {
