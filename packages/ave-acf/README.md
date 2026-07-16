@@ -12,6 +12,7 @@ composer require bostonuniversity/ave-acf
 
 ```php
 use Avenue\ACF\Fields;
+use Avenue\ACF\BlockFactory;
 use Avenue\ACF\FieldBuilder;
 use Avenue\ACF\Package;
 
@@ -26,6 +27,12 @@ $title = Fields::get('title', default: 'Untitled');
 $button_field = FieldBuilder::build_field('button', 'label', [
     'label' => 'Button Label',
     'type' => 'text',
+]);
+
+BlockFactory::register([
+    'name' => 'button',
+    'title' => 'Button',
+    'field_group_key' => 'group_ave_button_component',
 ]);
 ```
 
@@ -77,6 +84,28 @@ $button_field = FieldBuilder::build_field('button', 'label', [
 - `flexible([...])`
 - `tab([...])`
 - `accordion([...])`
+
+### BlockFactory
+
+`Avenue\ACF\BlockFactory` - ACF block registration with field-group attachment.
+
+**Core Methods:**
+- `configure_global_hooks()` - Configure shared hook/workaround options
+- `register()` - Register one block
+- `register_many()` - Register many blocks
+- `get_block()` and `get_blocks()` - Inspect registered block config
+
+### BlockAssets
+
+`Avenue\ACF\BlockAssets` - Generic reusable block/editor hook utilities.
+
+**Hook Options:**
+- `use_wp_iframe_defaults` (bool) - Enables sensible WordPress iframe editor defaults
+- `enqueue_assets_callback` (callable)
+- `enqueue_editor_assets_callback` (callable)
+- `force_module_handles` (string[])
+- `module_handle_predicate` (callable)
+- `include_editor_underscore_backbone` (bool)
 
 **Field Access:**
 - `get()` - Safe wrapper around `get_field` with default fallback
@@ -171,5 +200,28 @@ $accordion = FieldBuilder::accordion([
         'label' => 'Settings',
         'open' => 1,
     ],
+]);
+
+// Optional global block hook/workaround config
+BlockFactory::configure_global_hooks([
+    'use_wp_iframe_defaults' => true,
+    'enqueue_assets_callback' => static function (): void {
+        // Enqueue front-end and editor block assets.
+    },
+    'enqueue_editor_assets_callback' => static function (): void {
+        // Enqueue editor-only assets.
+    },
+    'force_module_handles' => ['theme-editor-scripts'],
+    'include_editor_underscore_backbone' => true,
+]);
+
+// Register a block and attach its field group
+BlockFactory::register([
+    'name' => 'button',
+    'title' => 'Button',
+    'description' => 'Button block.',
+    'field_group_key' => 'group_ave_button_component',
+    'category' => 'ave-components',
+    'icon' => 'admin-links',
 ]);
 ```
