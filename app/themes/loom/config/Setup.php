@@ -73,6 +73,6 @@ class Setup extends Site
      */
     public function register_components()
     {
-        //Components::init();
+        Components::init();
     }
 }

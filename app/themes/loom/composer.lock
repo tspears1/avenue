@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2d940bf3daace4b51cc8e65339139f17",
+    "content-hash": "8fa356c08c1313cec3c82a3f48faa3ad",
     "packages": [
         {
             "name": "bostonuniversity/ave-acf",
@@ -27,6 +27,50 @@
                 "MIT"
             ],
             "description": "Reusable ACF helpers for Avenue projects.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "bostonuniversity/ave-ui",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "../../../packages/ave-ui",
+                "reference": "d40abbd214312af146fca2332c9817eb4598e39a"
+            },
+            "require": {
+                "bostonuniversity/ave-acf": "dev-main",
+                "php": ">=8.0",
+                "timber/timber": "^2.0"
+            },
+            "type": "library",
+            "extra": {
+                "installer-paths": {
+                    "vendor/{$name}/": [
+                        "type:wordpress-plugin"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "AvenueUI\\": "src/"
+                },
+                "files": [
+                    "src/wordpress/index.php"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Your Name",
+                    "email": "your.email@example.com"
+                }
+            ],
+            "description": "Web components library built with Lit for WordPress integration - PHP/Twig templates",
             "transport-options": {
                 "symlink": true,
                 "relative": true
@@ -863,7 +907,8 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "bostonuniversity/ave-acf": 20
+        "bostonuniversity/ave-acf": 20,
+        "bostonuniversity/ave-ui": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,

@@ -29,6 +29,14 @@ console.log(utils.formatPath('packages/ave-ui'));
 outroSuccess(`semver: ${semver.valid('1.2.3')}`);
 ```
 
+### Bordered section output
+
+```js
+import { utils } from 'ave-cli';
+
+utils.logBorderedSection('Build Summary', 'Generated Files:\n• a\n• b');
+```
+
 ### What is exported
 
 - `default`: `{ prompts, kleur, semver, utils }`

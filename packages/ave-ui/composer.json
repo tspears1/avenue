@@ -19,8 +19,8 @@
         }
     ],
     "require": {
-        "bostonuniversity/ave-acf": "dev-main",
         "php": ">=8.0",
+        "bostonuniversity/ave-acf": "dev-main",
         "timber/timber": "^2.0"
     },
     "autoload": {
@@ -28,7 +28,7 @@
             "AvenueUI\\": "src/"
         },
         "files": [
-            "src/generated/autoload.php"
+            "src/wordpress/index.php"
         ]
     },
     "extra": {

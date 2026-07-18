@@ -9,10 +9,14 @@
 
 namespace Loom;
 
+use AvenueUI\WordPress\ComponentRegistry;
+
 class Components
 {
    public static function init()
    {
-
+      ComponentRegistry::register([
+         'button' => 'block',
+      ]);
    }
 }

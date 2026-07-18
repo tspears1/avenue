@@ -1,8 +1,8 @@
 {
-   "$schema": "http://json-schema.org/draft-07/schema#",
+   "$schema": "https://github.com/bostonuniversity/avenue/schemas/component.schema.json",
    "$id": "https://github.com/bostonuniversity/avenue/packages/ave-ui/src/components/button/button.schema.json",
    "title": "Button",
-   "type": "object",
+   "type": "component",
    "props": {
       "root": {
          "label": {
@@ -10,36 +10,56 @@
             "required": true
          },
          "variant": {
-            "type": "enum",
-            "values": ["primary", "secondary", "outline"],
+            "type": "string",
+            "enum": [
+               "primary",
+               "secondary",
+               "outline"
+            ],
             "default": "primary"
          },
          "href": {
+            "type": "string"
+         },
+         "target": {
             "type": "string",
-            "required": false
+            "enum": [
+               "_self",
+               "_blank"
+            ],
+            "default": "_self"
          },
          "icon": {
-            "type": "string",
-            "required": false
+            "type": "string"
          }
       }
    },
    "attributes": {
-
+      "root": {
+         "allowGlobal": true,
+         "allowData": true,
+         "allowAria": true
+      }
    },
    "slots": {
       "root": {
          "prefix": {
-            "allowed": ["html"],
+            "allowed": [
+               "html"
+            ],
             "optional": true
          },
          "suffix": {
-            "allowed": ["html"],
+            "allowed": [
+               "html"
+            ],
             "optional": true
          }
       }
    },
    "classes": {
-      "root": {}
+      "root": {
+         "allow": true
+      }
    }
 }

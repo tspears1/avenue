@@ -27,16 +27,12 @@ const meta = {
          },
       },
       icon: {},
-      onClick: {
-         table: { defaultValue: { summary: 'null' } },
-      },
    },
    args: {
       label: 'Buttons',
       href: '',
       variant: 'primary',
       icon: '',
-      onClick: fn(),
    },
 } satisfies Meta<ButtonProps>
 

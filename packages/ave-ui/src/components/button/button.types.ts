@@ -9,7 +9,6 @@ export interface ButtonProps {
    icon?: string
    href?: string
    target?: '_self' | '_blank'
-   onClick?: () => void
 }
 
 export interface ButtonACFField {

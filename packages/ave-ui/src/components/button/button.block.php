@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AvenueUI\Blocks;
 
 use Avenue\ACF\FieldBuilder;
+use AvenueUI\Components\Button;
 
 return [
 	'name' => 'button',
@@ -14,6 +15,14 @@ return [
 	'category' => 'ave-components',
 	'icon' => 'admin-links',
 	'keywords' => ['button', 'cta', 'link'],
+	'component' => Button::class,
+	'map_fields' => static function ( array $fields, array $block, bool $is_preview, int|string $post_id ): array {
+		return [
+			'props' => [
+				'target' => !empty($fields['target']) ? '_blank' : null,
+			],
+		];
+	},
 	'supports' => [
 		'align' => true,
 		'anchor' => true,
@@ -24,4 +33,3 @@ return [
 		'className' => true,
 	],
 ];
-

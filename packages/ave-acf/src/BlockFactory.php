@@ -19,8 +19,8 @@ final class BlockFactory
    /**
     * Configure global block hook options.
     *
-      * @param array<string, mixed> $options Global hook options for BlockAssets.
-      * Supported options include `use_wp_iframe_defaults` for WordPress iframe editor defaults.
+    * @param array<string, mixed> $options Global hook options for BlockAssets.
+    * Supported options include `use_wp_iframe_defaults` for WordPress iframe editor defaults.
     * @return void
     */
    public static function configure_global_hooks(array $options): void
@@ -121,29 +121,251 @@ final class BlockFactory
          : '';
 
       $config = self::get_block($block_name);
-      $fields = function_exists('get_fields') ? get_fields() : [];
+      $fields = function_exists('get_fields')
+         ? get_fields()
+         : [];
 
       if (!is_array($fields)) {
          $fields = [];
       }
 
       if ($is_preview) {
-         $fields = self::clean_auto_inline_editing_placeholders($fields);
+         $fields = self::clean_auto_inline_editing_placeholders(
+            $fields
+         );
       }
 
-      if (is_array($config) && isset($config['render_template']) && is_string($config['render_template'])) {
-         $template = $config['render_template'];
-         if (file_exists($template)) {
-            include $template;
-            return;
+      if (!is_array($config)) {
+         self::render_preview_placeholder($is_preview);
+         return;
+      }
+
+      // Preferred Avenue component render path.
+      if (self::render_component($config, $block, $fields, $is_preview, $post_id)) {
+         return;
+      }
+
+      // Legacy/custom template fallback.
+      if (isset($config['render_template']) && is_string($config['render_template']) && file_exists($config['render_template'])) {
+         include $config['render_template'];
+         return;
+      }
+
+      self::render_preview_placeholder($is_preview);
+   }
+
+   /**
+    * Render a configured Avenue component.
+    *
+    * @param array<string, mixed> $config
+    * @param array<string, mixed> $block
+    * @param array<string, mixed> $fields
+    * @param int|string $post_id
+    */
+   private static function render_component(array $config, array $block, array $fields, bool $is_preview, $post_id): bool
+   {
+      $component = $config['component'] ?? null;
+
+      if (!is_string($component) || !class_exists($component) || !is_callable([$component, 'render'])) {
+         return false;
+      }
+
+      $render_data = self::build_component_render_data(
+         $config,
+         $block,
+         $fields,
+         $is_preview,
+         $post_id
+      );
+
+      echo $component::render(
+         props: $render_data['props'],
+         attrs: $render_data['attrs'],
+         classes: $render_data['classes'],
+         slots: $render_data['slots']
+      );
+
+      return true;
+   }
+
+   /**
+    * Build the standard Avenue component render arguments.
+    *
+    * @param array<string, mixed> $config
+    * @param array<string, mixed> $block
+    * @param array<string, mixed> $fields
+    * @param int|string $post_id
+    *
+    * @return array{
+    *    props: array<string, mixed>,
+    *    attrs: array<string, mixed>,
+    *    classes: array<int|string, mixed>,
+    *    slots: array<string, mixed>
+    * }
+    */
+   private static function build_component_render_data(
+      array $config,
+      array $block,
+      array $fields,
+      bool $is_preview,
+      $post_id
+   ): array {
+      $data = [
+         // Default behavior: ACF fields map directly to component props.
+         'props' => $fields,
+
+         // WordPress block settings map to host attributes/classes.
+         'attrs' => self::build_block_attributes($block),
+         'classes' => self::build_block_classes($block),
+
+         // Empty unless the block mapper supplies slot content.
+         'slots' => [],
+      ];
+
+      $mapper = $config['map_fields'] ?? null;
+
+      if (!is_callable($mapper)) {
+         return $data;
+      }
+
+      $mapped = $mapper(
+         $fields,
+         $block,
+         $is_preview,
+         $post_id
+      );
+
+      if (!is_array($mapped)) {
+         return $data;
+      }
+
+      foreach (['props', 'attrs', 'classes', 'slots'] as $key) {
+         if (
+            isset($mapped[$key]) &&
+            is_array($mapped[$key])
+         ) {
+            $data[$key] = self::merge_render_data(
+               $data[$key],
+               $mapped[$key]
+            );
          }
       }
 
-      if ($is_preview && $fields === []) {
-         echo '<div class="ave-acf-block-preview-placeholder" style="padding:16px;border:1px dashed #c3c4c7;background:#fff;">';
-         echo '<p style="margin:0;color:#50575e;">Configure block fields to preview content.</p>';
-         echo '</div>';
+      return $data;
+   }
+
+   /**
+    * Merge component rendering data.
+    *
+    * Associative values are replaced by the mapped values.
+    * Numeric values are appended.
+    *
+    * @param array<mixed> $defaults
+    * @param array<mixed> $mapped
+    * @return array<mixed>
+    */
+   private static function merge_render_data(
+      array $defaults,
+      array $mapped
+   ): array {
+      foreach ($mapped as $key => $value) {
+         if (is_int($key)) {
+            $defaults[] = $value;
+            continue;
+         }
+
+         $defaults[$key] = $value;
       }
+
+      return $defaults;
+   }
+
+   /**
+    * Build host attributes from ACF block settings.
+    *
+    * @param array<string, mixed> $block
+    * @return array<string, mixed>
+    */
+   private static function build_block_attributes(
+      array $block
+   ): array {
+      $attrs = [];
+
+      if (
+         isset($block['anchor']) &&
+         is_string($block['anchor']) &&
+         $block['anchor'] !== ''
+      ) {
+         $attrs['id'] = $block['anchor'];
+      }
+
+      if (
+         isset($block['align']) &&
+         is_string($block['align']) &&
+         $block['align'] !== ''
+      ) {
+         $attrs['data-align'] = $block['align'];
+      }
+
+      return $attrs;
+   }
+
+   /**
+    * Build host classes from ACF block settings.
+    *
+    * @param array<string, mixed> $block
+    * @return array<int|string, mixed>
+    */
+   private static function build_block_classes(
+      array $block
+   ): array {
+      $name = isset($block['name']) && is_string($block['name'])
+         ? str_replace('acf/', '', $block['name'])
+         : '';
+
+      $classes = [];
+
+      if ($name !== '') {
+         $classes[] = 'wp-block-acf-' . self::normalize_block_name(
+            $name
+         );
+      }
+
+      if (
+         isset($block['className']) &&
+         is_string($block['className']) &&
+         $block['className'] !== ''
+      ) {
+         $classes[] = $block['className'];
+      }
+
+      if (
+         isset($block['align']) &&
+         is_string($block['align']) &&
+         $block['align'] !== ''
+      ) {
+         $classes[] = 'align' . $block['align'];
+      }
+
+      return $classes;
+   }
+
+   /**
+    * Render the default editor preview placeholder.
+    */
+   private static function render_preview_placeholder(
+      bool $is_preview
+   ): void {
+      if (!$is_preview) {
+         return;
+      }
+
+      echo '<div class="ave-acf-block-preview-placeholder"';
+      echo ' style="padding:16px;border:1px dashed #c3c4c7;background:#fff;">';
+      echo '<p style="margin:0;color:#50575e;">';
+      echo 'Configure block fields to preview content.';
+      echo '</p>';
+      echo '</div>';
    }
 
    /**
