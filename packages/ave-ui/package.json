@@ -5,6 +5,7 @@
    "exports": {
       ".": "./dist/index.js",
       "./all": "./dist/index.js",
+      "./loader": "./dist/loader.js",
       "./components/*": "./dist/components/*/*.lit.js"
    },
    "scripts": {

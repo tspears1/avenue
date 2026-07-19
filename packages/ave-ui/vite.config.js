@@ -11,6 +11,7 @@ import {
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const entryFile = path.resolve(dirname, "src/index.ts");
+const loaderFile = path.resolve(dirname, "src/loader.ts");
 const componentEntries = collectComponentEntries({
 	projectRoot: dirname,
 });
@@ -20,8 +21,10 @@ const buildPresets = {
 		outDir: "dist",
 		emptyOutDir: true,
 		rollupOptions: {
+			preserveEntrySignatures: "strict",
 			input: {
 				index: entryFile,
+				loader: loaderFile,
 				...componentEntries,
 			},
 			external: isEsExternal,
