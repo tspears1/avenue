@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AvenueUI\WordPress;
 
+use Avenue\ACF\BlockFactory;
 use InvalidArgumentException;
 use LogicException;
 use RuntimeException;
@@ -268,7 +269,22 @@ final class ComponentRegistry
             );
         }
 
-        self::requireIntegrationFile($name, $block, 'ACF block');
+        $config = self::requireIntegrationFile($name, $block, 'ACF block');
+
+        if (!is_array($config)) {
+            throw new RuntimeException(
+                sprintf(
+                    'ACF block file for "%s" must return a config array.',
+                    $name
+                )
+            );
+        }
+
+        if (!isset($config['name']) || !is_string($config['name']) || $config['name'] === '') {
+            $config['name'] = $name;
+        }
+
+        BlockFactory::register($config);
 
         self::$registered[$name]['block'] = true;
 
@@ -286,7 +302,7 @@ final class ComponentRegistry
         string $name,
         array $integration,
         string $label
-    ): void {
+    ) {
         $relativePath = $integration['file'] ?? null;
 
         if (!is_string($relativePath) || $relativePath === '') {
@@ -312,7 +328,7 @@ final class ComponentRegistry
             );
         }
 
-        require_once $path;
+        return require $path;
     }
 
     private static function beginResolution(string $name): void

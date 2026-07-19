@@ -4,21 +4,35 @@ import path from "path";
 import { fileURLToPath } from "node:url";
 import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
 import { playwright } from "@vitest/browser-playwright";
+import {
+	collectComponentEntries,
+	isEsExternal,
+} from "./build/entries.js";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const entryFile = path.resolve(dirname, "src/index.ts");
+const componentEntries = collectComponentEntries({
+	projectRoot: dirname,
+});
 
 const buildPresets = {
 	es: {
-		lib: {
-			entry: entryFile,
-			name: "AvenueUI",
-			formats: ["es"],
-			fileName: () => "avenue-ui.js",
-		},
 		outDir: "dist",
 		emptyOutDir: true,
-		codeSplitting: false,
+		rollupOptions: {
+			input: {
+				index: entryFile,
+				...componentEntries,
+			},
+			external: isEsExternal,
+			output: {
+				format: "es",
+				preserveModules: true,
+				preserveModulesRoot: "src",
+				entryFileNames: "[name].js",
+				chunkFileNames: "chunks/[name]-[hash].js",
+			},
+		},
 		sourcemap: true,
 		minify: "esbuild",
 	},

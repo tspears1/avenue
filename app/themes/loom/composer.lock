@@ -38,7 +38,7 @@
             "dist": {
                 "type": "path",
                 "url": "../../../packages/ave-ui",
-                "reference": "d40abbd214312af146fca2332c9817eb4598e39a"
+                "reference": "8663d065ab36afaba8195a829361217b6f545740"
             },
             "require": {
                 "bostonuniversity/ave-acf": "dev-main",
@@ -57,6 +57,10 @@
                 "psr-4": {
                     "AvenueUI\\": "src/"
                 },
+                "classmap": [
+                    "src/components",
+                    "src/wordpress/rendering"
+                ],
                 "files": [
                     "src/wordpress/index.php"
                 ]

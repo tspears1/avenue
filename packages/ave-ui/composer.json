@@ -27,6 +27,10 @@
         "psr-4": {
             "AvenueUI\\": "src/"
         },
+        "classmap": [
+            "src/components",
+            "src/wordpress/rendering"
+        ],
         "files": [
             "src/wordpress/index.php"
         ]

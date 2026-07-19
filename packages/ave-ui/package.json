@@ -3,7 +3,9 @@
    "version": "0.0.1",
    "type": "module",
    "exports": {
-      ".": "./dist/ave-ui.js"
+      ".": "./dist/index.js",
+      "./all": "./dist/index.js",
+      "./components/*": "./dist/components/*/*.lit.js"
    },
    "scripts": {
       "dev": "vite",

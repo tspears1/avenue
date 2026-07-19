@@ -32,7 +32,8 @@ final class BlockFactory
    /**
     * Register a single ACF block.
     *
-    * Required config keys: name, title, field_group_key.
+      * Required config keys: name, title, field_group_key.
+      * Optional config key: preview_props (preview-only component prop defaults).
     *
     * @param array<string, mixed> $config Block configuration.
     * @return void
@@ -210,9 +211,15 @@ final class BlockFactory
       bool $is_preview,
       $post_id
    ): array {
+      $props = self::merge_preview_props(
+         $config,
+         $fields,
+         $is_preview
+      );
+
       $data = [
          // Default behavior: ACF fields map directly to component props.
-         'props' => $fields,
+         'props' => $props,
 
          // WordPress block settings map to host attributes/classes.
          'attrs' => self::build_block_attributes($block),
@@ -252,6 +259,40 @@ final class BlockFactory
       }
 
       return $data;
+   }
+
+   /**
+    * Merge preview-only prop defaults with current field values.
+    *
+    * ACF values always override preview defaults.
+    *
+    * @param array<string, mixed> $config
+    * @param array<string, mixed> $fields
+    * @return array<string, mixed>
+    */
+   private static function merge_preview_props(
+      array $config,
+      array $fields,
+      bool $is_preview
+   ): array {
+      if (!$is_preview) {
+         return $fields;
+      }
+
+      $preview_props = Helper::array_option(
+         $config,
+         'preview_props',
+         []
+      );
+
+      if ($preview_props === []) {
+         return $fields;
+      }
+
+      return array_replace_recursive(
+         $preview_props,
+         $fields
+      );
    }
 
    /**
