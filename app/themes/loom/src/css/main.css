@@ -1,7 +1,6 @@
 @import "ave-css/styles/core";
 
 @import './abstracts/index.css';
-@import './abstracts/config/index.css';
 
 @import './base/index.css' layer(base);
 @import './utilities/index.css' layer(utilities);

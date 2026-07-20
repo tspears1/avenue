@@ -7,11 +7,20 @@
  * Import your design system's primitive and theme variables here.
  */
 
-/* Import design tokens */
-@import './base/primitive-variables.css';
-@import './base/theme-variables.css';
+@import "ave-css/styles/core";
 
-/* Optional: Add any editor-specific overrides or adjustments here */
-body {
-    /* Editor canvas inherits these variables */
+/* @import './abstracts/index.css'; */
+
+@import './base/index.css' layer(base);
+@import './utilities/index.css' layer(utilities);
+@import './vendor/index.css' layer(vendor);
+@import './atoms/index.css' layer(components);
+@import './molecules/index.css' layer(components);
+@import './organisms/index.css' layer(components);
+@import './templates/index.css' layer(templates);
+
+html :where(.editor-styles-wrapper) {
+    /* Editor-specific styles can be added here */
+    border: 3px solid deeppink;
+    font-family: var(--font-monospace-code);
 }

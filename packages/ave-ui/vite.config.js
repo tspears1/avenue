@@ -6,12 +6,13 @@ import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
 import { playwright } from "@vitest/browser-playwright";
 import {
 	collectComponentEntries,
-	isEsExternal,
 } from "./build/entries.js";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const entryFile = path.resolve(dirname, "src/index.ts");
 const loaderFile = path.resolve(dirname, "src/loader.ts");
+const wordpressEditorUiFile = path.resolve(dirname, "src/wordpress/editor-ui.ts");
+const wordpressEditorContentFile = path.resolve(dirname, "src/wordpress/editor-content.ts");
 const componentEntries = collectComponentEntries({
 	projectRoot: dirname,
 });
@@ -20,18 +21,21 @@ const buildPresets = {
 	es: {
 		outDir: "dist",
 		emptyOutDir: true,
+		modulePreload: {
+			resolveDependencies: () => [],
+		},
 		rollupOptions: {
 			preserveEntrySignatures: "strict",
 			input: {
 				index: entryFile,
 				loader: loaderFile,
+				'wordpress/editor-ui': wordpressEditorUiFile,
+				'wordpress/editor-content': wordpressEditorContentFile,
 				...componentEntries,
 			},
-			external: isEsExternal,
+			external: [],
 			output: {
 				format: "es",
-				preserveModules: true,
-				preserveModulesRoot: "src",
 				entryFileNames: "[name].js",
 				chunkFileNames: "chunks/[name]-[hash].js",
 			},

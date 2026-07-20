@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AvenueUI\WordPress;
 
 require_once __DIR__ . '/rendering/ComponentRegistry.php';
+require_once __DIR__ . '/EditorModules.php';
 
 $componentsFile = dirname(__DIR__) . '/generated/components.php';
 
@@ -15,4 +16,5 @@ if (is_file($componentsFile)) {
    );
 
    ComponentRegistry::boot();
+   EditorModules::boot();
 }

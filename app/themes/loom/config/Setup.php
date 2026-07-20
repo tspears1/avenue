@@ -50,7 +50,12 @@ class Setup extends Site
     {
         // Just load it and use JavaScript to detect iframe context
         // This is more reliable than trying to guess PHP parameters
+        $editor_styles = Vite::asset('src/css/editor.css');
         $editor_scripts = Vite::asset('src/js/editor.js');
+
+        if ($editor_styles) {
+            wp_enqueue_style('theme-editor-styles', $editor_styles, [], null);
+        }
 
         if ($editor_scripts) {
             wp_enqueue_script('theme-editor-scripts', $editor_scripts, [], null, true );

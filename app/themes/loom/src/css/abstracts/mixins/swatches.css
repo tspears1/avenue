@@ -1,9 +1,0 @@
-@define-mixin swatch-light {
-    --color-surface-oklch: var(--color-1-oklch);
-    --color-text-oklch: var(--color-2-oklch);
-}
-
-@define-mixin swatch-dark {
-    --color-surface-oklch: var(--color-2-oklch);
-    --color-text-oklch: var(--color-1-oklch);
-}
