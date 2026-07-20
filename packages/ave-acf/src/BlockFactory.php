@@ -179,14 +179,39 @@ final class BlockFactory
          $post_id
       );
 
-      echo $component::render(
-         props: $render_data['props'],
-         attrs: $render_data['attrs'],
-         classes: $render_data['classes'],
-         slots: $render_data['slots']
-      );
+      try {
+         echo $component::render(
+            props: $render_data['props'],
+            attrs: $render_data['attrs'],
+            classes: $render_data['classes'],
+            slots: $render_data['slots']
+         );
+      } catch (\Throwable $exception) {
+         self::report_component_render_error(
+            $component,
+            $exception
+         );
+
+         return false;
+      }
 
       return true;
+   }
+
+   /**
+    * Log a soft component render failure without crashing the request.
+    */
+   private static function report_component_render_error(
+      string $component,
+      \Throwable $exception
+   ): void {
+      error_log(
+         sprintf(
+            '[Avenue\ACF] Component render failed for "%s": %s',
+            $component,
+            $exception->getMessage()
+         )
+      );
    }
 
    /**
@@ -264,7 +289,8 @@ final class BlockFactory
    /**
     * Merge preview-only prop defaults with current field values.
     *
-    * ACF values always override preview defaults.
+      * Non-empty ACF values override preview defaults.
+      * Empty strings/nulls are ignored so untouched fields keep preview placeholders.
     *
     * @param array<string, mixed> $config
     * @param array<string, mixed> $fields
@@ -289,10 +315,64 @@ final class BlockFactory
          return $fields;
       }
 
-      return array_replace_recursive(
+      return self::merge_preview_field_values(
          $preview_props,
          $fields
       );
+   }
+
+   /**
+    * Merge field values into preview defaults without wiping defaults with empty values.
+    *
+    * @param array<string, mixed> $defaults
+    * @param array<string, mixed> $fields
+    * @return array<string, mixed>
+    */
+   private static function merge_preview_field_values(
+      array $defaults,
+      array $fields
+   ): array {
+      foreach ($fields as $key => $value) {
+         if (is_array($value)) {
+            if (!isset($defaults[$key]) || !is_array($defaults[$key])) {
+               if ($value !== []) {
+                  $defaults[$key] = $value;
+               }
+
+               continue;
+            }
+
+            $defaults[$key] = self::merge_preview_field_values(
+               $defaults[$key],
+               $value
+            );
+            continue;
+         }
+
+         if (!self::should_override_preview_value($value)) {
+            continue;
+         }
+
+         $defaults[$key] = $value;
+      }
+
+      return $defaults;
+   }
+
+   /**
+    * Determine if a field value should override a preview default.
+    */
+   private static function should_override_preview_value($value): bool
+   {
+      if ($value === null) {
+         return false;
+      }
+
+      if (is_string($value)) {
+         return trim($value) !== '';
+      }
+
+      return true;
    }
 
    /**

@@ -18,7 +18,6 @@ return [
 	'component' => Button::class,
 	'preview_props' => [
 		'label' => 'Button label',
-		'href' => '#',
 	],
 	'map_fields' => static function ( array $fields, array $block, bool $is_preview, int|string $post_id ): array {
 		return [
