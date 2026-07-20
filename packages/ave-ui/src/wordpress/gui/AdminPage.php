@@ -172,12 +172,6 @@ final class AdminPage
       $environment = is_array($snapshot['environment'] ?? null)
          ? $snapshot['environment']
          : [];
-      $counts = is_array($snapshot['counts'] ?? null)
-         ? $snapshot['counts']
-         : [];
-      $warnings = is_array($snapshot['warnings'] ?? null)
-         ? $snapshot['warnings']
-         : [];
       $components = is_array($snapshot['components'] ?? null)
          ? $snapshot['components']
          : [];
@@ -211,7 +205,6 @@ final class AdminPage
          echo '<script id="avenue-ui-diagnostics-loader" type="module" src="' . esc_url($loaderUrl) . '"></script>';
       }
 
-      echo '<p>Install health summary for this WordPress environment.</p>';
       echo '<h2>Components</h2>';
       echo '<p><label for="avenue-ui-component-search">Search:</label> ';
       echo '<input id="avenue-ui-component-search" type="search" placeholder="name, tag, status" style="min-width: 280px;" /></p>';
@@ -277,6 +270,50 @@ final class AdminPage
       echo '</tbody>';
       echo '</table>';
 
+      self::renderOverviewScript();
+   }
+
+   /**
+    * @param array<string, mixed> $snapshot
+    */
+   private static function renderDiagnostics(array $snapshot): void
+   {
+      $errors = is_array($snapshot['errors'] ?? null)
+         ? $snapshot['errors']
+         : [];
+      $environment = is_array($snapshot['environment'] ?? null)
+         ? $snapshot['environment']
+         : [];
+      $counts = is_array($snapshot['counts'] ?? null)
+         ? $snapshot['counts']
+         : [];
+      $warnings = is_array($snapshot['warnings'] ?? null)
+         ? $snapshot['warnings']
+         : [];
+
+      echo '<h2>Registration Errors (Current Request)</h2>';
+
+      if ($errors === []) {
+         echo '<p>No captured registration errors in this request.</p>';
+      } else {
+         echo '<table class="widefat striped" style="max-width: 900px;">';
+         echo '<thead><tr><th>Component</th><th>Mode</th><th>Message</th></tr></thead>';
+         echo '<tbody>';
+         foreach ($errors as $error) {
+            if (!is_array($error)) {
+               continue;
+            }
+
+            echo '<tr>';
+            echo '<td>' . esc_html((string) ($error['component'] ?? 'unknown')) . '</td>';
+            echo '<td>' . esc_html((string) ($error['mode'] ?? 'unknown')) . '</td>';
+            echo '<td>' . esc_html((string) ($error['message'] ?? 'unknown')) . '</td>';
+            echo '</tr>';
+         }
+         echo '</tbody>';
+         echo '</table>';
+      }
+
       echo '<h2>Health Summary</h2>';
       echo '<table class="widefat striped" style="max-width: 900px;">';
       echo '<tbody>';
@@ -315,42 +352,6 @@ final class AdminPage
       echo '<pre id="avenue-ui-report" style="max-height: 320px; overflow: auto; background: #fff; padding: 12px; border: 1px solid #ccd0d4;">';
       echo esc_html($report);
       echo '</pre></details>';
-
-      self::renderOverviewScript();
-   }
-
-   /**
-    * @param array<string, mixed> $snapshot
-    */
-   private static function renderDiagnostics(array $snapshot): void
-   {
-      $errors = is_array($snapshot['errors'] ?? null)
-         ? $snapshot['errors']
-         : [];
-
-      echo '<p>Phase 1 diagnostics intentionally stays lightweight. The deep checks land in phase 2.</p>';
-      echo '<h2>Registration Errors (Current Request)</h2>';
-
-      if ($errors === []) {
-         echo '<p>No captured registration errors in this request.</p>';
-      } else {
-         echo '<table class="widefat striped" style="max-width: 900px;">';
-         echo '<thead><tr><th>Component</th><th>Mode</th><th>Message</th></tr></thead>';
-         echo '<tbody>';
-         foreach ($errors as $error) {
-            if (!is_array($error)) {
-               continue;
-            }
-
-            echo '<tr>';
-            echo '<td>' . esc_html((string) ($error['component'] ?? 'unknown')) . '</td>';
-            echo '<td>' . esc_html((string) ($error['mode'] ?? 'unknown')) . '</td>';
-            echo '<td>' . esc_html((string) ($error['message'] ?? 'unknown')) . '</td>';
-            echo '</tr>';
-         }
-         echo '</tbody>';
-         echo '</table>';
-      }
    }
 
    private static function metaRow(string $label, string $value): void
