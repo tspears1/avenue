@@ -6,6 +6,9 @@
    "version": "1.0.0",
    "tag": "ave-button",
    "schema": "./button.schema.json",
+   "docs": {
+      "storybook": "http://localhost:6006/?path=/docs/atoms-button--docs"
+   },
    "exports": {
       "php": [
          "button.class.php"

@@ -340,6 +340,20 @@ function validateManifest(
         `"schema" in ${relative(file)}`
     )
 
+    if (manifest.docs !== undefined) {
+        assertObject(
+            manifest.docs,
+            `"docs" in ${relative(file)}`
+        )
+
+        if (manifest.docs.storybook !== undefined) {
+            assertNonEmptyString(
+                manifest.docs.storybook,
+                `"docs.storybook" in ${relative(file)}`
+            )
+        }
+    }
+
     const wordpress =
         manifest.integrations?.wordpress
 
@@ -734,6 +748,7 @@ function normalizeManifest(record) {
             manifest.description ?? '',
         version: manifest.version,
         tag: manifest.tag ?? null,
+        docs: normalizeDocs(manifest.docs),
         schema: toSourceRelativePath(
             path.resolve(
                 directory,
@@ -757,6 +772,24 @@ function normalizeManifest(record) {
     }
 
     return normalized
+}
+
+/**
+ * @param {Record<string, any>|undefined} docs
+ *
+ * @returns {Record<string, any>}
+ */
+function normalizeDocs(docs) {
+    if (!docs) {
+        return {}
+    }
+
+    return {
+        storybook:
+            typeof docs.storybook === 'string'
+                ? docs.storybook
+                : null,
+    }
 }
 
 /**

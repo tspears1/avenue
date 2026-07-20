@@ -16,6 +16,9 @@ return [
         'description' => 'Interactive button component with multiple theme variants',
         'version' => '1.0.0',
         'tag' => 'ave-button',
+        'docs' => [
+            'storybook' => 'http://localhost:6006/?path=/docs/atoms-button--docs',
+        ],
         'schema' => 'components/button/button.schema.json',
         'integrations' => [
             'wordpress' => [
