@@ -2,6 +2,7 @@ import type { CSSResultGroup, PropertyValues } from 'lit';
 import { LitElement, isServer } from 'lit';
 import { property } from 'lit/decorators.js';
 import hostStyles from '../styles/component/host.styles';
+import { SerializedPropsMixin } from './mixins/serialized-props.mixin';
 
 // Augment Lit's module
 declare module 'lit' {
@@ -14,7 +15,7 @@ declare module 'lit' {
    }
 }
 
-export default class AvenueElement extends LitElement {
+export default abstract class AvenueElement extends SerializedPropsMixin(LitElement) {
    /** One or more CSSResultGroup to include in the component's shadow root. Host styles are automatically prepended. */
    static css?: CSSResultGroup;
 

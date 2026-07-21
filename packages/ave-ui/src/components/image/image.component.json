@@ -1,0 +1,35 @@
+{
+   "$schema": "https://github.com/bostonuniversity/avenue/schemas/component-manifest.schema.json",
+   "name": "image",
+   "displayName": "Image",
+   "description": "Image component",
+   "version": "1.0.0",
+   "tag": "ave-image",
+   "schema": "./image.schema.json",
+   "docs": {
+      "storybook": "http://localhost:6006/?path=/docs/atoms-image--docs"
+   },
+   "exports": {
+      "php": [
+         "image.class.php"
+      ],
+      "acf": [
+         "image.acf.php"
+      ]
+   },
+   "integrations": {
+      "wordpress": {
+         "acfFields": {
+            "supported": true,
+            "file": "image.acf.php",
+            "groupKey": "group_image_component",
+            "dependencies": []
+         },
+         "acfBlock": {
+            "supported": true,
+            "file": "image.block.php",
+            "name": "avenue/image"
+         }
+      }
+   }
+}

@@ -26,6 +26,15 @@ const meta = {
             defaultValue: { summary: 'primary' },
          },
       },
+      target: {
+         description: 'Tells the browser where to open the link.',
+         control: 'radio',
+         options: ['_blank', '_parent', '_self', '_top'],
+         table: {
+            type: { summary: '_blank | _parent | _self | _top' },
+            defaultValue: { summary: '_self' },
+         },
+      },
       icon: {},
    },
    args: {

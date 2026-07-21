@@ -1,0 +1,36 @@
+{
+   "$schema": "https://github.com/bostonuniversity/avenue/schemas/component.schema.json",
+   "$id": "https://github.com/bostonuniversity/avenue/packages/ave-ui/src/components/image/image.schema.json",
+   "title": "Image",
+   "type": "component",
+   "props": {
+      "root": {
+         "label": {
+            "type": "string",
+            "required": true
+         }
+      }
+   },
+   "attributes": {
+      "root": {
+         "allowGlobal": true,
+         "allowData": true,
+         "allowAria": true
+      }
+   },
+   "slots": {
+      "root": {
+         "default": {
+            "allowed": [
+               "html"
+            ],
+            "optional": true
+         }
+      }
+   },
+   "classes": {
+      "root": {
+         "allow": true
+      }
+   }
+}

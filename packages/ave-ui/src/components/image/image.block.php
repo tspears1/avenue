@@ -5,20 +5,19 @@ declare(strict_types=1);
 namespace AvenueUI\Blocks;
 
 use Avenue\ACF\FieldBuilder;
-use Avenue\ACF\RichText;
-use AvenueUI\Components\Card;
+use AvenueUI\Components\Image;
 
 return [
-	'name' => 'card',
-	'title' => 'Card',
-	'description' => 'Card component',
-	'field_group_key' => FieldBuilder::build_group_key('card', 'component'),
+	'name' => 'image',
+	'title' => 'Image',
+	'description' => 'Image component',
+	'field_group_key' => FieldBuilder::build_group_key('image', 'component'),
 	'category' => 'ave-components',
 	'icon' => 'admin-generic',
-	'keywords' => ['card'],
-	'component' => Card::class,
+	'keywords' => ['image'],
+	'component' => Image::class,
 	'preview_props' => [
-		'title' => 'Card',
+		'label' => 'Image',
 	],
 	'supports' => [
 		'align' => true,

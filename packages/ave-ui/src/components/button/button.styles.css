@@ -1,17 +1,36 @@
 @layer component {
 
-	[part="root"]:where(button) {
-		@add-mixin button-reset;
-	}
-
-	[part="root"] {
+	:host {
 		--_button-background-color:         var( --button-background-color, oklch(var(--color-neutral-1000-oklch)) );
 		--_button-background-color--hover:  var( --button-background-color--hover, var(--_button-color) );
 		--_button-border-color:             var( --button-border-color, oklch(var(--color-neutral-1000-oklch)) );
 		--_button-border-color--hover:      var( --button-border-color--hover, var(--_button-border-color) );
 		--_button-color:                    var( --button-color, oklch(var(--color-neutral-0-oklch)) );
 		--_button-color--hover:             var( --button-color--hover, var(--_button-background-color) );
+	}
 
+	:host([variant="secondary"]) {
+		--button-background-color: 	oklch(var(--color-neutral-0-oklch));
+		--button-border-color: 			oklch(var(--color-neutral-0-oklch));
+		--button-border-color--hover: oklch(var(--color-neutral-1000-oklch));
+		--button-color: 					oklch(var(--color-neutral-1000-oklch));
+	}
+
+	:host([variant="outline"]) {
+		--button-background-color: oklch(var(--color-neutral-0-oklch));
+		--button-border-color: oklch(var(--color-neutral-1000-oklch));
+		--button-color: oklch(var(--color-neutral-1000-oklch));
+
+		& [part="root"] {
+			box-shadow: none;
+		}
+	}
+
+	[part="root"]:where(button) {
+		@add-mixin button-reset;
+	}
+
+	[part="root"] {
 		background: var(--_button-background-color);
 		border: var(--border-size-2) solid var(--_button-border-color);
 		border-radius: var(--radius-3);
@@ -32,20 +51,6 @@
 		&:is(a) {
 			display: inline-block;
 			text-decoration: none;
-		}
-
-		&[variant="secondary"] {
-			--button-background-color: oklch(var(--color-neutral-0-oklch));
-			--button-border-color: oklch(var(--color-neutral-0-oklch));
-			--button-border-color--hover: oklch(var(--color-neutral-1000-oklch));
-			--button-color: oklch(var(--color-neutral-1000-oklch));
-		}
-
-		&[variant="outline"] {
-			--button-background-color: oklch(var(--color-neutral-0-oklch));
-			--button-border-color: oklch(var(--color-neutral-1000-oklch));
-			--button-color: oklch(var(--color-neutral-1000-oklch));
-			box-shadow: none;
 		}
 
 		&:is(:hover, :focus) {

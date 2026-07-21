@@ -1,145 +1,133 @@
 #!/usr/bin/env node
 
-import { prompts as p, utils } from 'ave-cli'
-import { existsSync } from 'node:fs'
-import {
-    mkdir,
-    readFile,
-    writeFile,
-} from 'node:fs/promises'
-import path from 'node:path'
-import process from 'node:process'
-import { fileURLToPath } from 'node:url'
+import { prompts as p, utils } from "ave-cli";
+import { existsSync } from "node:fs";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import path from "node:path";
+import process from "node:process";
+import { fileURLToPath } from "node:url";
 
-const binDirectory = path.dirname(fileURLToPath(import.meta.url))
-const packageRoot = path.resolve(binDirectory, '..')
-const sourceRoot = path.join(packageRoot, 'src')
-const componentsRoot = path.join(sourceRoot, 'components')
-const componentsIndexFile = path.join(componentsRoot, 'index.ts')
+const binDirectory = path.dirname(fileURLToPath(import.meta.url));
+const packageRoot = path.resolve(binDirectory, "..");
+const sourceRoot = path.join(packageRoot, "src");
+const componentsRoot = path.join(sourceRoot, "components");
+const componentsIndexFile = path.join(componentsRoot, "index.ts");
 
 const {
-    bold,
-    dim,
-    formatFileList,
-    handleError,
-    intro,
-    noteBox,
-    outroSuccess,
-    success,
-} = utils
+	bold,
+	dim,
+	formatFileList,
+	handleError,
+	intro,
+	noteBox,
+	outroSuccess,
+	success,
+} = utils;
 
 function toKebabCase(value) {
-    return value
-        .trim()
-        .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
-        .replace(/[_\s]+/g, '-')
-        .replace(/[^a-zA-Z0-9-]/g, '')
-        .replace(/-{2,}/g, '-')
-        .replace(/^-+|-+$/g, '')
-        .toLowerCase()
+	return value
+		.trim()
+		.replace(/([a-z0-9])([A-Z])/g, "$1-$2")
+		.replace(/[_\s]+/g, "-")
+		.replace(/[^a-zA-Z0-9-]/g, "")
+		.replace(/-{2,}/g, "-")
+		.replace(/^-+|-+$/g, "")
+		.toLowerCase();
 }
 
 function toPascalCase(value) {
-    return value
-        .split('-')
-        .filter(Boolean)
-        .map((segment) =>
-            segment.charAt(0).toUpperCase() + segment.slice(1)
-        )
-        .join('')
+	return value
+		.split("-")
+		.filter(Boolean)
+		.map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+		.join("");
 }
 
 function toTitleCase(value) {
-    return value
-        .split('-')
-        .filter(Boolean)
-        .map((segment) =>
-            segment.charAt(0).toUpperCase() + segment.slice(1)
-        )
-        .join(' ')
+	return value
+		.split("-")
+		.filter(Boolean)
+		.map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+		.join(" ");
 }
 
 function toSlug(value) {
-    return value
-        .trim()
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-{2,}/g, '-')
+	return value
+		.trim()
+		.toLowerCase()
+		.replace(/[^a-z0-9\s-]/g, "")
+		.replace(/\s+/g, "-")
+		.replace(/-{2,}/g, "-");
 }
 
 function splitCsv(value, mapper = (entry) => entry) {
-    return value
-        .split(',')
-        .map((entry) => entry.trim())
-        .filter(Boolean)
-        .map(mapper)
+	return value
+		.split(",")
+		.map((entry) => entry.trim())
+		.filter(Boolean)
+		.map(mapper);
 }
 
 function createManifest({
-    componentName,
-    displayName,
-    description,
-    tag,
-    category,
-    includeAcf,
-    includeBlock,
-    acfDependencies,
+	componentName,
+	displayName,
+	description,
+	tag,
+	category,
+	includeAcf,
+	includeBlock,
+	acfDependencies,
 }) {
-    const manifest = {
-        $schema:
-            'https://github.com/bostonuniversity/avenue/schemas/component-manifest.schema.json',
-        name: componentName,
-        displayName,
-        description,
-        version: '1.0.0',
-        tag,
-        schema: `./${componentName}.schema.json`,
-        docs: {
-            storybook: `http://localhost:6006/?path=/docs/${toSlug(category)}-${componentName}--docs`,
-        },
-        exports: {
-            php: [`${componentName}.class.php`],
-            ...(includeAcf
-                ? {
-                      acf: [`${componentName}.acf.php`],
-                  }
-                : {}),
-        },
-        ...(includeAcf
-            ? {
-                  integrations: {
-                      wordpress: {
-                          acfFields: {
-                              supported: true,
-                              file: `${componentName}.acf.php`,
-                              groupKey: `group_${componentName.replace(/-/g, '_')}_component`,
-                              dependencies: acfDependencies,
-                          },
-                          ...(includeBlock
-                              ? {
-                                    acfBlock: {
-                                        supported: true,
-                                        file: `${componentName}.block.php`,
-                                        name: `avenue/${componentName}`,
-                                    },
-                                }
-                              : {}),
-                      },
-                  },
-              }
-            : {}),
-    }
+	const manifest = {
+		$schema:
+			"https://github.com/bostonuniversity/avenue/schemas/component-manifest.schema.json",
+		name: componentName,
+		displayName,
+		description,
+		version: "1.0.0",
+		tag,
+		schema: `./${componentName}.schema.json`,
+		docs: {
+			storybook: `http://localhost:6006/?path=/docs/${toSlug(category)}-${componentName}--docs`,
+		},
+		exports: {
+			php: [`${componentName}.class.php`],
+			...(includeAcf
+				? {
+						acf: [`${componentName}.acf.php`],
+					}
+				: {}),
+		},
+		...(includeAcf
+			? {
+					integrations: {
+						wordpress: {
+							acfFields: {
+								supported: true,
+								file: `${componentName}.acf.php`,
+								groupKey: `group_${componentName.replace(/-/g, "_")}_component`,
+								dependencies: acfDependencies,
+							},
+							...(includeBlock
+								? {
+										acfBlock: {
+											supported: true,
+											file: `${componentName}.block.php`,
+											name: `avenue/${componentName}`,
+										},
+									}
+								: {}),
+						},
+					},
+				}
+			: {}),
+	};
 
-    return `${JSON.stringify(manifest, null, 3)}\n`
+	return `${JSON.stringify(manifest, null, 3)}\n`;
 }
 
-function createLitTemplate({
-    componentName,
-    className,
-    tag,
-}) {
-    return `// Lit ===============================================================
+function createLitTemplate({ componentName, className, tag }) {
+	return `// Lit ===============================================================
 import { unsafeCSS } from 'lit'
 import { html } from 'lit/static-html.js'
 import { customElement, property } from 'lit/decorators.js'
@@ -170,16 +158,16 @@ export class ${className} extends AvenueElement {
    render() {
         return html\`
          <div part="root">
-            <slot>${'${this.label}'}</slot>
+            <slot>${"${this.label}"}</slot>
          </div>
         \`
    }
 }
-`
+`;
 }
 
 function createStylesTemplate({ componentName }) {
-    return `@layer component {
+	return `@layer component {
 
    :host {
       display: block;
@@ -193,11 +181,11 @@ function createStylesTemplate({ componentName }) {
       display: contents;
    }
 }
-`
+`;
 }
 
 function createTypesTemplate({ className }) {
-    return `/**
+	return `/**
  * ${className} Component Types
  * Shared between TypeScript and PHP
  */
@@ -209,17 +197,17 @@ export interface ${className}Props {
 export interface ${className}ACFField {
    label?: string
 }
-`
+`;
 }
 
 function createStoriesTemplate({
-    componentName,
-    className,
-    displayName,
-    tag,
-    storybookCategory,
+	componentName,
+	className,
+	displayName,
+	tag,
+	storybookCategory,
 }) {
-    return `// Storybook ============================================================
+	return `// Storybook ============================================================
 import type { Meta, StoryObj } from '@storybook/web-components-vite'
 
 // Component ===========================================================
@@ -252,55 +240,51 @@ export const Default: Story = {
       label: '${displayName}',
    },
 }
-`
+`;
 }
 
 function createSchemaTemplate({ componentName, displayName }) {
-    const schema = {
-        $schema:
-            'https://github.com/bostonuniversity/avenue/schemas/component.schema.json',
-        $id: `https://github.com/bostonuniversity/avenue/packages/ave-ui/src/components/${componentName}/${componentName}.schema.json`,
-        title: displayName,
-        type: 'component',
-        props: {
-            root: {
-                label: {
-                    type: 'string',
-                    required: true,
-                },
-            },
-        },
-        attributes: {
-            root: {
-                allowGlobal: true,
-                allowData: true,
-                allowAria: true,
-            },
-        },
-        slots: {
-            root: {
-                default: {
-                    allowed: ['html'],
-                    optional: true,
-                },
-            },
-        },
-        classes: {
-            root: {
-                allow: true,
-            },
-        },
-    }
+	const schema = {
+		$schema:
+			"https://github.com/bostonuniversity/avenue/schemas/component.schema.json",
+		$id: `https://github.com/bostonuniversity/avenue/packages/ave-ui/src/components/${componentName}/${componentName}.schema.json`,
+		title: displayName,
+		type: "component",
+		props: {
+			root: {
+				label: {
+					type: "string",
+					required: true,
+				},
+			},
+		},
+		attributes: {
+			root: {
+				allowGlobal: true,
+				allowData: true,
+				allowAria: true,
+			},
+		},
+		slots: {
+			root: {
+				default: {
+					allowed: ["html"],
+					optional: true,
+				},
+			},
+		},
+		classes: {
+			root: {
+				allow: true,
+			},
+		},
+	};
 
-    return `${JSON.stringify(schema, null, 3)}\n`
+	return `${JSON.stringify(schema, null, 3)}\n`;
 }
 
-function createPhpClassTemplate({
-    componentName,
-    className,
-    tag,
-}) {
-    return `<?php
+function createPhpClassTemplate({ componentName, className, tag }) {
+	return `<?php
 
 declare(strict_types=1);
 
@@ -316,11 +300,11 @@ final class ${className} extends AvenueElement
 
    protected static string $schema = __DIR__ . '/${componentName}.schema.json';
 }
-`
+`;
 }
 
 function createAcfTemplate({ componentName, displayName }) {
-    return `<?php
+	return `<?php
 
 declare(strict_types=1);
 
@@ -351,18 +335,18 @@ $field_group = Field::build_field_group($component_name, $fields, [
 ]);
 
 acf_add_local_field_group($field_group);
-`
+`;
 }
 
 function createBlockTemplate({
-    componentName,
-    className,
-    displayName,
-    description,
-    icon,
-    keywords,
+	componentName,
+	className,
+	displayName,
+	description,
+	icon,
+	keywords,
 }) {
-    return `<?php
+	return `<?php
 
 declare(strict_types=1);
 
@@ -378,7 +362,7 @@ return [
 \t'field_group_key' => FieldBuilder::build_group_key('${componentName}', 'component'),
 \t'category' => 'ave-components',
 \t'icon' => '${icon}',
-\t'keywords' => [${keywords.map((keyword) => `'${keyword}'`).join(', ')}],
+\t'keywords' => [${keywords.map((keyword) => `'${keyword}'`).join(", ")}],
 \t'component' => ${className}::class,
 \t'preview_props' => [
 \t\t'label' => '${displayName}',
@@ -393,335 +377,323 @@ return [
 \t\t'className' => true,
 \t],
 ];
-`
+`;
 }
 
-async function updateComponentsIndex({
-    componentName,
-    className,
-}) {
-    const importLine = `import './${componentName}/${componentName}.lit'`
-    const exportLine = `export { ${className} } from './${componentName}/${componentName}.lit'`
+async function updateComponentsIndex({ componentName, className }) {
+	const importLine = `import './${componentName}/${componentName}.lit'`;
+	const exportLine = `export { ${className} } from './${componentName}/${componentName}.lit'`;
 
-    let content = ''
+	let content = "";
 
-    if (existsSync(componentsIndexFile)) {
-        content = await readFile(componentsIndexFile, 'utf8')
+	if (existsSync(componentsIndexFile)) {
+		content = await readFile(componentsIndexFile, "utf8");
 
-        if (content.includes(importLine) || content.includes(exportLine)) {
-            return
-        }
+		if (content.includes(importLine) || content.includes(exportLine)) {
+			return;
+		}
 
-        content = content.trimEnd()
-        content += `\n${importLine}\n\n${exportLine}\n`
-    } else {
-        content = `${importLine}\n\n${exportLine}\n`
-    }
+		content = content.trimEnd();
+		content += `\n${importLine}\n\n${exportLine}\n`;
+	} else {
+		content = `${importLine}\n\n${exportLine}\n`;
+	}
 
-    await writeFile(componentsIndexFile, content)
+	await writeFile(componentsIndexFile, content);
 }
 
 async function main() {
-    intro('Create ave-ui Component', '◆')
+	intro("Create ave-ui Component", "◆");
 
-    const answers = await p.group(
-        {
-            componentName: () =>
-                p.text({
-                    message: 'Component name (kebab-case)',
-                    placeholder: 'alert-banner',
-                    validate: (value) => {
-                        if (!value) {
-                            return 'Component name is required'
-                        }
+	const answers = await p.group(
+		{
+			componentName: () =>
+				p.text({
+					message: "Component name (kebab-case)",
+					placeholder: "alert-banner",
+					validate: (value) => {
+						if (!value) {
+							return "Component name is required";
+						}
 
-                        const normalized = toKebabCase(value)
+						const normalized = toKebabCase(value);
 
-                        if (normalized !== value) {
-                            return 'Use lowercase kebab-case only'
-                        }
+						if (normalized !== value) {
+							return "Use lowercase kebab-case only";
+						}
 
-                        if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value)) {
-                            return 'Use letters, numbers, and single hyphens'
-                        }
-                    },
-                }),
+						if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value)) {
+							return "Use letters, numbers, and single hyphens";
+						}
+					},
+				}),
 
-            displayName: ({ results }) =>
-                p.text({
-                    message: 'Display name',
-                    initialValue: toTitleCase(results.componentName),
-                    validate: (value) => {
-                        if (!value) {
-                            return 'Display name is required'
-                        }
-                    },
-                }),
+			displayName: ({ results }) =>
+				p.text({
+					message: "Display name",
+					initialValue: toTitleCase(results.componentName),
+					validate: (value) => {
+						if (!value) {
+							return "Display name is required";
+						}
+					},
+				}),
 
-            description: ({ results }) =>
-                p.text({
-                    message: 'Description',
-                    initialValue: `${results.displayName} component`,
-                    validate: (value) => {
-                        if (!value) {
-                            return 'Description is required'
-                        }
-                    },
-                }),
+			description: ({ results }) =>
+				p.text({
+					message: "Description",
+					initialValue: `${results.displayName} component`,
+					validate: (value) => {
+						if (!value) {
+							return "Description is required";
+						}
+					},
+				}),
 
-            category: () =>
-                p.select({
-                    message: 'Storybook category',
-                    options: [
-                        {
-                            value: 'Atoms',
-                            label: 'Atoms',
-                        },
-                        {
-                            value: 'Molecules',
-                            label: 'Molecules',
-                        },
-                        {
-                            value: 'Organisms',
-                            label: 'Organisms',
-                        },
-                        {
-                            value: '__custom__',
-                            label: 'Custom',
-                        },
-                    ],
-                }),
+			category: () =>
+				p.select({
+					message: "Storybook category",
+					options: [
+						{
+							value: "Atoms",
+							label: "Atoms",
+						},
+						{
+							value: "Molecules",
+							label: "Molecules",
+						},
+						{
+							value: "Organisms",
+							label: "Organisms",
+						},
+						{
+							value: "__custom__",
+							label: "Custom",
+						},
+					],
+				}),
 
-            customCategory: ({ results }) =>
-                results.category === '__custom__'
-                    ? p.text({
-                          message: 'Custom Storybook category',
-                          placeholder: 'Layout',
-                          validate: (value) => {
-                              if (!value) {
-                                  return 'Category is required'
-                              }
-                          },
-                      })
-                    : undefined,
+			customCategory: ({ results }) =>
+				results.category === "__custom__"
+					? p.text({
+							message: "Custom Storybook category",
+							placeholder: "Layout",
+							validate: (value) => {
+								if (!value) {
+									return "Category is required";
+								}
+							},
+						})
+					: undefined,
 
-            includeAcf: () =>
-                p.confirm({
-                    message: 'Include WordPress ACF field integration?',
-                    initialValue: true,
-                }),
+			includeAcf: () =>
+				p.confirm({
+					message: "Include WordPress ACF field integration?",
+					initialValue: true,
+				}),
 
-            includeBlock: ({ results }) =>
-                results.includeAcf
-                    ? p.confirm({
-                          message: 'Include WordPress ACF block registration?',
-                          initialValue: true,
-                      })
-                    : false,
+			includeBlock: ({ results }) =>
+				results.includeAcf
+					? p.confirm({
+							message: "Include WordPress ACF block registration?",
+							initialValue: true,
+						})
+					: false,
 
-            acfDependencies: ({ results }) =>
-                results.includeAcf
-                    ? p.text({
-                          message: 'ACF dependencies (comma-separated component names)',
-                          placeholder: 'button, card',
-                          initialValue: '',
-                      })
-                    : '',
+			acfDependencies: ({ results }) =>
+				results.includeAcf
+					? p.text({
+							message:
+								"ACF dependencies (comma-separated component names)",
+							placeholder: "button, card",
+							initialValue: "",
+						})
+					: "",
 
-            keywords: ({ results }) =>
-                results.includeBlock
-                    ? p.text({
-                          message: 'Block keywords (comma-separated)',
-                          initialValue: results.componentName,
-                      })
-                    : '',
+			keywords: ({ results }) =>
+				results.includeBlock
+					? p.text({
+							message: "Block keywords (comma-separated)",
+							initialValue: results.componentName,
+						})
+					: "",
 
-            blockIcon: ({ results }) =>
-                results.includeBlock
-                    ? p.text({
-                          message: 'WordPress dashicon',
-                          initialValue: 'admin-generic',
-                          validate: (value) => {
-                              if (!value) {
-                                  return 'Icon is required for block registration'
-                              }
-                          },
-                      })
-                    : '',
-        },
-        {
-            onCancel: () => {
-                p.cancel('Component generation canceled')
-                process.exit(0)
-            },
-        }
-    )
+			blockIcon: ({ results }) =>
+				results.includeBlock
+					? p.text({
+							message: "WordPress dashicon",
+							initialValue: "admin-generic",
+							validate: (value) => {
+								if (!value) {
+									return "Icon is required for block registration";
+								}
+							},
+						})
+					: "",
+		},
+		{
+			onCancel: () => {
+				p.cancel("Component generation canceled");
+				process.exit(0);
+			},
+		},
+	);
 
-    const componentName = answers.componentName
-    const className = toPascalCase(componentName)
-    const tag = `ave-${componentName}`
-    const componentDirectory = path.join(
-        componentsRoot,
-        componentName
-    )
+	const componentName = answers.componentName;
+	const className = toPascalCase(componentName);
+	const tag = `ave-${componentName}`;
+	const componentDirectory = path.join(componentsRoot, componentName);
 
-    const storybookCategory =
-        answers.category === '__custom__'
-            ? answers.customCategory
-            : answers.category
+	const storybookCategory =
+		answers.category === "__custom__"
+			? answers.customCategory
+			: answers.category;
 
-    const includeAcf = answers.includeAcf
-    const includeBlock = Boolean(answers.includeBlock)
+	const includeAcf = answers.includeAcf;
+	const includeBlock = Boolean(answers.includeBlock);
 
-    const acfDependencies = includeAcf
-        ? splitCsv(
-              answers.acfDependencies,
-              toKebabCase
-          )
-        : []
+	const acfDependencies = includeAcf
+		? splitCsv(answers.acfDependencies ?? '', toKebabCase)
+		: [];
 
-    const blockKeywords = includeBlock
-        ? splitCsv(answers.keywords).map((entry) =>
-              entry.toLowerCase()
-          )
-        : []
+	const blockKeywords = includeBlock
+		? splitCsv(answers.keywords).map((entry) => entry.toLowerCase())
+		: [];
 
-    const spinner = p.spinner()
-    spinner.start('Generating component files')
+	const spinner = p.spinner();
+	spinner.start("Generating component files");
 
-    try {
-        if (existsSync(componentDirectory)) {
-            throw new Error(
-                `Component directory already exists: ${componentName}`
-            )
-        }
+	try {
+		if (existsSync(componentDirectory)) {
+			throw new Error(
+				`Component directory already exists: ${componentName}`,
+			);
+		}
 
-        await mkdir(componentDirectory, {
-            recursive: true,
-        })
+		await mkdir(componentDirectory, {
+			recursive: true,
+		});
 
-        const files = [
-            {
-                name: `${componentName}.component.json`,
-                content: createManifest({
-                    componentName,
-                    displayName: answers.displayName,
-                    description: answers.description,
-                    tag,
-                    category: storybookCategory,
-                    includeAcf,
-                    includeBlock,
-                    acfDependencies,
-                }),
-            },
-            {
-                name: `${componentName}.lit.ts`,
-                content: createLitTemplate({
-                    componentName,
-                    className,
-                    tag,
-                }),
-            },
-            {
-                name: `${componentName}.styles.css`,
-                content: createStylesTemplate({
-                    componentName,
-                }),
-            },
-            {
-                name: `${componentName}.types.ts`,
-                content: createTypesTemplate({
-                    className,
-                }),
-            },
-            {
-                name: `${componentName}.stories.ts`,
-                content: createStoriesTemplate({
-                    componentName,
-                    className,
-                    displayName: answers.displayName,
-                    tag,
-                    storybookCategory,
-                }),
-            },
-            {
-                name: `${componentName}.schema.json`,
-                content: createSchemaTemplate({
-                    componentName,
-                    displayName: answers.displayName,
-                }),
-            },
-            {
-                name: `${componentName}.class.php`,
-                content: createPhpClassTemplate({
-                    componentName,
-                    className,
-                    tag,
-                }),
-            },
-        ]
+		const files = [
+			{
+				name: `${componentName}.component.json`,
+				content: createManifest({
+					componentName,
+					displayName: answers.displayName,
+					description: answers.description,
+					tag,
+					category: storybookCategory,
+					includeAcf,
+					includeBlock,
+					acfDependencies,
+				}),
+			},
+			{
+				name: `${componentName}.lit.ts`,
+				content: createLitTemplate({
+					componentName,
+					className,
+					tag,
+				}),
+			},
+			{
+				name: `${componentName}.styles.css`,
+				content: createStylesTemplate({
+					componentName,
+				}),
+			},
+			{
+				name: `${componentName}.types.ts`,
+				content: createTypesTemplate({
+					className,
+				}),
+			},
+			{
+				name: `${componentName}.stories.ts`,
+				content: createStoriesTemplate({
+					componentName,
+					className,
+					displayName: answers.displayName,
+					tag,
+					storybookCategory,
+				}),
+			},
+			{
+				name: `${componentName}.schema.json`,
+				content: createSchemaTemplate({
+					componentName,
+					displayName: answers.displayName,
+				}),
+			},
+			{
+				name: `${componentName}.class.php`,
+				content: createPhpClassTemplate({
+					componentName,
+					className,
+					tag,
+				}),
+			},
+		];
 
-        if (includeAcf) {
-            files.push({
-                name: `${componentName}.acf.php`,
-                content: createAcfTemplate({
-                    componentName,
-                    displayName: answers.displayName,
-                }),
-            })
-        }
+		if (includeAcf) {
+			files.push({
+				name: `${componentName}.acf.php`,
+				content: createAcfTemplate({
+					componentName,
+					displayName: answers.displayName,
+				}),
+			});
+		}
 
-        if (includeBlock) {
-            files.push({
-                name: `${componentName}.block.php`,
-                content: createBlockTemplate({
-                    componentName,
-                    className,
-                    displayName: answers.displayName,
-                    description: answers.description,
-                    icon: answers.blockIcon,
-                    keywords:
-                        blockKeywords.length > 0
-                            ? blockKeywords
-                            : [componentName],
-                }),
-            })
-        }
+		if (includeBlock) {
+			files.push({
+				name: `${componentName}.block.php`,
+				content: createBlockTemplate({
+					componentName,
+					className,
+					displayName: answers.displayName,
+					description: answers.description,
+					icon: answers.blockIcon,
+					keywords:
+						blockKeywords.length > 0 ? blockKeywords : [componentName],
+				}),
+			});
+		}
 
-        for (const file of files) {
-            await writeFile(
-                path.join(componentDirectory, file.name),
-                file.content
-            )
-        }
+		for (const file of files) {
+			await writeFile(
+				path.join(componentDirectory, file.name),
+				file.content,
+			);
+		}
 
-        await updateComponentsIndex({
-            componentName,
-            className,
-        })
+		await updateComponentsIndex({
+			componentName,
+			className,
+		});
 
-        spinner.stop(
-            `Created ${success(files.length)} files for ${success(componentName)}`
-        )
+		spinner.stop(
+			`Created ${success(files.length)} files for ${success(componentName)}`,
+		);
 
-        noteBox(
-            'Component created',
-            `${bold('Location:')} ${dim(`src/components/${componentName}/`)}\n\n` +
-                `${bold('Files:')}\n` +
-                `${formatFileList(files.map((file) => file.name))}\n\n` +
-                `${bold('Next:')}\n` +
-                `  1. Run ${dim('pnpm run build:registry')}\n` +
-                `  2. Run ${dim('pnpm build')}\n` +
-                `  3. Implement component behavior in ${dim(`${componentName}.lit.ts`)}`
-        )
+		noteBox(
+			"Component created",
+			`${bold("Location:")} ${dim(`src/components/${componentName}/`)}\n\n` +
+				`${bold("Files:")}\n` +
+				`${formatFileList(files.map((file) => file.name))}\n\n` +
+				`${bold("Next:")}\n` +
+				`  1. Run ${dim("pnpm run build:registry")}\n` +
+				`  2. Run ${dim("pnpm build")}\n` +
+				`  3. Implement component behavior in ${dim(`${componentName}.lit.ts`)}`,
+		);
 
-        outroSuccess('Component scaffold complete')
-    } catch (error) {
-        handleError(error, spinner)
-    }
+		outroSuccess("Component scaffold complete");
+	} catch (error) {
+		handleError(error, spinner);
+	}
 }
 
 main().catch((error) => {
-    p.log.error(error instanceof Error ? error.message : String(error))
-    process.exit(1)
-})
+	p.log.error(error instanceof Error ? error.message : String(error));
+	process.exit(1);
+});

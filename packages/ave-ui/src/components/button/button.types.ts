@@ -6,15 +6,15 @@
 export interface ButtonProps {
    label: string
    variant?: 'primary' | 'secondary' | 'outline'
-   icon?: string
    href?: string
-   target?: '_self' | '_blank'
+   target?: '_blank' | '_parent' | '_self' | '_top';
+   icon?: string
 }
 
 export interface ButtonACFField {
    label: string
+   variant?: 'primary' | 'secondary' | 'outline'
    href?: string
-   target?: string
-   variant?: string
+   target?: '_blank' | '_parent' | '_self' | '_top';
    icon?: string
 }

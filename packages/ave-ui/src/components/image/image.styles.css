@@ -1,0 +1,22 @@
+@layer component {
+
+   :host {
+      block-size: 100%;
+      display: block;
+      inline-size: 100%;
+   }
+
+   :host([object-fit="contain"]) img {
+      object-fit: contain;
+   }
+
+   :host([object-fit="cover"]) img {
+      object-fit: cover;
+   }
+
+   img {
+      block-size: 100%;
+      display: block;
+      inline-size: 100%;
+   }
+}

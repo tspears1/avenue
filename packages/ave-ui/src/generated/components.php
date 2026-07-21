@@ -54,12 +54,39 @@ return [
                     'groupKey' => 'group_card_component',
                     'dependencies' => [
                         'button',
+                        'image',
                     ],
                 ],
                 'acfBlock' => [
                     'supported' => true,
                     'file' => 'components/card/card.block.php',
                     'name' => 'avenue/card',
+                ],
+            ],
+        ],
+    ],
+    'image' => [
+        'name' => 'image',
+        'displayName' => 'Image',
+        'description' => 'Image component',
+        'version' => '1.0.0',
+        'tag' => 'ave-image',
+        'docs' => [
+            'storybook' => 'http://localhost:6006/?path=/docs/atoms-image--docs',
+        ],
+        'schema' => 'components/image/image.schema.json',
+        'integrations' => [
+            'wordpress' => [
+                'acfFields' => [
+                    'supported' => true,
+                    'file' => 'components/image/image.acf.php',
+                    'groupKey' => 'group_image_component',
+                    'dependencies' => [],
+                ],
+                'acfBlock' => [
+                    'supported' => true,
+                    'file' => 'components/image/image.block.php',
+                    'name' => 'avenue/image',
                 ],
             ],
         ],

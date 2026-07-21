@@ -1,14 +1,55 @@
 @layer component {
+	:host {
+		display: contents;
+	}
 
-   :host {
-      display: block;
-   }
+	[part=root] {
+		--_card-background-color: var(
+			--card-background-color,
+			oklch(var(--color-surface-oklch))
+		);
+		--_card-color: var(--card-color, oklch(var(--color-text-oklch)));
+		--_card-ratio: var(--card-ratio, var(--ratio-film-y));
+		--_card-inline-size: var(--card-inline-size, 100%);
+		--_card-max-inline-size: var(--card-max-inline-size, 22.5rem);
+		--font-family: var(--font-monospace-code);
 
-   [part="root"] {
-      display: block;
-   }
+		aspect-ratio: var(--_card-ratio);
+		background: var(--_card-background-color);
+		block-size: auto;
+		color: var(--_card-color);
+		border: var(--border-size-2) solid var(--_card-color);
+		border-radius: var(--radius-4);
+		box-shadow:
+			0.3px 0.5px 0.8px oklch(from var(--_card-color) l c h / 0.06),
+			0.5px 1.1px 1.8px -0.1px oklch(from var(--_card-color) l c h / 0.24);
+		display: grid;
+		font-family: var(--font-family);
+		grid-template-areas: "MEDIA" "CONTENT";
+		inline-size: var(--_card-inline-size);
+		max-inline-size: var(--_card-max-inline-size);
+		overflow: clip;
+		text-align: start;
 
-   .card {
-      display: contents;
-   }
+		&[part=root]:has(ave-image) {
+			grid-template-rows: minmax(20vb, 1fr) 1fr;
+		}
+	}
+
+	[part=content] {
+		display: grid;
+		gap: var(--size-fluid-2);
+		grid-area: CONTENT;
+		padding: var(--size-fluid-3) var(--size-fluid-2);
+		place-items: start;
+	}
+
+	[part=title],
+	[part=text] {
+		margin-block: 0;
+	}
+
+	ave-image {
+		grid-area: MEDIA;
+	}
 }

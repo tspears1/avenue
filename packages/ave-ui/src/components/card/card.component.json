@@ -24,7 +24,8 @@
             "file": "card.acf.php",
             "groupKey": "group_card_component",
             "dependencies": [
-               "button"
+               "button",
+               "image"
             ]
          },
          "acfBlock": {
