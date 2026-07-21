@@ -95,22 +95,24 @@ final class FieldBuilder
     *
     * @param string $component_name Component slug or name.
     * @param string $clone_name Clone field name.
-    * @param array<int, string> $clone_keys Field/group keys to clone.
+    * @param array<int, string>|null $clone_keys Field/group keys or source field names.
+    *                                       When null/empty or containing "all"/"*", clones the full source component group.
     * @param array<string, mixed> $args Additional ACF clone args.
     * @return array<string, mixed> ACF clone field array.
     */
-   public static function build_clone(string $component_name, string $clone_name, array $clone_keys, array $args = []): array
+   public static function build_clone(string $component_name, string $clone_name, ?array $clone_keys = null, array $args = []): array
    {
       $component_key = self::normalize_token($component_name);
       $clone_key = self::normalize_token($clone_name);
+      $resolved_clone_keys = self::resolve_clone_keys($clone_key, $clone_keys);
 
       return [
          'key' => self::build_field_key($component_key, 'clone_' . $clone_key),
          'name' => $clone_key,
          'label' => $args['label'] ?? self::build_label($clone_key),
          'type' => 'clone',
-         'clone' => $clone_keys,
-         'display' => $args['display'] ?? 'group',
+         'clone' => $resolved_clone_keys,
+         'display' => $args['display'] ?? 'seamless',
          'layout' => $args['layout'] ?? 'block',
          'wrapper' => $args['wrapper'] ?? [],
       ];
@@ -407,5 +409,58 @@ final class FieldBuilder
       $normalized = preg_replace('/[^a-z0-9_]+/', '_', $normalized) ?? '';
       $normalized = preg_replace('/_+/', '_', $normalized) ?? '';
       return trim($normalized, '_');
+   }
+
+   /**
+    * Resolve clone targets from full ACF keys or shorthand field names.
+    *
+    * @param string $source_component Component name used as the clone source.
+    * @param array<int, string>|null $clone_keys Clone keys or shorthand names.
+    * @return array<int, string> Resolved ACF clone targets.
+    */
+   private static function resolve_clone_keys(string $source_component, ?array $clone_keys): array
+   {
+      $source_key = self::normalize_token($source_component);
+      $default_group_key = self::build_group_key($source_key, 'component');
+
+      if ($clone_keys === null || $clone_keys === []) {
+         return [$default_group_key];
+      }
+
+      $resolved_keys = [];
+
+      foreach ($clone_keys as $clone_target) {
+         if (!is_string($clone_target)) {
+            continue;
+         }
+
+         $trimmed_target = trim($clone_target);
+
+         if ($trimmed_target === '') {
+            continue;
+         }
+
+         $normalized_target = self::normalize_token($trimmed_target);
+
+         if ($normalized_target === 'all' || $trimmed_target === '*') {
+            $resolved_keys[] = $default_group_key;
+            continue;
+         }
+
+         if (str_starts_with($trimmed_target, 'field_') || str_starts_with($trimmed_target, 'group_')) {
+            $resolved_keys[] = $trimmed_target;
+            continue;
+         }
+
+         $resolved_keys[] = self::build_field_key($source_key, $normalized_target);
+      }
+
+      $resolved_keys = array_values(array_unique($resolved_keys));
+
+      if ($resolved_keys === []) {
+         return [$default_group_key];
+      }
+
+      return $resolved_keys;
    }
 }

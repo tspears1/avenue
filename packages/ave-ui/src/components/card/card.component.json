@@ -2,10 +2,13 @@
    "$schema": "https://github.com/bostonuniversity/avenue/schemas/component-manifest.schema.json",
    "name": "card",
    "displayName": "Card",
-   "description": "Interactive card component with multiple theme variants",
+   "description": "Card component",
    "version": "1.0.0",
    "tag": "ave-card",
    "schema": "./card.schema.json",
+   "docs": {
+      "storybook": "http://localhost:6006/?path=/docs/molecules-card--docs"
+   },
    "exports": {
       "php": [
          "card.class.php"
@@ -18,6 +21,7 @@
       "wordpress": {
          "acfFields": {
             "supported": true,
+            "file": "card.acf.php",
             "groupKey": "group_card_component",
             "dependencies": [
                "button"
@@ -25,8 +29,8 @@
          },
          "acfBlock": {
             "supported": true,
-            "name": "avenue/card",
-            "file": "card.block.php"
+            "file": "card.block.php",
+            "name": "avenue/card"
          }
       }
    }

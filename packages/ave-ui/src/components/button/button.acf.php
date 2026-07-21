@@ -16,7 +16,6 @@ $fields = [
    Field::build_field($component_name, 'label', [
       'label' => 'Label',
       'type' => 'text',
-      'required' => 1,
       'instructions' => 'The text displayed on the button',
    ]),
    Field::build_field($component_name, 'variant', [

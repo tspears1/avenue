@@ -85,6 +85,12 @@ BlockFactory::register([
 - `tab([...])`
 - `accordion([...])`
 
+Clone helper notes:
+- `build_clone('card', 'button', null)` clones the full `button` component group.
+- `build_clone('card', 'button', ['all'])` and `build_clone('card', 'button', ['*'])` do the same.
+- Field names like `['label', 'href']` are resolved to deterministic keys for the source component.
+- Full ACF keys like `group_...` and `field_...` are still supported directly.
+
 ### BlockFactory
 
 `Avenue\ACF\BlockFactory` - ACF block registration with field-group attachment.

@@ -36,4 +36,32 @@ return [
             ],
         ],
     ],
+    'card' => [
+        'name' => 'card',
+        'displayName' => 'Card',
+        'description' => 'Card component',
+        'version' => '1.0.0',
+        'tag' => 'ave-card',
+        'docs' => [
+            'storybook' => 'http://localhost:6006/?path=/docs/molecules-card--docs',
+        ],
+        'schema' => 'components/card/card.schema.json',
+        'integrations' => [
+            'wordpress' => [
+                'acfFields' => [
+                    'supported' => true,
+                    'file' => 'components/card/card.acf.php',
+                    'groupKey' => 'group_card_component',
+                    'dependencies' => [
+                        'button',
+                    ],
+                ],
+                'acfBlock' => [
+                    'supported' => true,
+                    'file' => 'components/card/card.block.php',
+                    'name' => 'avenue/card',
+                ],
+            ],
+        ],
+    ],
 ];
