@@ -15,6 +15,8 @@ import type { ImageProps } from '../image/image.types'
 import '../button/button.lit.ts'
 import '../image/image.lit.ts'
 
+import { Heading } from '../../internal/templates/heading'
+
 /**
  * @component ave-card
  * @since 0.0.1
@@ -62,9 +64,7 @@ export class Card extends AvenueElement {
                      <slot name="before-title"></slot>
                      ${when(
                         this.title,
-                        () => html`
-                           <h2 part="title">${this.title}</h2>
-                        `
+                        () => Heading(this.title, 'h2')
                      )}
                      <slot name="after-title"></slot>
                      ${when(

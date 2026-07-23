@@ -44,7 +44,7 @@
 		place-items: start;
 	}
 
-	[part=title],
+	[part=heading],
 	[part=text] {
 		margin-block: 0;
 	}
