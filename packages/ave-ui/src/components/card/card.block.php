@@ -20,9 +20,12 @@ return [
 		'title' => 'Card',
 	],
 	'map_fields' => static function ( array $fields, array $block, bool $is_preview, int|string $post_id ): array {
+		$link = $fields['link'] ?? null;
 		return [
 			'props' => [
 				'image' => null,
+				'link' => null,
+				'data-props' => json_encode(['link' => $link]),
 			],
 		];
 	},

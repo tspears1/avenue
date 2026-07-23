@@ -13,10 +13,12 @@
             "type": "string"
          },
          "link": {
-            "type": "object"
+            "type": "object",
+            "transport": "property"
          },
          "image": {
-            "type": "object"
+            "type": "object",
+            "transport": "property"
          }
       }
    },
