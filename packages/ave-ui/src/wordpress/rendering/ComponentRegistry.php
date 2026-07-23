@@ -284,6 +284,12 @@ final class ComponentRegistry
             $config['name'] = $name;
         }
 
+        self::ensureComponentClassIsLoadable(
+            $name,
+            $config,
+            $block
+        );
+
         BlockFactory::register($config);
 
         self::$registered[$name]['block'] = true;
@@ -293,6 +299,84 @@ final class ComponentRegistry
             $name,
             $metadata
         );
+    }
+
+    /**
+     * Ensure the configured component class can be loaded.
+     *
+     * This guards against stale Composer classmaps by requiring the
+     * component class file directly when needed.
+     *
+     * @param array<string, mixed> $config
+     * @param array<string, mixed> $integration
+     */
+    private static function ensureComponentClassIsLoadable(
+        string $name,
+        array $config,
+        array $integration
+    ): void {
+        $component = $config['component'] ?? null;
+
+        if (!is_string($component) || $component === '') {
+            return;
+        }
+
+        if (class_exists($component)) {
+            return;
+        }
+
+        foreach (self::componentClassCandidates($name, $integration) as $candidate) {
+            if (!is_file($candidate)) {
+                continue;
+            }
+
+            require_once $candidate;
+
+            if (class_exists($component)) {
+                return;
+            }
+        }
+
+        throw new RuntimeException(
+            sprintf(
+                'Component class "%s" for "%s" could not be loaded. Run "composer dump-autoload" in app/themes/loom to refresh classmaps.',
+                $component,
+                $name
+            )
+        );
+    }
+
+    /**
+     * Build likely filesystem paths for a component class file.
+     *
+     * @param array<string, mixed> $integration
+     *
+     * @return array<int, string>
+     */
+    private static function componentClassCandidates(
+        string $name,
+        array $integration
+    ): array {
+        $paths = [];
+
+        $blockFile = $integration['file'] ?? null;
+
+        if (is_string($blockFile) && $blockFile !== '') {
+            $resolvedBlock = self::$basePath . '/' . ltrim($blockFile, '/\\');
+            $blockDir = dirname($resolvedBlock);
+
+            $paths[] = $blockDir . '/' . $name . '.class.php';
+
+            $blockBase = basename($blockFile, '.block.php');
+
+            if ($blockBase !== '' && $blockBase !== $name) {
+                $paths[] = $blockDir . '/' . $blockBase . '.class.php';
+            }
+        }
+
+        $paths[] = self::$basePath . '/components/' . $name . '/' . $name . '.class.php';
+
+        return array_values(array_unique($paths));
     }
 
     /**

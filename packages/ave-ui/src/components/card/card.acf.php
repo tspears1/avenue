@@ -67,13 +67,10 @@ final class CardFields extends ComponentFields
             ],
          ),
 
-         Field::build_repeater(
+         Field::build_group(
             $component,
-            'actions',
+            'link',
             $button_fields,
-            [
-               'label' => 'Buttons',
-            ],
          ),
       ];
    }

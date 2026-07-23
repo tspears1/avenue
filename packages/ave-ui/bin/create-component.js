@@ -308,33 +308,51 @@ function createAcfTemplate({ componentName, displayName }) {
 
 declare(strict_types=1);
 
-namespace AvenueUI\\ACF;
+namespace AvenueUI\ACF;
 
-use Avenue\\ACF\\FieldBuilder as Field;
+use Avenue\ACF\ComponentFields;
+use Avenue\ACF\FieldBuilder as Field;
 
-if (!function_exists('acf_add_local_field_group')) {
-   return;
+final class ${displayName}Fields extends ComponentFields
+{
+   protected static function component_name(): string
+   {
+      return '${componentName}';
+   }
+
+   /**
+    * @return array<int, array<string, mixed>>
+    */
+   protected static function define_fields(): array
+   {
+      $component = static::component_name();
+
+      return [
+         Field::build_field(
+            $component,
+            'label',
+            [
+               'label' => 'Label',
+               'type' => 'text',
+               'required' => 1,
+               'instructions' => 'The text displayed on the component.',
+            ],
+         ),
+      ];
+   }
+
+   protected static function field_group_config(): array
+   {
+      return [
+         'title' => '${displayName}',
+         'location' => [],
+         'style' => 'seamless',
+         'wrap' => false,
+      ];
+   }
 }
 
-$component_name = '${componentName}';
-
-$fields = [
-   Field::build_field($component_name, 'label', [
-      'label' => 'Label',
-      'type' => 'text',
-      'required' => 1,
-      'instructions' => 'The text displayed in the component',
-   ]),
-];
-
-$field_group = Field::build_field_group($component_name, $fields, [
-   'title' => '${displayName}',
-   'location' => [],
-   'style' => 'seamless',
-   'wrap' => false,
-]);
-
-acf_add_local_field_group($field_group);
+${displayName}Fields::register();
 `;
 }
 

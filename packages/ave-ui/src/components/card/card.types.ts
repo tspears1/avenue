@@ -16,4 +16,7 @@ export interface CardProps {
 
 export interface CardACFField {
    title?: string
+   text?: string
+   image?: ImageProps
+   link?: ButtonProps[]
 }

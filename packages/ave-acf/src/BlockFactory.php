@@ -33,7 +33,9 @@ final class BlockFactory
     * Register a single ACF block.
     *
       * Required config keys: name, title, field_group_key.
-      * Optional config key: preview_props (preview-only component prop defaults).
+         * Optional config keys:
+         * - preview_props (preview-only component prop defaults).
+         * - debug (preview-only dump of fields/config for wiring diagnostics).
     *
     * @param array<string, mixed> $config Block configuration.
     * @return void
@@ -115,13 +117,19 @@ final class BlockFactory
     * @param int|string $post_id Post ID/context.
     * @return void
     */
-   public static function render_block(array $block, string $content = '', bool $is_preview = false, $post_id = 0): void
+   public static function render_block(array $block, string $content = '', bool $is_preview = false, $post_id = 0, bool $debug = false): void
    {
       $block_name = isset($block['name']) && is_string($block['name'])
          ? str_replace('acf/', '', $block['name'])
          : '';
 
       $config = self::get_block($block_name);
+      $debug_enabled = $debug;
+
+      if (is_array($config)) {
+         $debug_enabled = $debug_enabled || Helper::bool_option($config, 'debug', false);
+      }
+
       $fields = function_exists('get_fields')
          ? get_fields()
          : [];
@@ -137,7 +145,20 @@ final class BlockFactory
       }
 
       if (!is_array($config)) {
-         self::render_preview_placeholder($is_preview);
+         self::render_preview_placeholder($is_preview, $fields, $config, $debug_enabled);
+         return;
+      }
+
+      if ($debug_enabled) {
+         $debug_context = self::build_debug_context(
+            $config,
+            $block,
+            $fields,
+            $is_preview,
+            $post_id
+         );
+
+         self::render_preview_placeholder($is_preview, $fields, $config, true, $debug_context);
          return;
       }
 
@@ -152,7 +173,7 @@ final class BlockFactory
          return;
       }
 
-      self::render_preview_placeholder($is_preview);
+      self::render_preview_placeholder($is_preview, $fields, $config);
    }
 
    /**
@@ -236,11 +257,19 @@ final class BlockFactory
       bool $is_preview,
       $post_id
    ): array {
-      $props = self::merge_preview_props(
+      $map_fields_only = Helper::bool_option(
          $config,
-         $fields,
-         $is_preview
+         'map_fields_only',
+         false
       );
+
+      $props = $map_fields_only
+         ? []
+         : self::merge_preview_props(
+            $config,
+            $fields,
+            $is_preview
+         );
 
       $data = [
          // Default behavior: ACF fields map directly to component props.
@@ -283,7 +312,58 @@ final class BlockFactory
          }
       }
 
+      $discard_stale_props = Helper::bool_option(
+         $config,
+         'discard_stale_props',
+         true
+      );
+
+      if ($discard_stale_props) {
+         $data['props'] = self::prune_unknown_props(
+            $config,
+            $data['props']
+         );
+      }
+
       return $data;
+   }
+
+   /**
+    * Remove props not declared in the component schema when available.
+    *
+    * @param array<string, mixed> $config
+    * @param array<string, mixed> $props
+    * @return array<string, mixed>
+    */
+   private static function prune_unknown_props(
+      array $config,
+      array $props
+   ): array {
+      $schema = self::inspect_component_schema(
+         $config['component'] ?? null
+      );
+
+      if (
+         !is_array($schema) ||
+         !isset($schema['allowed_props']) ||
+         !is_array($schema['allowed_props']) ||
+         $schema['allowed_props'] === []
+      ) {
+         return $props;
+      }
+
+      $allowed_lookup = array_fill_keys(
+         $schema['allowed_props'],
+         true
+      );
+
+      foreach (array_keys($props) as $name) {
+         if (!isset($allowed_lookup[$name])) {
+            unset($props[$name]);
+         }
+      }
+
+      return $props;
    }
 
    /**
@@ -475,9 +555,26 @@ final class BlockFactory
     * Render the default editor preview placeholder.
     */
    private static function render_preview_placeholder(
-      bool $is_preview
+      bool $is_preview,
+      array $fields,
+      array|null $config = null,
+      bool $debug = false,
+      array $debug_context = []
    ): void {
       if (!$is_preview) {
+         return;
+      }
+
+      if ($debug) {
+         $debug_payload = [
+            'fields' => $fields,
+            'config' => $config,
+            'diagnostics' => $debug_context,
+         ];
+
+         echo '<pre>';
+         print_r($debug_payload);
+         echo '</pre>';
          return;
       }
 
@@ -487,6 +584,231 @@ final class BlockFactory
       echo 'Configure block fields to preview content.';
       echo '</p>';
       echo '</div>';
+   }
+
+   /**
+    * Build block debug diagnostics for field mapping and schema validation.
+    *
+    * @param array<string, mixed> $config
+    * @param array<string, mixed> $block
+    * @param array<string, mixed> $fields
+    * @param int|string $post_id
+    * @return array<string, mixed>
+    */
+   private static function build_debug_context(
+      array $config,
+      array $block,
+      array $fields,
+      bool $is_preview,
+      $post_id
+   ): array {
+      $render_data = self::build_component_render_data(
+         $config,
+         $block,
+         $fields,
+         $is_preview,
+         $post_id
+      );
+
+      $context = [
+         'component' => $config['component'] ?? null,
+         'has_map_fields' => is_callable($config['map_fields'] ?? null),
+         'discard_stale_props' => Helper::bool_option($config, 'discard_stale_props', true),
+         'mapped' => [
+            'prop_keys' => array_keys($render_data['props']),
+            'attr_keys' => array_keys($render_data['attrs']),
+            'class_count' => count($render_data['classes']),
+            'slot_keys' => array_keys($render_data['slots']),
+         ],
+         'validation_hints' => [
+            'schema_available' => false,
+            'unknown_props' => [],
+            'missing_required_props' => [],
+            'schema_error' => null,
+         ],
+      ];
+
+      $render_probe = self::probe_component_render(
+         $config,
+         $render_data
+      );
+
+      $context['render_probe'] = $render_probe;
+
+      $schema = self::inspect_component_schema(
+         $config['component'] ?? null
+      );
+
+      if ($schema === null) {
+         return $context;
+      }
+
+      $context['validation_hints']['schema_available'] = true;
+
+      if (isset($schema['error']) && is_string($schema['error'])) {
+         $context['validation_hints']['schema_error'] = $schema['error'];
+      }
+
+      $prop_names = array_keys($render_data['props']);
+      $unknown_props = array_values(
+         array_diff($prop_names, $schema['allowed_props'])
+      );
+
+      $missing_required_props = [];
+
+      foreach ($schema['required_props'] as $required_prop) {
+         if (
+            !array_key_exists($required_prop, $render_data['props']) ||
+            $render_data['props'][$required_prop] === null ||
+            $render_data['props'][$required_prop] === ''
+         ) {
+            $missing_required_props[] = $required_prop;
+         }
+      }
+
+      $context['schema'] = $schema;
+      $context['validation_hints']['unknown_props'] = $unknown_props;
+      $context['validation_hints']['missing_required_props'] = $missing_required_props;
+
+      return $context;
+   }
+
+   /**
+    * Probe component rendering and surface exception details for debug mode.
+    *
+    * @param array<string, mixed> $config
+    * @param array<string, mixed> $render_data
+    * @return array<string, mixed>
+    */
+   private static function probe_component_render(
+      array $config,
+      array $render_data
+   ): array {
+      $component = $config['component'] ?? null;
+
+      if (!is_string($component) || !class_exists($component)) {
+         return [
+            'can_render' => false,
+            'error' => 'Component class is unavailable.',
+         ];
+      }
+
+      if (!is_callable([$component, 'render'])) {
+         return [
+            'can_render' => false,
+            'error' => 'Component render method is not callable.',
+         ];
+      }
+
+      try {
+         $output = $component::render(
+            props: $render_data['props'] ?? [],
+            attrs: $render_data['attrs'] ?? [],
+            classes: $render_data['classes'] ?? [],
+            slots: $render_data['slots'] ?? []
+         );
+
+         return [
+            'can_render' => true,
+            'output_length' => is_string($output) ? strlen($output) : 0,
+         ];
+      } catch (\Throwable $exception) {
+         return [
+            'can_render' => false,
+            'error' => $exception->getMessage(),
+            'exception' => get_class($exception),
+         ];
+      }
+   }
+
+   /**
+    * Inspect a component schema file when available.
+    *
+    * @param mixed $component
+    * @return array<string, mixed>|null
+    */
+   private static function inspect_component_schema($component): ?array
+   {
+      if (!is_string($component) || !class_exists($component)) {
+         return null;
+      }
+
+      try {
+         $reflection = new \ReflectionClass($component);
+
+         if (!$reflection->hasProperty('schema')) {
+            return null;
+         }
+
+         $schema_property = $reflection->getProperty('schema');
+         $schema_property->setAccessible(true);
+         $schema_path = $schema_property->getValue();
+
+         if (!is_string($schema_path) || $schema_path === '') {
+            return null;
+         }
+
+         $resolved_path = realpath($schema_path);
+
+         if ($resolved_path === false || !is_file($resolved_path)) {
+            return [
+               'path' => $schema_path,
+               'allowed_props' => [],
+               'required_props' => [],
+               'error' => 'Schema file not found.',
+            ];
+         }
+
+         $contents = file_get_contents($resolved_path);
+
+         if ($contents === false) {
+            return [
+               'path' => $resolved_path,
+               'allowed_props' => [],
+               'required_props' => [],
+               'error' => 'Schema file could not be read.',
+            ];
+         }
+
+         $decoded = json_decode($contents, true);
+
+         if (!is_array($decoded)) {
+            return [
+               'path' => $resolved_path,
+               'allowed_props' => [],
+               'required_props' => [],
+               'error' => 'Schema JSON is invalid.',
+            ];
+         }
+
+         $definitions = $decoded['props']['root'] ?? [];
+
+         if (!is_array($definitions)) {
+            $definitions = [];
+         }
+
+         $allowed_props = array_keys($definitions);
+         $required_props = [];
+
+         foreach ($definitions as $name => $definition) {
+            if (is_array($definition) && (($definition['required'] ?? false) === true)) {
+               $required_props[] = $name;
+            }
+         }
+
+         return [
+            'path' => $resolved_path,
+            'allowed_props' => $allowed_props,
+            'required_props' => $required_props,
+         ];
+      } catch (\Throwable $exception) {
+         return [
+            'path' => '',
+            'allowed_props' => [],
+            'required_props' => [],
+            'error' => $exception->getMessage(),
+         ];
+      }
    }
 
    /**
@@ -528,8 +850,8 @@ final class BlockFactory
 
       $render_callback = (isset($config['render_callback']) && is_callable($config['render_callback']))
          ? $config['render_callback']
-         : static function (array $block, string $content = '', bool $is_preview = false, $post_id = 0): void {
-            self::render_block($block, $content, $is_preview, $post_id);
+         : static function (array $block, string $content = '', bool $is_preview = false, $post_id = 0) use ($config): void {
+            self::render_block($block, $content, $is_preview, $post_id, $config['debug'] ?? false);
          };
 
       $block_config = [

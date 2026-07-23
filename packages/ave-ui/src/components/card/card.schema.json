@@ -8,6 +8,15 @@
          "title": {
             "type": "string",
             "required": true
+         },
+         "text": {
+            "type": "string"
+         },
+         "link": {
+            "type": "object"
+         },
+         "image": {
+            "type": "object"
          }
       }
    },
