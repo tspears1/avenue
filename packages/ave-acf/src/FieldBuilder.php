@@ -22,15 +22,16 @@ final class FieldBuilder
 
       if ($wrap) {
          $fields = [
-            [
-               'key' => self::build_field_key($component_key, 'section'),
-               'name' => $component_key . '_section',
-               'label' => self::build_label($component_key),
-               'type' => 'group',
-               'sub_fields' => $fields,
-               'layout' => 'block',
-               'wrapper' => ['class' => $wrapper_class],
-            ],
+            self::build_group(
+               $component_key,
+               'section',
+               $fields,
+               [
+                  'name' => $component_key . '_section',
+                  'label' => self::build_label($component_key),
+                  'wrapper' => ['class' => $wrapper_class],
+               ],
+            ),
          ];
       }
 
@@ -43,7 +44,10 @@ final class FieldBuilder
 
       unset($config['wrap'], $config['wrapper_class']);
 
-      return array_merge($defaults, $config);
+      return array_replace($defaults, $config, [
+         'key' => $defaults['key'],
+         'fields' => $fields,
+      ]);
    }
 
    /**
@@ -59,10 +63,16 @@ final class FieldBuilder
       $component_key = self::normalize_token($component_name);
       $field_key = self::normalize_token($field_name);
 
-      return array_merge([
-         'key' => self::build_field_key($component_key, $field_key),
-         'name' => $field_key,
-      ], $args);
+      return array_replace(
+         [
+            'key' => self::build_field_key($component_key, $field_key),
+            'name' => $field_key,
+         ],
+         $args,
+         [
+            'key' => self::build_field_key($component_key, $field_key),
+         ],
+      );
    }
 
    /**
@@ -79,15 +89,21 @@ final class FieldBuilder
       $component_key = self::normalize_token($component_name);
       $group_key = self::normalize_token($group_name);
 
-      return [
+      $defaults = [
          'key' => self::build_field_key($component_key, 'group_' . $group_key),
          'name' => $group_key,
-         'label' => $args['label'] ?? self::build_label($group_key),
+         'label' => self::build_label($group_key),
          'type' => 'group',
-         'layout' => $args['layout'] ?? 'block',
+         'layout' => 'block',
          'sub_fields' => $fields,
-         'wrapper' => $args['wrapper'] ?? [],
+         'wrapper' => [],
       ];
+
+      return array_replace($defaults, $args, [
+         'key' => $defaults['key'],
+         'type' => 'group',
+         'sub_fields' => $fields,
+      ]);
    }
 
    /**
@@ -96,7 +112,6 @@ final class FieldBuilder
     * @param string $component_name Component slug or name.
     * @param string $clone_name Clone field name.
     * @param array<int, string>|null $clone_keys Field/group keys or source field names.
-    *                                       When null/empty or containing "all"/"*", clones the full source component group.
     * @param array<string, mixed> $args Additional ACF clone args.
     * @return array<string, mixed> ACF clone field array.
     */
@@ -106,16 +121,22 @@ final class FieldBuilder
       $clone_key = self::normalize_token($clone_name);
       $resolved_clone_keys = self::resolve_clone_keys($clone_key, $clone_keys);
 
-      return [
+      $defaults = [
          'key' => self::build_field_key($component_key, 'clone_' . $clone_key),
          'name' => $clone_key,
-         'label' => $args['label'] ?? self::build_label($clone_key),
+         'label' => self::build_label($clone_key),
          'type' => 'clone',
          'clone' => $resolved_clone_keys,
-         'display' => $args['display'] ?? 'seamless',
-         'layout' => $args['layout'] ?? 'block',
-         'wrapper' => $args['wrapper'] ?? [],
+         'display' => 'seamless',
+         'layout' => 'block',
+         'wrapper' => [],
       ];
+
+      return array_replace($defaults, $args, [
+         'key' => $defaults['key'],
+         'type' => 'clone',
+         'clone' => $resolved_clone_keys,
+      ]);
    }
 
    /**
@@ -132,14 +153,20 @@ final class FieldBuilder
       $component_key = self::normalize_token($component_name);
       $flex_key = self::normalize_token($flex_name);
 
-      return [
+      $defaults = [
          'key' => self::build_field_key($component_key, 'flex_' . $flex_key),
          'name' => $flex_key,
-         'label' => $args['label'] ?? self::build_label($flex_key),
+         'label' => self::build_label($flex_key),
          'type' => 'flexible_content',
          'layouts' => $layouts,
-         'wrapper' => $args['wrapper'] ?? [],
+         'wrapper' => [],
       ];
+
+      return array_replace($defaults, $args, [
+         'key' => $defaults['key'],
+         'type' => 'flexible_content',
+         'layouts' => $layouts,
+      ]);
    }
 
    /**
@@ -155,13 +182,18 @@ final class FieldBuilder
       $component_key = self::normalize_token($component_name);
       $tab_key = self::normalize_token($tab_name);
 
-      return [
+      $defaults = [
          'key' => self::build_field_key($component_key, 'tab_' . $tab_key),
          'name' => $tab_key,
-         'label' => $args['label'] ?? self::build_label($tab_key),
+         'label' => self::build_label($tab_key),
          'type' => 'tab',
-         'placement' => $args['placement'] ?? 'top',
+         'placement' => 'top',
       ];
+
+      return array_replace($defaults, $args, [
+         'key' => $defaults['key'],
+         'type' => 'tab',
+      ]);
    }
 
    /**
@@ -177,16 +209,21 @@ final class FieldBuilder
       $component_key = self::normalize_token($component_name);
       $accordion_key = self::normalize_token($accordion_name);
 
-      return [
+      $defaults = [
          'key' => self::build_field_key($component_key, 'accordion_' . $accordion_key),
          'name' => $accordion_key,
-         'label' => $args['label'] ?? self::build_label($accordion_key),
+         'label' => self::build_label($accordion_key),
          'type' => 'accordion',
-         'open' => $args['open'] ?? 0,
-         'multi_expand' => $args['multi_expand'] ?? 0,
-         'endpoint' => $args['endpoint'] ?? 0,
-         'placement' => $args['placement'] ?? 'top',
+         'open' => 0,
+         'multi_expand' => 0,
+         'endpoint' => 0,
+         'placement' => 'top',
       ];
+
+      return array_replace($defaults, $args, [
+         'key' => $defaults['key'],
+         'type' => 'accordion',
+      ]);
    }
 
    /**
@@ -203,17 +240,142 @@ final class FieldBuilder
       $component_key = self::normalize_token($component_name);
       $repeater_key = self::normalize_token($repeater_name);
 
-      return [
+      $defaults = [
          'key' => self::build_field_key($component_key, 'repeater_' . $repeater_key),
          'name' => $repeater_key,
-         'label' => $args['label'] ?? self::build_label($repeater_key),
+         'label' => self::build_label($repeater_key),
          'type' => 'repeater',
          'sub_fields' => $fields,
-         'layout' => $args['layout'] ?? 'block',
-         'min' => $args['min'] ?? 0,
-         'max' => $args['max'] ?? 0,
-         'wrapper' => $args['wrapper'] ?? [],
+         'layout' => 'block',
+         'min' => 0,
+         'max' => 0,
+         'wrapper' => [],
       ];
+
+      return array_replace($defaults, $args, [
+         'key' => $defaults['key'],
+         'type' => 'repeater',
+         'sub_fields' => $fields,
+      ]);
+   }
+
+   /**
+    * Extract fields from a field group.
+    *
+    * When the group uses FieldBuilder's component wrapper, the wrapper's
+    * sub-fields are returned by default.
+    *
+    * @param array<string, mixed> $field_group ACF field group config.
+    * @param bool $unwrap Whether to unwrap the generated component group.
+    * @return array<int, array<string, mixed>> Field definitions.
+    */
+   public static function get_fields(array $field_group, bool $unwrap = true): array
+   {
+      $fields = $field_group['fields'] ?? [];
+
+      if (!is_array($fields)) {
+         return [];
+      }
+
+      if (!$unwrap || count($fields) !== 1) {
+         return array_values($fields);
+      }
+
+      $wrapper = $fields[0] ?? null;
+
+      if (
+         !is_array($wrapper)
+         || ($wrapper['type'] ?? null) !== 'group'
+         || !isset($wrapper['sub_fields'])
+         || !is_array($wrapper['sub_fields'])
+      ) {
+         return array_values($fields);
+      }
+
+      return array_values($wrapper['sub_fields']);
+   }
+
+   /**
+    * Apply field overrides recursively.
+    *
+    * Overrides may target a field by name, full ACF key, or dotted field path.
+    * Dotted paths are useful when duplicate field names exist in separate groups.
+    *
+    * Example:
+    * [
+    *    'items' => ['min' => 1, 'max' => 4],
+    *    'settings.theme' => ['default_value' => 'light'],
+    *    'field_ave_button_url' => ['required' => true],
+    * ]
+    *
+    * @param array<int, array<string, mixed>> $fields Field definitions.
+    * @param array<string, array<string, mixed>> $overrides Overrides keyed by name, key, or path.
+    * @return array<int, array<string, mixed>> Updated field definitions.
+    */
+   public static function override_fields(array $fields, array $overrides): array
+   {
+      return self::walk_fields(
+         $fields,
+         static function (array $field, string $path) use ($overrides): array {
+            $targets = array_filter([
+               $field['name'] ?? null,
+               $field['key'] ?? null,
+               $path,
+            ], 'is_string');
+
+            foreach ($targets as $target) {
+               if (!isset($overrides[$target]) || !is_array($overrides[$target])) {
+                  continue;
+               }
+
+               $field = self::replace_field_args($field, $overrides[$target]);
+            }
+
+            return $field;
+         },
+      );
+   }
+
+   /**
+    * Materialize reusable field definitions for another component.
+    *
+    * This copies the fields, applies context-specific overrides, and generates
+    * fresh deterministic keys for the consuming component. Use this instead of
+    * an ACF clone field when the consuming component needs different settings.
+    *
+    * @param string $component_name Consuming component name.
+    * @param array<int, array<string, mixed>> $fields Source field definitions.
+    * @param array<string, array<string, mixed>> $overrides Overrides keyed by name, key, or dotted path.
+    * @param string|null $namespace Optional key namespace for multiple instances in one component.
+    * @return array<int, array<string, mixed>> Materialized field definitions.
+    */
+   public static function materialize_fields(
+      string $component_name,
+      array $fields,
+      array $overrides = [],
+      ?string $namespace = null,
+   ): array {
+      $component_key = self::normalize_token($component_name);
+      $namespace_key = self::normalize_token((string) $namespace);
+
+      $fields = self::override_fields($fields, $overrides);
+
+      return self::walk_fields(
+         $fields,
+         static function (array $field, string $path) use ($component_key, $namespace_key): array {
+            $identity = $path !== ''
+               ? $path
+               : (string) ($field['name'] ?? $field['key'] ?? 'field');
+
+            if ($namespace_key !== '') {
+               $identity = $namespace_key . '_' . $identity;
+            }
+
+            $field['key'] = self::build_field_key($component_key, $identity);
+
+            return $field;
+         },
+      );
    }
 
    /**
@@ -234,38 +396,26 @@ final class FieldBuilder
 
    /**
     * Build a deterministic group key.
-    *
-    * @param string $component_name Component slug or name.
-    * @param string $suffix Group key suffix.
-    * @return string Deterministic group key.
     */
    public static function build_group_key(string $component_name, string $suffix = 'component'): string
    {
       $component_key = self::normalize_token($component_name);
       $suffix_key = self::normalize_token($suffix);
+
       return 'group_ave_' . $component_key . '_' . $suffix_key;
    }
 
    /**
     * Build a deterministic field key.
-    *
-    * @param string $component_name Component slug or name.
-    * @param string $field_name Field slug or name.
-    * @return string Deterministic field key.
     */
    public static function build_field_key(string $component_name, string $field_name): string
    {
       $component_key = self::normalize_token($component_name);
       $field_key = self::normalize_token($field_name);
+
       return 'field_ave_' . $component_key . '_' . $field_key;
    }
 
-   /**
-    * Alias for build_field_group using a single config array.
-    *
-    * @param array<string, mixed> $config Alias config with component_name, fields, and optional config.
-    * @return array<string, mixed> ACF field group array.
-    */
    public static function field_group(array $config): array
    {
       return self::build_field_group(
@@ -275,12 +425,6 @@ final class FieldBuilder
       );
    }
 
-   /**
-    * Alias for build_field using a single config array.
-    *
-    * @param array<string, mixed> $config Alias config with component_name, field_name, and optional args.
-    * @return array<string, mixed> ACF field array.
-    */
    public static function field(array $config): array
    {
       return self::build_field(
@@ -290,12 +434,6 @@ final class FieldBuilder
       );
    }
 
-   /**
-    * Alias for build_group using a single config array.
-    *
-    * @param array<string, mixed> $config Alias config with component_name, group_name, fields, and optional args.
-    * @return array<string, mixed> ACF group field array.
-    */
    public static function group(array $config): array
    {
       return self::build_group(
@@ -306,12 +444,6 @@ final class FieldBuilder
       );
    }
 
-   /**
-    * Alias for build_repeater using a single config array.
-    *
-    * @param array<string, mixed> $config Alias config with component_name, repeater_name, fields, and optional args.
-    * @return array<string, mixed> ACF repeater field array.
-    */
    public static function repeater(array $config): array
    {
       return self::build_repeater(
@@ -322,30 +454,18 @@ final class FieldBuilder
       );
    }
 
-   /**
-    * Alias for build_clone using a single config array.
-    *
-    * `clone` is a reserved keyword in PHP, so the alias is `clone_field`.
-    *
-    * @param array<string, mixed> $config Alias config with component_name, clone_name, clone_keys, and optional args.
-    * @return array<string, mixed> ACF clone field array.
-    */
    public static function clone_field(array $config): array
    {
       return self::build_clone(
          (string) ($config['component_name'] ?? ''),
          (string) ($config['clone_name'] ?? ''),
-         (array) ($config['clone_keys'] ?? []),
+         isset($config['clone_keys']) && is_array($config['clone_keys'])
+            ? $config['clone_keys']
+            : null,
          (array) ($config['args'] ?? []),
       );
    }
 
-   /**
-    * Alias for build_flexible using a single config array.
-    *
-    * @param array<string, mixed> $config Alias config with component_name, flex_name, layouts, and optional args.
-    * @return array<string, mixed> ACF flexible content field array.
-    */
    public static function flexible(array $config): array
    {
       return self::build_flexible(
@@ -356,12 +476,6 @@ final class FieldBuilder
       );
    }
 
-   /**
-    * Alias for build_tab using a single config array.
-    *
-    * @param array<string, mixed> $config Alias config with component_name, tab_name, and optional args.
-    * @return array<string, mixed> ACF tab field array.
-    */
    public static function tab(array $config): array
    {
       return self::build_tab(
@@ -371,12 +485,6 @@ final class FieldBuilder
       );
    }
 
-   /**
-    * Alias for build_accordion using a single config array.
-    *
-    * @param array<string, mixed> $config Alias config with component_name, accordion_name, and optional args.
-    * @return array<string, mixed> ACF accordion field array.
-    */
    public static function accordion(array $config): array
    {
       return self::build_accordion(
@@ -387,27 +495,117 @@ final class FieldBuilder
    }
 
    /**
-    * Build a human-readable label from an underscore token.
+    * Recursively walk fields, nested sub-fields, and flexible layouts.
     *
-    * @param string $value Normalized token value.
-    * @return string Human-readable label.
+    * @param array<int, array<string, mixed>> $fields
+    * @param callable(array<string, mixed>, string): array<string, mixed> $callback
+    * @param string $parent_path
+    * @return array<int, array<string, mixed>>
     */
+   private static function walk_fields(array $fields, callable $callback, string $parent_path = ''): array
+   {
+      foreach ($fields as $index => $field) {
+         if (!is_array($field)) {
+            continue;
+         }
+
+         $field_name = self::normalize_token(
+            (string) ($field['name'] ?? $field['key'] ?? 'field_' . $index),
+         );
+
+         $path = $parent_path === ''
+            ? $field_name
+            : $parent_path . '.' . $field_name;
+
+         $field = $callback($field, $path);
+
+         if (isset($field['sub_fields']) && is_array($field['sub_fields'])) {
+            $field['sub_fields'] = self::walk_fields(
+               $field['sub_fields'],
+               $callback,
+               $path,
+            );
+         }
+
+         if (isset($field['layouts']) && is_array($field['layouts'])) {
+            foreach ($field['layouts'] as $layout_index => $layout) {
+               if (!is_array($layout)) {
+                  continue;
+               }
+
+               $layout_name = self::normalize_token(
+                  (string) ($layout['name'] ?? $layout['key'] ?? 'layout_' . $layout_index),
+               );
+
+               $layout_path = $path . '.' . $layout_name;
+
+               if (isset($layout['sub_fields']) && is_array($layout['sub_fields'])) {
+                  $layout['sub_fields'] = self::walk_fields(
+                     $layout['sub_fields'],
+                     $callback,
+                     $layout_path,
+                  );
+               }
+
+               $field['layouts'][$layout_index] = $layout;
+            }
+         }
+
+         $fields[$index] = $field;
+      }
+
+      return array_values($fields);
+   }
+
+   /**
+    * Replace a field's settings while protecting structural identity.
+    *
+    * Associative settings such as wrapper and conditional_logic are merged
+    * recursively. Indexed arrays such as choices are replaced as complete values.
+    *
+    * @param array<string, mixed> $field
+    * @param array<string, mixed> $overrides
+    * @return array<string, mixed>
+    */
+   private static function replace_field_args(array $field, array $overrides): array
+   {
+      unset(
+         $overrides['key'],
+         $overrides['name'],
+         $overrides['type'],
+         $overrides['sub_fields'],
+         $overrides['layouts'],
+      );
+
+      foreach ($overrides as $key => $value) {
+         if (
+            isset($field[$key])
+            && is_array($field[$key])
+            && is_array($value)
+            && !array_is_list($field[$key])
+            && !array_is_list($value)
+         ) {
+            $field[$key] = array_replace_recursive($field[$key], $value);
+            continue;
+         }
+
+         $field[$key] = $value;
+      }
+
+      return $field;
+   }
+
    private static function build_label(string $value): string
    {
       return ucwords(str_replace('_', ' ', $value));
    }
 
-   /**
-    * Normalize arbitrary input into a safe underscore token.
-    *
-    * @param string $value Raw token value.
-    * @return string Normalized token.
-    */
    private static function normalize_token(string $value): string
    {
       $normalized = strtolower(trim($value));
       $normalized = preg_replace('/[^a-z0-9_]+/', '_', $normalized) ?? '';
       $normalized = preg_replace('/_+/', '_', $normalized) ?? '';
+
       return trim($normalized, '_');
    }
 
@@ -447,7 +645,10 @@ final class FieldBuilder
             continue;
          }
 
-         if (str_starts_with($trimmed_target, 'field_') || str_starts_with($trimmed_target, 'group_')) {
+         if (
+            str_starts_with($trimmed_target, 'field_')
+            || str_starts_with($trimmed_target, 'group_')
+         ) {
             $resolved_keys[] = $trimmed_target;
             continue;
          }
@@ -457,10 +658,97 @@ final class FieldBuilder
 
       $resolved_keys = array_values(array_unique($resolved_keys));
 
-      if ($resolved_keys === []) {
-         return [$default_group_key];
+      return $resolved_keys !== []
+         ? $resolved_keys
+         : [$default_group_key];
+   }
+
+   /**
+    * Select fields by field name or full ACF field key.
+    *
+    * An empty include list returns all fields. Exclusions are applied after
+    * inclusions and therefore take precedence.
+    *
+    * This selects top-level fields only. Nested sub-fields remain attached to
+    * their parent field.
+    *
+    * @param array<int, array<string, mixed>> $fields Field definitions.
+    * @param array<int, string>|null $include Field names or keys to include.
+    * @param array<int, string> $exclude Field names or keys to exclude.
+    * @return array<int, array<string, mixed>> Selected field definitions.
+    */
+   public static function select_fields(
+      array $fields,
+      ?array $include = null,
+      array $exclude = [],
+   ): array {
+      $include = self::normalize_field_selectors($include ?? []);
+      $exclude = self::normalize_field_selectors($exclude);
+
+      return array_values(
+         array_filter(
+            $fields,
+            static function (array $field) use ($include, $exclude): bool {
+               $identifiers = self::get_field_identifiers($field);
+
+               $is_included = $include === []
+                  || array_intersect($identifiers, $include) !== [];
+
+               $is_excluded = array_intersect($identifiers, $exclude) !== [];
+
+               return $is_included && !$is_excluded;
+            },
+         ),
+      );
+   }
+
+   /**
+    * Get the selectable identifiers for a field.
+    *
+    * @param array<string, mixed> $field Field definition.
+    * @return array<int, string>
+    */
+   private static function get_field_identifiers(array $field): array
+   {
+      $identifiers = [];
+
+      if (isset($field['name']) && is_string($field['name'])) {
+         $identifiers[] = self::normalize_token($field['name']);
       }
 
-      return $resolved_keys;
+      if (isset($field['key']) && is_string($field['key'])) {
+         $identifiers[] = $field['key'];
+      }
+
+      return array_values(array_unique($identifiers));
+   }
+
+   /**
+    * Normalize field selector names while preserving complete ACF keys.
+    *
+    * @param array<int, mixed> $selectors Field names or keys.
+    * @return array<int, string>
+    */
+   private static function normalize_field_selectors(array $selectors): array
+   {
+      $normalized = [];
+
+      foreach ($selectors as $selector) {
+         if (!is_string($selector)) {
+            continue;
+         }
+
+         $selector = trim($selector);
+
+         if ($selector === '') {
+            continue;
+         }
+
+         $normalized[] = str_starts_with($selector, 'field_')
+            ? $selector
+            : self::normalize_token($selector);
+      }
+
+      return array_values(array_unique($normalized));
    }
 }
