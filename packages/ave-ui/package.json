@@ -10,10 +10,12 @@
    },
    "scripts": {
       "dev": "vite",
-      "build": "npm run build:registry && tsc && vite build",
+      "build": "pnpm run build:registry && tsc && vite build",
+      "build:storybook": "pnpm run build && storybook build",
       "build:registry": "node bin/build-registry.js",
       "watch": "tsc && vite build --watch",
       "preview": "vite preview",
+      "test:browser": "vitest run --project browser",
       "storybook": "storybook dev -p 6006",
       "build-storybook": "storybook build",
       "create:component": "node bin/create-component.js"
