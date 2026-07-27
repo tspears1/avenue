@@ -218,9 +218,6 @@ importers:
       vite:
         specifier: ^8.0.16
         version: 8.1.5(esbuild@0.28.1)(sugarss@5.0.1(postcss@8.5.20))(yaml@2.9.0)
-      vite-plugin-lightningcss:
-        specifier: ^0.0.5
-        version: 0.0.5
 
   packages/ave-cli:
     dependencies:
@@ -1942,9 +1939,6 @@ packages:
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
 
-  vite-plugin-lightningcss@0.0.5:
-    resolution: {integrity: sha512-lhz5GkXeRT/k09A7qEqmoL3CwdJDHgODPeGVlWGU1UxuGPEKfvSpKnDXza8nawKvxvc0eawJEsKjBzQP4AeGHw==}
-
   vite@8.1.5:
     resolution: {integrity: sha512-7ULLwsCdYx/nRyrpiEwvqb5TFHrMVZyBt+rg/OAXT7rgj/z+DtTDyKFeLAdDkubDVDKD8jOsndmy7m55XcfUsw==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -3488,11 +3482,6 @@ snapshots:
       react: 19.2.7
 
   util-deprecate@1.0.2: {}
-
-  vite-plugin-lightningcss@0.0.5:
-    dependencies:
-      browserslist: 4.28.6
-      lightningcss: 1.32.0
 
   vite@8.1.5(esbuild@0.28.1)(sugarss@5.0.1(postcss@8.5.20))(yaml@2.9.0):
     dependencies:

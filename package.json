@@ -4,7 +4,11 @@
     "version": "0.0.1",
     "main": "index.js",
     "scripts": {
-        "local-symlink": "bash ./bin/localdev-symlink.sh"
+        "local-symlink": "bash ./bin/localdev-symlink.sh",
+        "build": "pnpm -r build",
+        "build:css": "pnpm --filter ave-css build",
+        "build:ui": "pnpm --filter ave-ui build",
+        "build:storybook": "pnpm build:css && pnpm --filter ave-ui build:storybook"
     },
     "keywords": [],
     "author": "",
