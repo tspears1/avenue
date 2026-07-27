@@ -3,7 +3,6 @@
     "description": "not a foundation but sort of a framework.",
     "version": "0.0.1",
     "main": "index.js",
-    "packageManager": "pnpm@11.5.2",
     "scripts": {
         "local-symlink": "bash ./bin/localdev-symlink.sh",
         "build": "pnpm -r build",
