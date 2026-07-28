@@ -121,7 +121,7 @@ ValueAdapters::boot();
 avenue_assert_same(
    [
       'wordpress' => [
-         'avenue/image' => AvenueUI\WordPress\Adapters\WordPressImageAdapter::class,
+         'avenue/image' => AvenueUI\wordpress\adapters\WordPressImageAdapter::class,
       ],
    ],
    AdapterRegistry::get_registered(),
@@ -230,6 +230,63 @@ avenue_assert_same(
       ],
    ),
    'BlockFactory should recursively apply transforms declared on nested ACF fields.',
+);
+
+final class AvenueAdapterCardFixture
+{
+   protected static string $schema =
+      __DIR__ . '/../../src/components/card/card.schema.json';
+}
+
+$adapt_method = new ReflectionMethod(
+   Avenue\ACF\BlockFactory::class,
+   'adapt_component_props',
+);
+$adapt_method->setAccessible(true);
+
+avenue_assert_same(
+   [
+      'title' => 'Card',
+      'link' => [
+         'label' => 'About',
+         'href' => '/about/',
+      ],
+      'image' => [
+         'src' => 'https://example.test/card.jpg',
+         'alt' => 'Card image',
+         'width' => '1200',
+         'height' => '675',
+      ],
+   ],
+   $adapt_method->invoke(
+      null,
+      [
+         'name' => 'card',
+         'component' => AvenueAdapterCardFixture::class,
+         'field_definitions' => [
+            [
+               'name' => 'image',
+               'type' => 'image',
+            ],
+         ],
+      ],
+      [
+         'title' => 'Card',
+         'link' => [
+            'label' => 'About',
+            'href' => '/about/',
+         ],
+         'image' => [
+            'url' => 'https://example.test/card.jpg',
+            'alt' => 'Card image',
+            'width' => 1200,
+            'height' => 675,
+         ],
+      ],
+      false,
+      99,
+   ),
+   'BlockFactory should automatically adapt props with registered component contracts.',
 );
 
 $image_context = new AdapterContext(

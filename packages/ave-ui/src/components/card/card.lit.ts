@@ -99,7 +99,7 @@ export class Card extends AvenueElement {
                      sizes=${ifDefined(this.image?.sizes)}
                      height=${ifDefined(this.image?.height)}
                      width=${ifDefined(this.image?.width)}
-                     sources=${ifDefined(this.image?.sources)}
+                     .sources=${this.image?.sources ?? []}
                      object-fit=${ifDefined(this.image?.objectFit)}
                      object-position=${ifDefined(this.image?.objectPosition)}
                   ></ave-image>

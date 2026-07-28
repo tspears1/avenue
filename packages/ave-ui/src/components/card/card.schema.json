@@ -23,7 +23,10 @@
          "image": {
             "type": "object",
             "attribute": false,
-            "transport": "property"
+            "transport": "property",
+            "contract": {
+               "component": "image"
+            }
          }
       }
    },

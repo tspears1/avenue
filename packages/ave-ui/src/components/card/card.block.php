@@ -19,15 +19,6 @@ return [
    'preview_props' => [
       'title' => 'Card',
    ],
-   'map_fields' => static function (
-       array $fields, array $block, bool $is_preview, int|string $post_id
-   ): array {
-      return [
-         'props' => [
-            'image' => null,
-         ],
-      ];
-   },
    'supports' => [
       'align' => true,
       'anchor' => true,

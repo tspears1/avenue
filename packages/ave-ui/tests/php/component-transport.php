@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use AvenueUI\Components\Card;
+use AvenueUI\Components\Image;
 
 require_once __DIR__ . '/../../src/wordpress/rendering/HtmlString.php';
 require_once __DIR__ . '/../../src/wordpress/rendering/ClassNames.php';
@@ -12,6 +13,7 @@ require_once __DIR__ . '/../../src/wordpress/rendering/SchemaParseResult.php';
 require_once __DIR__ . '/../../src/wordpress/rendering/ComponentSchema.php';
 require_once __DIR__ . '/../../src/wordpress/rendering/AvenueElement.php';
 require_once __DIR__ . '/../../src/components/card/card.class.php';
+require_once __DIR__ . '/../../src/components/image/image.class.php';
 
 /**
  * @throws RuntimeException
@@ -102,7 +104,12 @@ $rendered = Card::render(
          'href' => '/about/',
          'target' => '_blank',
       ],
-      'image' => null,
+      'image' => [
+         'src' => 'https://example.test/card.jpg',
+         'alt' => 'Card image',
+         'width' => '1200',
+         'height' => '675',
+      ],
    ],
    attrs: [
       'id' => 'featured-card',
@@ -126,7 +133,7 @@ avenue_transport_assert(
 );
 avenue_transport_assert(
    !str_contains($rendered, ' image="'),
-   'Null property-transport props must be omitted.',
+   'Property-transport Image props must not render as individual attributes.',
 );
 avenue_transport_assert(
    str_contains($rendered, ' id="featured-card"'),
@@ -145,8 +152,16 @@ avenue_transport_assert(
          'href' => '/about/',
          'target' => '_blank',
       ],
+      'image' => [
+         'src' => 'https://example.test/card.jpg',
+         'alt' => 'Card image',
+         'height' => '675',
+         'width' => '1200',
+         'objectFit' => 'cover',
+         'objectPosition' => 'center',
+      ],
    ] === avenue_transport_data_props($rendered),
-   'Complex props should survive JSON and HTML attribute escaping.',
+   'Link and Image props should survive JSON and HTML attribute escaping.',
 );
 
 $withoutProperties = Card::render(
@@ -161,15 +176,15 @@ avenue_transport_assert(
    'An empty property payload should omit data-props.',
 );
 
-$withEmptyArray = Card::render(
+$withEmptyArray = Image::render(
    props: [
-      'title' => 'Empty image data',
-      'image' => [],
+      'src' => 'https://example.test/image.jpg',
+      'sources' => [],
    ],
 );
 
 avenue_transport_assert(
-   ['image' => []] === avenue_transport_data_props($withEmptyArray),
+   ['sources' => []] === avenue_transport_data_props($withEmptyArray),
    'Intentional empty arrays should survive property transport.',
 );
 

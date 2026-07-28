@@ -49,7 +49,7 @@ export class Image extends AvenueElement {
 
    @property() width: string = ''
 
-   @property() sources: ImageSource[] = []
+   @property({ attribute: false }) sources: ImageSource[] = []
 
    @property({ reflect: true, attribute: 'object-fit' }) objectFit: string = 'cover'
 

@@ -44,7 +44,7 @@
 		font-size: var(--text-size-sm);
 		font-weight: var(--font-weight-semibold);
 		letter-spacing: var(--tracking-wider);
-		line-height: var(--line-height-0);
+		line-height: var(--leading-none);
 		transition:
 			background-color var(--duration-fast) var(--ease-out-quint),
 			border-color var(--duration-fast) var(--ease-out-quint),

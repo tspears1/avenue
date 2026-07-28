@@ -120,4 +120,35 @@ avenue_schema_assert_same(
    'Nested schema issues should retain precise paths and rules.',
 );
 
+$withImage = $schema->safeParse([
+   'title' => 'Card with image',
+   'image' => [
+      'src' => 'https://example.test/card.jpg',
+      'alt' => 'Card image',
+      'width' => '1200',
+      'height' => '675',
+   ],
+]);
+
+avenue_schema_assert_same(
+   true,
+   $withImage->success(),
+   'A canonical Image value should satisfy Card’s Image contract.',
+);
+avenue_schema_assert_same(
+   [
+      'title' => 'Card with image',
+      'image' => [
+         'src' => 'https://example.test/card.jpg',
+         'alt' => 'Card image',
+         'height' => '675',
+         'width' => '1200',
+         'objectFit' => 'cover',
+         'objectPosition' => 'center',
+      ],
+   ],
+   $withImage->data(),
+   'Nested Image defaults should come from the Image schema.',
+);
+
 fwrite(STDOUT, "Component schema checks passed.\n");

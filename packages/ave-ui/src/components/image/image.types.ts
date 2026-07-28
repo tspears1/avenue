@@ -16,7 +16,13 @@ export interface ImageProps {
 }
 
 export interface ImageACFField {
-   label?: string
+   ID?: number
+   id?: number
+   url?: string
+   alt?: string
+   width?: number | string
+   height?: number | string
+   sizes?: Record<string, string>
 }
 
 export interface ImageSource {

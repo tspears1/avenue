@@ -15,12 +15,14 @@ Current implemented slice:
 - Caller-supplied `data-props` is rejected as reserved.
 - Card's `link` is validated through the Button contract and transported as a
   structured property.
-- Card's Lit `link` and `image` declarations use `attribute:false`.
+- Card's Image contract selects the registered WordPress Image adapter
+  automatically; the adapted value is validated and transported alongside
+  `link`.
+- Card's Lit `link` and `image` declarations use `attribute:false`, and nested
+  Image `sources` are assigned as a property.
 - The serialized-props mixin hydrates eligible properties reactively.
-- PHP and browser tests cover serialization and hydration.
-
-Image adaptation and transport remain intentionally deferred beyond the current
-Card link example.
+- PHP and browser tests cover Image adaptation, serialization, hydration, and
+  nested rendering.
 
 ## Goal
 

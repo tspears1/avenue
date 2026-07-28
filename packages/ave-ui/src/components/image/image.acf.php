@@ -13,11 +13,12 @@ if (!function_exists('acf_add_local_field_group')) {
 $component_name = 'image';
 
 $fields = [
-   Field::build_field($component_name, 'label', [
-      'label' => 'Label',
-      'type' => 'text',
+   Field::build_field($component_name, 'image', [
+      'label' => 'Image',
+      'type' => 'image',
       'required' => 1,
-      'instructions' => 'The text displayed in the component',
+      'return_format' => 'array',
+      'preview_size' => 'medium',
    ]),
 ];
 

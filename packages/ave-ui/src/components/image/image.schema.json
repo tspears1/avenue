@@ -5,9 +5,58 @@
    "type": "component",
    "props": {
       "root": {
-         "label": {
+         "src": {
             "type": "string",
             "required": true
+         },
+         "alt": {
+            "type": "string",
+            "default": ""
+         },
+         "srcset": {
+            "type": "string"
+         },
+         "sizes": {
+            "type": "string"
+         },
+         "height": {
+            "type": "string"
+         },
+         "width": {
+            "type": "string"
+         },
+         "sources": {
+            "type": "array",
+            "attribute": false,
+            "transport": "property",
+            "items": {
+               "type": "object",
+               "properties": {
+                  "src": {
+                     "type": "string",
+                     "required": true
+                  },
+                  "type": {
+                     "type": "string"
+                  },
+                  "media": {
+                     "type": "string"
+                  },
+                  "sizes": {
+                     "type": "string"
+                  }
+               }
+            }
+         },
+         "objectFit": {
+            "type": "string",
+            "attribute": "object-fit",
+            "default": "cover"
+         },
+         "objectPosition": {
+            "type": "string",
+            "attribute": "object-position",
+            "default": "center"
          }
       }
    },
