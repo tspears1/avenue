@@ -40,10 +40,11 @@ export function createPostcssConfig(options = {}) {
             postcssNesting(nestingOptions),
             postcssLightningcss({
                 lightningcssOptions: {
+                    ...lightningcssOptions,
                     drafts: {
                         customMedia: true,
+                        ...lightningcssOptions.drafts,
                     },
-                    ...lightningcssOptions,
                 },
             }),
         ],

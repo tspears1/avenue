@@ -11,6 +11,18 @@ use RuntimeException;
 final class ComponentSchema
 {
     /**
+     * Validation rules that a consuming component may specialize.
+     *
+     * @var list<string>
+     */
+    private const CONTRACT_OVERRIDE_RULES = [
+        'required',
+        'default',
+        'defaultOnEmpty',
+        'enum',
+    ];
+
+    /**
      * @var array<string, self>
      */
     private static array $cache = [];
@@ -132,10 +144,28 @@ final class ComponentSchema
      */
     public function safeParse(array $props): SchemaParseResult
     {
+        return $this->safeParseDefinitions(
+            $props,
+            $this->propDefinitions(),
+        );
+    }
+
+    /**
+     * Parse properties against an explicit set of definitions.
+     *
+     * @param array<string, mixed>                $props       Component properties.
+     * @param array<string, array<string, mixed>> $definitions Property definitions.
+     *
+     * @return SchemaParseResult Parsed data and validation issues.
+     */
+    private function safeParseDefinitions(
+        array $props,
+        array $definitions,
+    ): SchemaParseResult {
         $errors = [];
         $data = $this->parseObject(
             $props,
-            $this->propDefinitions(),
+            $definitions,
             '$',
             $errors,
         );
@@ -324,7 +354,14 @@ final class ComponentSchema
                 $contractSchema = $this->resolveComponentContract(
                     $component,
                 );
-                $result = $contractSchema->safeParse($value);
+                $definitions = $this->contractDefinitions(
+                    $contractSchema,
+                    $contract,
+                );
+                $result = $contractSchema->safeParseDefinitions(
+                    $value,
+                    $definitions,
+                );
 
                 foreach ($result->errors() as $issue) {
                     $errors[] = new SchemaValidationIssue(
@@ -445,6 +482,18 @@ final class ComponentSchema
             }
 
             if (
+                $exists &&
+                ($definition['defaultOnEmpty'] ?? false) === true &&
+                array_key_exists('default', $definition) &&
+                (
+                    $value[$name] === null ||
+                    $value[$name] === ''
+                )
+            ) {
+                $value[$name] = $definition['default'];
+            }
+
+            if (
                 ($definition['required'] ?? false) === true &&
                 (
                 !$exists ||
@@ -512,6 +561,41 @@ final class ComponentSchema
         );
 
         return self::fromFile($contractPath);
+    }
+
+    /**
+     * Apply contextual overrides to referenced contract definitions.
+     *
+     * @param self                 $contractSchema Referenced component schema.
+     * @param array<string, mixed> $contract       Contract declaration.
+     *
+     * @return array<string, array<string, mixed>> Specialized property definitions.
+     */
+    private function contractDefinitions(
+        self $contractSchema,
+        array $contract,
+    ): array {
+        $definitions = $contractSchema->propDefinitions();
+        $overrides = $contract['overrides'] ?? [];
+
+        if (!is_array($overrides)) {
+            return $definitions;
+        }
+
+        foreach ($overrides as $name => $override) {
+            if (
+                is_string($name) &&
+                isset($definitions[$name]) &&
+                is_array($override)
+            ) {
+                $definitions[$name] = array_replace(
+                    $definitions[$name],
+                    $override,
+                );
+            }
+        }
+
+        return $definitions;
     }
 
     /**
@@ -699,6 +783,160 @@ final class ComponentSchema
                 throw new RuntimeException(
                     sprintf(
                         'Contract prop "%s" must have type "object". Schema: %s',
+                        $name,
+                        $this->path,
+                    )
+                );
+            }
+
+            if (is_array($contract)) {
+                $this->validateContractOverrides(
+                    $name,
+                    $contract,
+                );
+            }
+        }
+    }
+
+    /**
+     * Validate contextual overrides for a referenced component contract.
+     *
+     * @param string               $propName Prop declaring the contract.
+     * @param array<string, mixed> $contract Contract declaration.
+     *
+     * @return void
+     */
+    private function validateContractOverrides(
+        string $propName,
+        array $contract,
+    ): void {
+        foreach (array_keys($contract) as $key) {
+            if (
+                !is_string($key) ||
+                !in_array($key, ['component', 'overrides'], true)
+            ) {
+                throw new RuntimeException(
+                    sprintf(
+                        'Contract for prop "%s" contains unsupported key "%s". Schema: %s',
+                        $propName,
+                        (string) $key,
+                        $this->path,
+                    )
+                );
+            }
+        }
+
+        $overrides = $contract['overrides'] ?? null;
+
+        if ($overrides === null) {
+            return;
+        }
+
+        if (!is_array($overrides)) {
+            throw new RuntimeException(
+                sprintf(
+                    'Contract overrides for prop "%s" must be an object. Schema: %s',
+                    $propName,
+                    $this->path,
+                )
+            );
+        }
+
+        $component = $contract['component'];
+        $contractSchema = $this->resolveComponentContract($component);
+        $definitions = $contractSchema->propDefinitions();
+
+        foreach ($overrides as $name => $override) {
+            if (!is_string($name) || !array_key_exists($name, $definitions)) {
+                throw new RuntimeException(
+                    sprintf(
+                        'Contract override for prop "%s" references unknown "%s" prop. Schema: %s',
+                        $propName,
+                        (string) $name,
+                        $this->path,
+                    )
+                );
+            }
+
+            if (!is_array($override)) {
+                throw new RuntimeException(
+                    sprintf(
+                        'Contract override "%s.%s" must be an object. Schema: %s',
+                        $propName,
+                        $name,
+                        $this->path,
+                    )
+                );
+            }
+
+            foreach (array_keys($override) as $rule) {
+                if (
+                    !is_string($rule) ||
+                    !in_array($rule, self::CONTRACT_OVERRIDE_RULES, true)
+                ) {
+                    throw new RuntimeException(
+                        sprintf(
+                            'Contract override "%s.%s" contains unsupported rule "%s". Schema: %s',
+                            $propName,
+                            $name,
+                            (string) $rule,
+                            $this->path,
+                        )
+                    );
+                }
+            }
+
+            if (
+                array_key_exists('required', $override) &&
+                !is_bool($override['required'])
+            ) {
+                throw new RuntimeException(
+                    sprintf(
+                        'Contract override "%s.%s.required" must be boolean. Schema: %s',
+                        $propName,
+                        $name,
+                        $this->path,
+                    )
+                );
+            }
+
+            if (
+                array_key_exists('defaultOnEmpty', $override) &&
+                !is_bool($override['defaultOnEmpty'])
+            ) {
+                throw new RuntimeException(
+                    sprintf(
+                        'Contract override "%s.%s.defaultOnEmpty" must be boolean. Schema: %s',
+                        $propName,
+                        $name,
+                        $this->path,
+                    )
+                );
+            }
+
+            if (
+                ($override['defaultOnEmpty'] ?? false) === true &&
+                !array_key_exists('default', $override) &&
+                !array_key_exists('default', $definitions[$name])
+            ) {
+                throw new RuntimeException(
+                    sprintf(
+                        'Contract override "%s.%s.defaultOnEmpty" requires a default. Schema: %s',
+                        $propName,
+                        $name,
+                        $this->path,
+                    )
+                );
+            }
+
+            if (
+                array_key_exists('enum', $override) &&
+                !is_array($override['enum'])
+            ) {
+                throw new RuntimeException(
+                    sprintf(
+                        'Contract override "%s.%s.enum" must be an array. Schema: %s',
+                        $propName,
                         $name,
                         $this->path,
                     )

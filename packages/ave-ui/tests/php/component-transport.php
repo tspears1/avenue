@@ -176,6 +176,28 @@ avenue_transport_assert(
    'An empty property payload should omit data-props.',
 );
 
+$withDefaultLinkLabel = Card::render(
+   props: [
+      'title' => 'Default action label',
+      'link' => [
+         'label' => '',
+         'href' => '/learn-more/',
+      ],
+   ],
+);
+
+avenue_transport_assert(
+   [
+      'link' => [
+         'label' => 'Learn More',
+         'variant' => 'primary',
+         'href' => '/learn-more/',
+         'target' => '_self',
+      ],
+   ] === avenue_transport_data_props($withDefaultLinkLabel),
+   'Contextual contract defaults should be serialized into data-props.',
+);
+
 $withEmptyArray = Image::render(
    props: [
       'src' => 'https://example.test/image.jpg',

@@ -83,6 +83,75 @@ avenue_schema_assert_same(
    'Schema transport should separate primitive attributes from structured properties.',
 );
 
+$withDefaultLabel = $schema->safeParse([
+   'title' => 'Card title',
+   'link' => [
+      'label' => '',
+      'href' => '/learn-more/',
+   ],
+]);
+
+avenue_schema_assert_same(
+   true,
+   $withDefaultLabel->success(),
+   'Card should accept an empty contextual Button label.',
+);
+avenue_schema_assert_same(
+   [
+      'title' => 'Card title',
+      'link' => [
+         'label' => 'Learn More',
+         'variant' => 'primary',
+         'href' => '/learn-more/',
+         'target' => '_self',
+      ],
+   ],
+   $withDefaultLabel->data(),
+   'Card should replace an empty Button label with its contextual default.',
+);
+
+$withMissingLabel = $schema->safeParse([
+   'title' => 'Card title',
+   'link' => [
+      'href' => '/learn-more/',
+   ],
+]);
+
+avenue_schema_assert_same(
+   'Learn More',
+   $withMissingLabel->data()['link']['label'] ?? null,
+   'Card should apply its contextual Button label default when the label is absent.',
+);
+
+$buttonSchema = ComponentSchema::fromFile(
+   __DIR__ . '/../../src/components/button/button.schema.json',
+);
+$standaloneButton = $buttonSchema->safeParse([
+   'href' => '/learn-more/',
+]);
+
+avenue_schema_assert_same(
+   false,
+   $standaloneButton->success(),
+   'Card contract overrides must not mutate the canonical Button schema.',
+);
+avenue_schema_assert_same(
+   [
+      [
+         'path' => '$.label',
+         'rule' => 'required',
+      ],
+   ],
+   array_map(
+      static fn($issue): array => [
+         'path' => $issue->path,
+         'rule' => $issue->rule,
+      ],
+      $standaloneButton->errors(),
+   ),
+   'Standalone Button should continue to require its canonical label.',
+);
+
 $invalid = $schema->safeParse([
    'title' => 'Card title',
    'link' => [
@@ -149,6 +218,25 @@ avenue_schema_assert_same(
    ],
    $withImage->data(),
    'Nested Image defaults should come from the Image schema.',
+);
+
+$rejectedStructuralOverride = false;
+
+try {
+   ComponentSchema::fromFile(
+      __DIR__ . '/fixtures/components/card/card.schema.json',
+   );
+} catch (RuntimeException $exception) {
+   $rejectedStructuralOverride = str_contains(
+      $exception->getMessage(),
+      'unsupported rule "type"',
+   );
+}
+
+avenue_schema_assert_same(
+   true,
+   $rejectedStructuralOverride,
+   'Contract overrides should reject structural component rules.',
 );
 
 fwrite(STDOUT, "Component schema checks passed.\n");

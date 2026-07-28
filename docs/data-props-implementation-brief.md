@@ -381,6 +381,29 @@ A component contract recursively uses the referenced component's prop schema.
 For example, Card's `link` value is parsed against Button's prop definitions, so
 Button remains the source of truth for required fields, enums, and defaults.
 
+Consuming components may specialize non-structural validation rules without
+mutating the referenced component's canonical schema:
+
+```json
+{
+  "contract": {
+    "component": "button",
+    "overrides": {
+      "label": {
+        "required": false,
+        "default": "Learn More",
+        "defaultOnEmpty": true
+      }
+    }
+  }
+}
+```
+
+Contract overrides may adjust `required`, `default`, `defaultOnEmpty`, and
+`enum`. Structural rules such as `type`, `attribute`, and `transport` cannot be
+overridden. `defaultOnEmpty` applies the declared default to `null` and empty
+strings while preserving meaningful falsey values such as `false` and `0`.
+
 Reusable source transforms handle small representation differences before
 schema parsing. Transforms belong to the source integration:
 

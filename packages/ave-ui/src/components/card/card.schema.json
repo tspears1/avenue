@@ -17,7 +17,14 @@
             "attribute": false,
             "transport": "property",
             "contract": {
-               "component": "button"
+               "component": "button",
+               "overrides": {
+                  "label": {
+                     "required": false,
+                     "default": "Learn More",
+                     "defaultOnEmpty": true
+                  }
+               }
             }
          },
          "image": {

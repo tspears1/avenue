@@ -1,0 +1,21 @@
+{
+   "title": "Invalid Card fixture",
+   "type": "component",
+   "props": {
+      "root": {
+         "link": {
+            "type": "object",
+            "attribute": false,
+            "transport": "property",
+            "contract": {
+               "component": "button",
+               "overrides": {
+                  "label": {
+                     "type": "number"
+                  }
+               }
+            }
+         }
+      }
+   }
+}

@@ -4,6 +4,7 @@ dist/
 
 # PHP artifacts
 vendor/
+!app/themes/loom/src/css/vendor
 
 # Env files
 .env*

@@ -1,0 +1,12 @@
+{
+   "title": "Button fixture",
+   "type": "component",
+   "props": {
+      "root": {
+         "label": {
+            "type": "string",
+            "required": true
+         }
+      }
+   }
+}
