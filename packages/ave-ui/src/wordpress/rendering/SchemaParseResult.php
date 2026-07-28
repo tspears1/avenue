@@ -6,36 +6,45 @@ namespace AvenueUI\Core;
 
 final class SchemaParseResult
 {
-   /**
-    * @param array<string, mixed> $data
-    * @param list<SchemaValidationIssue> $errors
+    /**
+     * Create a component schema parse result.
+     *
+     * @param array<string, mixed>         $data   Successfully parsed data.
+     * @param list<SchemaValidationIssue> $errors Validation issues.
     */
-   public function __construct(
-      private array $data,
-      private array $errors,
-   ) {
-   }
+    public function __construct(
+        private array $data,
+        private array $errors,
+    ) {
+    }
 
-   public function success(): bool
-   {
-      return $this->errors === [];
-   }
+    /**
+     * Determine whether parsing completed without validation issues.
+     *
+     * @return bool Whether parsing succeeded.
+     */
+    public function success(): bool
+    {
+        return $this->errors === [];
+    }
 
-   /**
-    * Parsed data, including defaults and successful nested coercions.
-    *
-    * @return array<string, mixed>
+    /**
+     * Return parsed data, defaults, and successful nested coercions.
+     *
+     * @return array<string, mixed> Parsed component data.
     */
-   public function data(): array
-   {
-      return $this->data;
-   }
+    public function data(): array
+    {
+        return $this->data;
+    }
 
-   /**
-    * @return list<SchemaValidationIssue>
+    /**
+     * Return all schema validation issues.
+     *
+     * @return list<SchemaValidationIssue> Validation issues.
     */
-   public function errors(): array
-   {
-      return $this->errors;
-   }
+    public function errors(): array
+    {
+        return $this->errors;
+    }
 }

@@ -14,10 +14,13 @@ use InvalidArgumentException;
 final class WordPressImageAdapter implements ValueAdapter
 {
     /**
-     * @param mixed $value
-     * @param array<string, mixed> $definition
+     * Convert a WordPress image value into canonical Image properties.
      *
-     * @return array<string, mixed>|null
+     * @param mixed                $value      Source image value.
+     * @param array<string, mixed> $definition Canonical property definition.
+     * @param AdapterContext       $context    Source adapter context.
+     *
+     * @return array<string, mixed>|null Adapted Image properties.
      */
     public function adapt(
         mixed $value,
@@ -48,14 +51,14 @@ final class WordPressImageAdapter implements ValueAdapter
             );
         }
 
-        $attachment_id = $this->attachment_id($value);
-        $size = $this->image_size($context);
-        $attachment = $this->attachment_data(
+        $attachment_id = $this->attachmentId($value);
+        $size = $this->imageSize($context);
+        $attachment = $this->attachmentData(
             $attachment_id,
             $size,
         );
 
-        $src = $this->first_string(
+        $src = $this->firstString(
             $value['src'] ?? null,
             $value['url'] ?? null,
             $attachment['src'] ?? null,
@@ -67,19 +70,19 @@ final class WordPressImageAdapter implements ValueAdapter
 
         $adapted = [
             'src' => $src,
-            'alt' => $this->first_string(
+            'alt' => $this->firstString(
                 $value['alt'] ?? null,
                 $attachment['alt'] ?? null,
             ) ?? '',
         ];
 
-        $this->copy_string(
+        $this->copyString(
             $adapted,
             'srcset',
             $value['srcset'] ?? null,
             $attachment['srcset'] ?? null,
         );
-        $this->copy_string(
+        $this->copyString(
             $adapted,
             'sizes',
             is_string($value['sizes'] ?? null)
@@ -88,25 +91,25 @@ final class WordPressImageAdapter implements ValueAdapter
             $value['sizes_attribute'] ?? null,
             $attachment['sizes'] ?? null,
         );
-        $this->copy_dimension(
+        $this->copyDimension(
             $adapted,
             'width',
             $value['width'] ?? null,
             $attachment['width'] ?? null,
         );
-        $this->copy_dimension(
+        $this->copyDimension(
             $adapted,
             'height',
             $value['height'] ?? null,
             $attachment['height'] ?? null,
         );
-        $this->copy_string(
+        $this->copyString(
             $adapted,
             'objectFit',
             $value['objectFit'] ?? null,
             $value['object_fit'] ?? null,
         );
-        $this->copy_string(
+        $this->copyString(
             $adapted,
             'objectPosition',
             $value['objectPosition'] ?? null,
@@ -114,7 +117,7 @@ final class WordPressImageAdapter implements ValueAdapter
         );
 
         if (array_key_exists('sources', $value)) {
-            $adapted['sources'] = $this->adapt_sources(
+            $adapted['sources'] = $this->adaptSources(
                 $value['sources'],
             );
         }
@@ -123,9 +126,13 @@ final class WordPressImageAdapter implements ValueAdapter
     }
 
     /**
-     * @param array<string, mixed> $value
+     * Resolve an attachment ID from common WordPress image keys.
+     *
+     * @param array<string, mixed> $value Source image value.
+     *
+     * @return int Non-negative attachment ID.
      */
-    private function attachment_id(array $value): int
+    private function attachmentId(array $value): int
     {
         $id = $value['ID'] ?? $value['id'] ?? 0;
 
@@ -140,7 +147,14 @@ final class WordPressImageAdapter implements ValueAdapter
         return 0;
     }
 
-    private function image_size(AdapterContext $context): string
+    /**
+     * Resolve the requested WordPress image size.
+     *
+     * @param AdapterContext $context Source adapter context.
+     *
+     * @return string WordPress image size.
+     */
+    private function imageSize(AdapterContext $context): string
     {
         $size = $context->options['image_size'] ?? 'full';
 
@@ -152,9 +166,12 @@ final class WordPressImageAdapter implements ValueAdapter
     /**
      * Enrich sparse image values when WordPress attachment APIs are available.
      *
-     * @return array<string, int|string>
+     * @param int    $attachment_id WordPress attachment ID.
+     * @param string $size          Requested WordPress image size.
+     *
+     * @return array<string, int|string> Available attachment metadata.
      */
-    private function attachment_data(
+    private function attachmentData(
         int $attachment_id,
         string $size,
     ): array {
@@ -223,14 +240,20 @@ final class WordPressImageAdapter implements ValueAdapter
     }
 
     /**
-     * @param array<string, mixed> $target
+     * Copy the first non-empty string into a target property.
+     *
+     * @param array<string, mixed> $target Destination properties.
+     * @param string               $name   Destination property name.
+     * @param mixed                ...$values Candidate values.
+     *
+     * @return void
      */
-    private function copy_string(
+    private function copyString(
         array &$target,
         string $name,
         mixed ...$values,
     ): void {
-        $value = $this->first_string(...$values);
+        $value = $this->firstString(...$values);
 
         if ($value !== null) {
             $target[$name] = $value;
@@ -238,9 +261,15 @@ final class WordPressImageAdapter implements ValueAdapter
     }
 
     /**
-     * @param array<string, mixed> $target
+     * Copy the first numeric dimension into a target property.
+     *
+     * @param array<string, mixed> $target Destination properties.
+     * @param string               $name   Destination property name.
+     * @param mixed                ...$values Candidate values.
+     *
+     * @return void
      */
-    private function copy_dimension(
+    private function copyDimension(
         array &$target,
         string $name,
         mixed ...$values,
@@ -258,7 +287,14 @@ final class WordPressImageAdapter implements ValueAdapter
         }
     }
 
-    private function first_string(mixed ...$values): ?string
+    /**
+     * Return the first non-empty string from a list of values.
+     *
+     * @param mixed ...$values Candidate values.
+     *
+     * @return string|null First matching string, or null.
+     */
+    private function firstString(mixed ...$values): ?string
     {
         foreach ($values as $value) {
             if (is_string($value) && $value !== '') {
@@ -270,9 +306,14 @@ final class WordPressImageAdapter implements ValueAdapter
     }
 
     /**
+     * Normalize responsive image source definitions.
+     *
+     * @param mixed $sources Source definitions.
+     *
      * @return list<array{src: string, type: string, media: string, sizes: string}>
+     *     Canonical Image source properties.
      */
-    private function adapt_sources(mixed $sources): array
+    private function adaptSources(mixed $sources): array
     {
         if (!is_array($sources)) {
             throw new InvalidArgumentException(
@@ -292,7 +333,7 @@ final class WordPressImageAdapter implements ValueAdapter
                 );
             }
 
-            $src = $this->first_string($source['src'] ?? null);
+            $src = $this->firstString($source['src'] ?? null);
 
             if ($src === null) {
                 throw new InvalidArgumentException(
@@ -302,9 +343,9 @@ final class WordPressImageAdapter implements ValueAdapter
 
             $adapted[] = [
                 'src' => $src,
-                'type' => $this->first_string($source['type'] ?? null) ?? '',
-                'media' => $this->first_string($source['media'] ?? null) ?? '',
-                'sizes' => $this->first_string($source['sizes'] ?? null) ?? '',
+                'type' => $this->firstString($source['type'] ?? null) ?? '',
+                'media' => $this->firstString($source['media'] ?? null) ?? '',
+                'sizes' => $this->firstString($source['sizes'] ?? null) ?? '',
             ];
         }
 

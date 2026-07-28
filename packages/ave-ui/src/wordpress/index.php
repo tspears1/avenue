@@ -18,16 +18,16 @@ GUI\DiagnosticsStore::boot();
 $componentsFile = dirname(__DIR__) . '/generated/components.php';
 
 GUI\AdminPage::boot([
-   'componentsFile' => $componentsFile,
-   'sourceBasePath' => dirname(__DIR__),
+    'componentsFile' => $componentsFile,
+    'sourceBasePath' => dirname(__DIR__),
 ]);
 
 if (is_file($componentsFile)) {
-   ComponentRegistry::configure(
-      require $componentsFile,
-      dirname(__DIR__)
-   );
+    ComponentRegistry::configure(
+        require $componentsFile,
+        dirname(__DIR__)
+    );
 
-   ComponentRegistry::boot();
-   EditorModules::boot();
+    ComponentRegistry::boot();
+    EditorModules::boot();
 }

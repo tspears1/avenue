@@ -13,6 +13,11 @@ final class DiagnosticsStore
 
     private static bool $booted = false;
 
+    /**
+     * Register the diagnostics event listener exactly once.
+     *
+     * @return void
+     */
     public static function boot(): void
     {
         if (self::$booted || !function_exists('add_action')) {
@@ -30,7 +35,13 @@ final class DiagnosticsStore
     }
 
     /**
-     * @param mixed $mode
+     * Capture a component registration error for the current request.
+     *
+     * @param string     $component Component name.
+     * @param mixed      $mode      Requested registration mode.
+     * @param \Throwable $exception Registration failure.
+     *
+     * @return void
      */
     public static function captureRegistrationError(
         string $component,
@@ -45,7 +56,10 @@ final class DiagnosticsStore
     }
 
     /**
+     * Return registration errors captured during the current request.
+     *
      * @return list<array{component: string, mode: string, message: string}>
+     *     Captured registration errors.
      */
     public static function getRegistrationErrors(): array
     {

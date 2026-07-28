@@ -9,7 +9,12 @@ use AvenueUI\WordPress\ComponentRegistry;
 final class OverviewSnapshot
 {
     /**
-     * @return array<string, mixed>
+     * Build an Avenue UI registration and runtime diagnostics snapshot.
+     *
+     * @param string $componentsFile Generated component metadata file.
+     * @param string $sourceBasePath Component source base path.
+     *
+     * @return array<string, mixed> Diagnostics snapshot.
      */
     public static function build(string $componentsFile, string $sourceBasePath): array
     {
@@ -118,6 +123,14 @@ final class OverviewSnapshot
         }
 
         $version = self::packageVersion();
+        $registeredFields = array_filter(
+            $registered,
+            static fn (array $entry): bool => (bool) ($entry['fields'] ?? false)
+        );
+        $registeredBlocks = array_filter(
+            $registered,
+            static fn (array $entry): bool => (bool) ($entry['block'] ?? false)
+        );
 
         return [
             'environment' => [
@@ -133,8 +146,8 @@ final class OverviewSnapshot
             'counts' => [
                 'available' => count($available),
                 'requested' => count($requested),
-                'registeredFields' => count(array_filter($registered, static fn (array $entry): bool => (bool) ($entry['fields'] ?? false))),
-                'registeredBlocks' => count(array_filter($registered, static fn (array $entry): bool => (bool) ($entry['block'] ?? false))),
+                'registeredFields' => count($registeredFields),
+                'registeredBlocks' => count($registeredBlocks),
                 'errors' => count($errors),
                 'warnings' => count($warnings),
             ],
@@ -144,6 +157,11 @@ final class OverviewSnapshot
         ];
     }
 
+    /**
+     * Resolve the installed Avenue UI package version.
+     *
+     * @return string Package version, or `unknown`.
+     */
     private static function packageVersion(): string
     {
         if (class_exists('\\Composer\\InstalledVersions')) {
@@ -161,6 +179,11 @@ final class OverviewSnapshot
         return 'unknown';
     }
 
+    /**
+     * Resolve the active WordPress version.
+     *
+     * @return string WordPress version, or `unknown`.
+     */
     private static function wordpressVersion(): string
     {
         global $wp_version;
@@ -169,7 +192,11 @@ final class OverviewSnapshot
     }
 
     /**
-     * @return array<string, array<string, mixed>>
+     * Load generated component metadata.
+     *
+     * @param string $componentsFile Generated metadata file.
+     *
+     * @return array<string, array<string, mixed>> Component metadata.
      */
     private static function loadComponentMap(string $componentsFile): array
     {
@@ -185,7 +212,11 @@ final class OverviewSnapshot
     }
 
     /**
-     * @param array<string, mixed> $integration
+     * Return an integration's relative source file.
+     *
+     * @param array<string, mixed> $integration Integration metadata.
+     *
+     * @return string|null Relative path, or null when unavailable.
      */
     private static function integrationFile(array $integration): ?string
     {
@@ -196,6 +227,14 @@ final class OverviewSnapshot
             : null;
     }
 
+    /**
+     * Resolve a relative integration path against its source base.
+     *
+     * @param string      $basePath     Source base path.
+     * @param string|null $relativePath Relative integration path.
+     *
+     * @return string|null Resolved path, or null when unavailable.
+     */
     private static function resolvePath(string $basePath, ?string $relativePath): ?string
     {
         if ($relativePath === null) {
@@ -205,6 +244,17 @@ final class OverviewSnapshot
         return rtrim($basePath, '/\\') . '/' . ltrim($relativePath, '/\\');
     }
 
+    /**
+     * Summarize component discovery and registration state.
+     *
+     * @param bool        $discovered    Whether metadata discovered the component.
+     * @param string|null $requestedMode Requested integration mode.
+     * @param bool        $registered    Whether registration completed.
+     * @param bool        $enqueued      Whether its loader was enqueued.
+     * @param bool        $hasError      Whether registration reported an error.
+     *
+     * @return string Human-readable component state.
+     */
     private static function summarizeState(
         bool $discovered,
         ?string $requestedMode,
@@ -231,6 +281,15 @@ final class OverviewSnapshot
         return 'Healthy';
     }
 
+    /**
+     * Determine whether registration satisfies the requested mode.
+     *
+     * @param string|null $requestedMode   Requested integration mode.
+     * @param bool        $fieldsRegistered Whether fields are registered.
+     * @param bool        $blockRegistered  Whether the block is registered.
+     *
+     * @return bool Whether registration is complete.
+     */
     private static function isRegisteredForRequestedMode(
         ?string $requestedMode,
         bool $fieldsRegistered,
@@ -247,16 +306,23 @@ final class OverviewSnapshot
         return $fieldsRegistered;
     }
 
+    /**
+     * Resolve an available diagnostics component-loader URL.
+     *
+     * @return string|null Public loader URL, or null when unavailable.
+     */
     private static function resolveDiagnosticsLoaderUrl(): ?string
     {
         if (!function_exists('get_theme_file_path') || !function_exists('get_theme_file_uri')) {
             return null;
         }
 
-        foreach ([
-            'vendor/bostonuniversity/ave-ui/dist/wordpress/editor-content.js',
-            'vendor/bostonuniversity/ave-ui/dist/wordpress/editor-ui.js',
-        ] as $relativeThemePath) {
+        foreach (
+            [
+                'vendor/bostonuniversity/ave-ui/dist/wordpress/editor-content.js',
+                'vendor/bostonuniversity/ave-ui/dist/wordpress/editor-ui.js',
+            ] as $relativeThemePath
+        ) {
             $themeModulePath = get_theme_file_path($relativeThemePath);
 
             if (!is_string($themeModulePath) || $themeModulePath === '' || !is_file($themeModulePath)) {
@@ -274,7 +340,11 @@ final class OverviewSnapshot
     }
 
     /**
-     * @param array<string, mixed> $metadata
+     * Resolve a component's Storybook documentation URL.
+     *
+     * @param array<string, mixed> $metadata Component metadata.
+     *
+     * @return string|null Storybook URL, or null when unavailable.
      */
     private static function storybookUrl(array $metadata): ?string
     {

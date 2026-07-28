@@ -6,34 +6,38 @@ namespace AvenueUI\Core;
 
 final class ClassNames
 {
-   /**
-    * @param array<int|string, mixed>|string $classes
+    /**
+     * Normalize conditional and positional class names.
+     *
+     * @param array<int|string, mixed>|string $classes Class names to normalize.
+     *
+     * @return string Space-separated unique class names.
     */
-   public static function render(array|string $classes): string
-   {
-      if (is_string($classes)) {
-         return trim($classes);
-      }
+    public static function render(array|string $classes): string
+    {
+        if (is_string($classes)) {
+            return trim($classes);
+        }
 
-      $output = [];
+        $output = [];
 
-      foreach ($classes as $key => $value) {
-         if (is_int($key)) {
-            if (is_string($value) && trim($value) !== '') {
-               $output[] = trim($value);
+        foreach ($classes as $key => $value) {
+            if (is_int($key)) {
+                if (is_string($value) && trim($value) !== '') {
+                    $output[] = trim($value);
+                }
+
+                continue;
             }
 
-            continue;
-         }
+            if ($value) {
+                $output[] = trim($key);
+            }
+        }
 
-         if ($value) {
-            $output[] = trim($key);
-         }
-      }
-
-      return implode(
-         ' ',
-         array_values(array_unique($output)),
-      );
-   }
+        return implode(
+            ' ',
+            array_values(array_unique($output)),
+        );
+    }
 }

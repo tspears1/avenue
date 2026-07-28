@@ -12,23 +12,28 @@ use AvenueUI\wordpress\adapters\WordPressImageAdapter;
  */
 final class ValueAdapters
 {
-   public const PLATFORM = 'wordpress';
-   public const IMAGE_CONTRACT = 'avenue/image';
+    public const PLATFORM = 'wordpress';
+    public const IMAGE_CONTRACT = 'avenue/image';
 
-   private static bool $booted = false;
+    private static bool $booted = false;
 
-   public static function boot(): void
-   {
-      if (self::$booted) {
-         return;
-      }
+    /**
+     * Register WordPress value adapters exactly once.
+     *
+     * @return void
+     */
+    public static function boot(): void
+    {
+        if (self::$booted) {
+            return;
+        }
 
-      AdapterRegistry::register(
-         self::PLATFORM,
-         self::IMAGE_CONTRACT,
-         new WordPressImageAdapter(),
-      );
+        AdapterRegistry::register(
+            self::PLATFORM,
+            self::IMAGE_CONTRACT,
+            new WordPressImageAdapter(),
+        );
 
-      self::$booted = true;
-   }
+        self::$booted = true;
+    }
 }

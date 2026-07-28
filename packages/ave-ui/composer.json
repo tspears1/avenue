@@ -37,10 +37,12 @@
     },
     "scripts": {
         "test:adapters": "php tests/php/value-adapters.php",
+        "test:acf-validation": "php tests/php/acf-required-validation.php",
         "test:schema": "php tests/php/component-schema.php",
         "test:transport": "php tests/php/component-transport.php",
         "test:php": [
             "@test:adapters",
+            "@test:acf-validation",
             "@test:schema",
             "@test:transport"
         ]

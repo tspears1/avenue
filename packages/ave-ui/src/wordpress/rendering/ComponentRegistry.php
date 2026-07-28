@@ -43,7 +43,10 @@ final class ComponentRegistry
     /**
      * Supply generated component metadata.
      *
-     * @param array<string, array<string, mixed>> $components
+     * @param array<string, array<string, mixed>> $components Generated component metadata.
+     * @param string                              $basePath   Component source base path.
+     *
+     * @return void
      */
     public static function configure(array $components, string $basePath): void
     {
@@ -59,6 +62,8 @@ final class ComponentRegistry
 
     /**
      * Attach the WordPress registration lifecycle.
+     *
+     * @return void
      */
     public static function boot(): void
     {
@@ -97,7 +102,9 @@ final class ComponentRegistry
      *
      * Numeric entries default to the "fields" mode.
      *
-     * @param string|array<int|string, string|array{mode?: string}> $components
+     * @param string|array<int|string, string|array{mode?: string}> $components Components and modes to request.
+     *
+     * @return void
      */
     public static function register(string|array $components): void
     {
@@ -139,6 +146,8 @@ final class ComponentRegistry
      * Register all currently requested integrations.
      *
      * This method is public only so WordPress can call it as a hook callback.
+     *
+     * @return void
      */
     public static function flush(): void
     {
@@ -164,7 +173,11 @@ final class ComponentRegistry
     }
 
     /**
-     * @return array<string, mixed>|null
+     * Return generated metadata for one component.
+     *
+     * @param string $name Component name.
+     *
+     * @return array<string, mixed>|null Component metadata, or null.
      */
     public static function getMetadata(string $name): ?array
     {
@@ -172,7 +185,9 @@ final class ComponentRegistry
     }
 
     /**
-     * @return array<string, array{fields: bool, block: bool}>
+     * Return registration state keyed by component.
+     *
+     * @return array<string, array{fields: bool, block: bool}> Registration state.
      */
     public static function getRegistered(): array
     {
@@ -180,7 +195,9 @@ final class ComponentRegistry
     }
 
     /**
-     * @return array<string, self::MODE_*>
+     * Return requested integration modes keyed by component.
+     *
+     * @return array<string, self::MODE_*> Requested integration modes.
      */
     public static function getRequested(): array
     {
@@ -188,13 +205,22 @@ final class ComponentRegistry
     }
 
     /**
-     * @return list<string>
+     * Return all components present in generated metadata.
+     *
+     * @return list<string> Available component names.
      */
     public static function getAvailable(): array
     {
         return array_keys(self::$components);
     }
 
+    /**
+     * Register a component's ACF field integration and dependencies.
+     *
+     * @param string $name Component name.
+     *
+     * @return void
+     */
     private static function registerFields(string $name): void
     {
         if (self::$registered[$name]['fields'] ?? false) {
@@ -248,6 +274,13 @@ final class ComponentRegistry
         }
     }
 
+    /**
+     * Register a component's ACF block integration.
+     *
+     * @param string $name Component name.
+     *
+     * @return void
+     */
     private static function registerBlock(string $name): void
     {
         if (self::$registered[$name]['block'] ?? false) {
@@ -307,8 +340,11 @@ final class ComponentRegistry
      * This guards against stale Composer classmaps by requiring the
      * component class file directly when needed.
      *
-     * @param array<string, mixed> $config
-     * @param array<string, mixed> $integration
+     * @param string               $name        Component name.
+     * @param array<string, mixed> $config      Block configuration.
+     * @param array<string, mixed> $integration Generated integration metadata.
+     *
+     * @return void
      */
     private static function ensureComponentClassIsLoadable(
         string $name,
@@ -339,7 +375,8 @@ final class ComponentRegistry
 
         throw new RuntimeException(
             sprintf(
-                'Component class "%s" for "%s" could not be loaded. Run "composer dump-autoload" in app/themes/loom to refresh classmaps.',
+                'Component class "%s" for "%s" could not be loaded. '
+                . 'Run "composer dump-autoload" in app/themes/loom to refresh classmaps.',
                 $component,
                 $name
             )
@@ -349,9 +386,10 @@ final class ComponentRegistry
     /**
      * Build likely filesystem paths for a component class file.
      *
-     * @param array<string, mixed> $integration
+     * @param string               $name        Component name.
+     * @param array<string, mixed> $integration Generated integration metadata.
      *
-     * @return array<int, string>
+     * @return array<int, string> Candidate class-file paths.
      */
     private static function componentClassCandidates(
         string $name,
@@ -380,7 +418,13 @@ final class ComponentRegistry
     }
 
     /**
-     * @param array<string, mixed> $integration
+     * Require and return a generated integration file.
+     *
+     * @param string               $name        Component name.
+     * @param array<string, mixed> $integration Generated integration metadata.
+     * @param string               $label       Human-readable integration label.
+     *
+     * @return mixed Value returned by the integration file.
      */
     private static function requireIntegrationFile(
         string $name,
@@ -415,6 +459,13 @@ final class ComponentRegistry
         return require $path;
     }
 
+    /**
+     * Mark a component as actively resolving and detect cycles.
+     *
+     * @param string $name Component name.
+     *
+     * @return void
+     */
     private static function beginResolution(string $name): void
     {
         if (isset(self::$resolving[$name])) {
@@ -431,11 +482,25 @@ final class ComponentRegistry
         self::$resolving[$name] = true;
     }
 
+    /**
+     * Mark a component resolution as complete.
+     *
+     * @param string $name Component name.
+     *
+     * @return void
+     */
     private static function endResolution(string $name): void
     {
         unset(self::$resolving[$name]);
     }
 
+    /**
+     * Assert that generated metadata contains a component.
+     *
+     * @param string $name Component name.
+     *
+     * @return void
+     */
     private static function assertComponentExists(string $name): void
     {
         if (!isset(self::$components[$name])) {
@@ -445,6 +510,13 @@ final class ComponentRegistry
         }
     }
 
+    /**
+     * Assert that an integration mode is supported.
+     *
+     * @param string $mode Integration mode.
+     *
+     * @return void
+     */
     private static function assertMode(string $mode): void
     {
         if (!in_array($mode, [self::MODE_FIELDS, self::MODE_BLOCK], true)) {
@@ -459,6 +531,14 @@ final class ComponentRegistry
         }
     }
 
+    /**
+     * Resolve the more capable of two integration modes.
+     *
+     * @param string|null $current   Existing integration mode.
+     * @param string      $requested Requested integration mode.
+     *
+     * @return string Resolved integration mode.
+     */
     private static function higherMode(?string $current, string $requested): string
     {
         if ($current === self::MODE_BLOCK || $requested === self::MODE_BLOCK) {
@@ -468,6 +548,15 @@ final class ComponentRegistry
         return self::MODE_FIELDS;
     }
 
+    /**
+     * Report a component integration registration failure.
+     *
+     * @param string     $name      Component name.
+     * @param string     $mode      Requested integration mode.
+     * @param \Throwable $exception Registration failure.
+     *
+     * @return void
+     */
     private static function reportRegistrationError(
         string $name,
         string $mode,
@@ -494,6 +583,8 @@ final class ComponentRegistry
      * Strict by default when WP_DEBUG is enabled, soft-fail otherwise.
      *
      * Filter: avenue_component_registry_strict_errors
+     *
+     * @return bool Whether registration errors should be rethrown.
      */
     private static function shouldThrowRegistrationErrors(): bool
     {
