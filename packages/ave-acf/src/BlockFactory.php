@@ -42,6 +42,8 @@ final class BlockFactory
     */
    public static function register(array $config): void
    {
+      DefaultTransforms::boot();
+
       if (!self::has_required_config($config)) {
          return;
       }
@@ -149,6 +151,11 @@ final class BlockFactory
          return;
       }
 
+      $fields = self::transform_field_values(
+         $config,
+         $fields,
+      );
+
       if ($debug_enabled) {
          $debug_context = self::build_debug_context(
             $config,
@@ -174,6 +181,113 @@ final class BlockFactory
       }
 
       self::render_preview_placeholder($is_preview, $fields, $config);
+   }
+
+   /**
+    * Apply reusable transforms declared by ACF field definitions.
+    *
+    * @param array<string, mixed> $config
+    * @param array<string, mixed> $values
+    * @return array<string, mixed>
+    */
+   private static function transform_field_values(
+      array $config,
+      array $values
+   ): array {
+      DefaultTransforms::boot();
+
+      $definitions = self::resolve_field_definitions($config);
+
+      if ($definitions === []) {
+         return $values;
+      }
+
+      return self::transform_values_from_definitions(
+         $values,
+         $definitions,
+      );
+   }
+
+   /**
+    * @param array<string, mixed> $config
+    * @return array<int, array<string, mixed>>
+    */
+   private static function resolve_field_definitions(
+      array $config
+   ): array {
+      if (
+         isset($config['field_definitions']) &&
+         is_array($config['field_definitions'])
+      ) {
+         return array_values(
+            array_filter($config['field_definitions'], 'is_array')
+         );
+      }
+
+      $field_group_key = $config['field_group_key'] ?? null;
+
+      if (
+         !is_string($field_group_key) ||
+         $field_group_key === '' ||
+         !function_exists('acf_get_fields')
+      ) {
+         return [];
+      }
+
+      $definitions = acf_get_fields($field_group_key);
+
+      if (!is_array($definitions)) {
+         return [];
+      }
+
+      return array_values(
+         array_filter($definitions, 'is_array')
+      );
+   }
+
+   /**
+    * @param array<string, mixed> $values
+    * @param array<int, array<string, mixed>> $definitions
+    * @return array<string, mixed>
+    */
+   private static function transform_values_from_definitions(
+      array $values,
+      array $definitions
+   ): array {
+      foreach ($definitions as $definition) {
+         $name = $definition['name'] ?? null;
+
+         if (
+            !is_string($name) ||
+            $name === '' ||
+            !array_key_exists($name, $values)
+         ) {
+            continue;
+         }
+
+         $value = $values[$name];
+         $sub_fields = $definition['sub_fields'] ?? null;
+
+         if (is_array($value) && is_array($sub_fields)) {
+            $value = self::transform_values_from_definitions(
+               $value,
+               array_values(array_filter($sub_fields, 'is_array')),
+            );
+         }
+
+         $transform = $definition['avenue_transform'] ?? null;
+
+         if (is_array($transform)) {
+            $value = TransformRegistry::apply(
+               $value,
+               $transform,
+            );
+         }
+
+         $values[$name] = $value;
+      }
+
+      return $values;
    }
 
    /**

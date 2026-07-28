@@ -35,6 +35,16 @@
             "src/wordpress/index.php"
         ]
     },
+    "scripts": {
+        "test:adapters": "php tests/php/value-adapters.php",
+        "test:schema": "php tests/php/component-schema.php",
+        "test:transport": "php tests/php/component-transport.php",
+        "test:php": [
+            "@test:adapters",
+            "@test:schema",
+            "@test:transport"
+        ]
+    },
     "extra": {
         "installer-paths": {
             "vendor/{$name}/": [

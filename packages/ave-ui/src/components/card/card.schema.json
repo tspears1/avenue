@@ -14,10 +14,15 @@
          },
          "link": {
             "type": "object",
-            "transport": "property"
+            "attribute": false,
+            "transport": "property",
+            "contract": {
+               "component": "button"
+            }
          },
          "image": {
             "type": "object",
+            "attribute": false,
             "transport": "property"
          }
       }

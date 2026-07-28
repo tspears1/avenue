@@ -43,9 +43,9 @@ export class Card extends AvenueElement {
 
    @property() text: string | object = ''
 
-   @property() link: ButtonProps = { href: '', label: '', target: '_self' }
+   @property({ attribute: false }) link: ButtonProps = { href: '', label: '', target: '_self' }
 
-   @property() image: ImageProps = {}
+   @property({ attribute: false }) image: ImageProps = {}
 
    /**
     * Returns whether the card has content to display.

@@ -33,12 +33,14 @@ abstract class AvenueElement
       $schema = ComponentSchema::fromFile(static::$schema);
 
       $props = $schema->prepareProps($props);
+      $transport = $schema->partitionProps($props);
 
       $schema->validateAttributes($attrs);
       $schema->validateSlots($slots);
 
       $hostAttributes = static::buildHostAttributes(
-         props: $props,
+         attributeProps: $transport['attributes'],
+         propertyProps: $transport['properties'],
          attrs: $attrs,
          classes: $classes,
       );
@@ -60,14 +62,16 @@ abstract class AvenueElement
    }
 
    /**
-    * @param array<string, mixed>            $props
+    * @param array<string, mixed>            $attributeProps
+    * @param array<string, mixed>            $propertyProps
     * @param array<string, mixed>            $attrs
     * @param array<int|string, mixed>|string $classes
     *
     * @return array<string, mixed>
     */
    private static function buildHostAttributes(
-      array $props,
+      array $attributeProps,
+      array $propertyProps,
       array $attrs,
       array|string $classes,
    ): array {
@@ -80,7 +84,7 @@ abstract class AvenueElement
          ]);
       }
 
-      foreach ($props as $name => $value) {
+      foreach ($attributeProps as $name => $value) {
          if (array_key_exists($name, $attrs)) {
             throw new InvalidArgumentException(
                sprintf(
@@ -92,6 +96,12 @@ abstract class AvenueElement
          }
 
          $attrs[$name] = static::serializeProp($value);
+      }
+
+      if ($propertyProps !== []) {
+         $attrs['data-props'] = static::serializePropertyProps(
+            $propertyProps,
+         );
       }
 
       return $attrs;
@@ -135,6 +145,42 @@ abstract class AvenueElement
             get_debug_type($value),
          )
       );
+   }
+
+   /**
+    * @param array<string, mixed> $props
+    */
+   private static function serializePropertyProps(array $props): string
+   {
+      $options =
+         JSON_THROW_ON_ERROR |
+         JSON_UNESCAPED_SLASHES |
+         JSON_UNESCAPED_UNICODE;
+
+      try {
+         $json = function_exists('wp_json_encode')
+            ? wp_json_encode($props, $options)
+            : json_encode($props, $options);
+      } catch (JsonException $exception) {
+         throw new InvalidArgumentException(
+            sprintf(
+               'Unable to serialize data-props for "%s".',
+               static::$name,
+            ),
+            previous: $exception,
+         );
+      }
+
+      if (!is_string($json)) {
+         throw new InvalidArgumentException(
+            sprintf(
+               'Unable to serialize data-props for "%s".',
+               static::$name,
+            )
+         );
+      }
+
+      return $json;
    }
 
    /**

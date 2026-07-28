@@ -12,16 +12,9 @@
     "repositories": [
         {
             "type": "path",
-            "url": "../../../packages/ave-acf",
+            "url": "../../../packages/*",
             "options": {
-                "symlink": true
-            }
-        },
-        {
-            "type": "path",
-            "url": "../../../packages/ave-ui",
-            "options": {
-                "symlink": true
+                "reference": "config"
             }
         },
         {

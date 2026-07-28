@@ -25,7 +25,9 @@
             "type": "string",
             "enum": [
                "_self",
-               "_blank"
+               "_blank",
+               "_parent",
+               "_top"
             ],
             "default": "_self"
          },

@@ -75,9 +75,38 @@ export default defineConfig(({ command, mode }) => {
 				"@ave-utils": "ave-css/styles/utils",
 			},
 		},
+		optimizeDeps: {
+			include: [
+				"lit",
+				"lit/decorators.js",
+				"lit/static-html.js",
+				"lit/directives/class-map.js",
+				"lit/directives/if-defined.js",
+				"lit/directives/when.js",
+			],
+		},
 		build: selectedBuild,
 		test: {
 			projects: [
+				{
+					extends: true,
+					test: {
+						name: "browser",
+						include: [
+							"tests/browser/**/*.test.ts",
+						],
+						browser: {
+							enabled: true,
+							headless: true,
+							provider: playwright({}),
+							instances: [
+								{
+									browser: "chromium",
+								},
+							],
+						},
+					},
+				},
 				{
 					extends: true,
 					plugins: [

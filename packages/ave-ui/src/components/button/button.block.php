@@ -34,5 +34,5 @@ return [
 		'html' => false,
 		'customClassName' => true,
 		'className' => true,
-	],
+	]
 ];

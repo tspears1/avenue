@@ -41,8 +41,10 @@
 		color: var(--_button-color);
 		padding: var(--size-fluid-1) var(--size-fluid-2);
 		font-family: inherit;
+		font-size: var(--text-size-sm);
 		font-weight: var(--font-weight-semibold);
 		letter-spacing: var(--tracking-wider);
+		line-height: var(--line-height-0);
 		transition:
 			background-color var(--duration-fast) var(--ease-out-quint),
 			border-color var(--duration-fast) var(--ease-out-quint),

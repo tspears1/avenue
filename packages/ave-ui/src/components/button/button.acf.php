@@ -64,6 +64,11 @@ final class ButtonFields extends ComponentFields
             [
                'label' => 'Open in New Tab',
                'type' => 'true_false',
+               'avenue_transform' => [
+                  'type' => 'boolean-map',
+                  'true' => '_blank',
+                  'false' => null,
+               ],
             ],
          ),
 
