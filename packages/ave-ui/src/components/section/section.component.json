@@ -1,0 +1,32 @@
+{
+   "$schema": "https://github.com/bostonuniversity/avenue/schemas/component-manifest.schema.json",
+   "name": "section",
+   "displayName": "Section",
+   "description": "Section component",
+   "version": "1.0.0",
+   "tag": "ave-section",
+   "schema": "./section.schema.json",
+   "docs": {
+      "storybook": "http://localhost:6006/?path=/docs/organisms-section--docs"
+   },
+   "exports": {
+      "php": [
+         "section.class.php"
+      ],
+      "acf": [
+         "section.acf.php"
+      ]
+   },
+   "integrations": {
+      "wordpress": {
+         "acfFields": {
+            "supported": true,
+            "file": "section.acf.php",
+            "groupKey": "group_section_component",
+            "dependencies": [
+               "button"
+            ]
+         }
+      }
+   }
+}

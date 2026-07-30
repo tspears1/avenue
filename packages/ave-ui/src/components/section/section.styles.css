@@ -1,0 +1,14 @@
+@layer component {
+
+    :host {
+        display: block;
+    }
+
+    [part="root"] {
+        display: block;
+    }
+
+    .section {
+        display: contents;
+    }
+}
