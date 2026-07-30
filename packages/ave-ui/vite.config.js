@@ -13,6 +13,7 @@ const entryFile = path.resolve(dirname, "src/index.ts");
 const loaderFile = path.resolve(dirname, "src/loader.ts");
 const wordpressEditorUiFile = path.resolve(dirname, "src/WordPress/editor-ui.ts");
 const wordpressEditorContentFile = path.resolve(dirname, "src/WordPress/editor-content.ts");
+const wordpressAdminDiagnosticsFile = path.resolve(dirname, "src/WordPress/GUI/assets/admin-diagnostics.ts");
 const componentEntries = collectComponentEntries({
 	projectRoot: dirname,
 });
@@ -29,6 +30,7 @@ const buildPresets = {
 			input: {
 				index: entryFile,
 				loader: loaderFile,
+				'wordpress/admin-diagnostics': wordpressAdminDiagnosticsFile,
 				'wordpress/editor-ui': wordpressEditorUiFile,
 				'wordpress/editor-content': wordpressEditorContentFile,
 				...componentEntries,

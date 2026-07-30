@@ -37,7 +37,7 @@
             "dist": {
                 "type": "path",
                 "url": "../../../packages/ave-ui",
-                "reference": "6755134aa2ea7db9dc87a9a16c89ca3121e1ed97"
+                "reference": "2aa3776f0e8dd1cecaca967626f8e51cd19dbb47"
             },
             "require": {
                 "bostonuniversity/ave-acf": "dev-main",
@@ -70,6 +70,9 @@
                 "test:acf-validation": [
                     "php tests/php/acf-required-validation.php"
                 ],
+                "test:admin-assets": [
+                    "php tests/php/admin-page-assets.php"
+                ],
                 "test:schema": [
                     "php tests/php/component-schema.php"
                 ],
@@ -79,6 +82,7 @@
                 "test:php": [
                     "@test:adapters",
                     "@test:acf-validation",
+                    "@test:admin-assets",
                     "@test:schema",
                     "@test:transport"
                 ]

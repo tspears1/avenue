@@ -8,6 +8,9 @@ final class AdminPage
 {
     private const MENU_SLUG = 'avenue-ui';
     private const MENU_POSITION = 24;
+    private const PAGE_HOOK = 'toplevel_page_avenue-ui';
+    private const SCRIPT_MODULE_ID = 'avenue-ui/admin-diagnostics';
+    private const SCRIPT_MODULE_PATH = 'vendor/bostonuniversity/ave-ui/dist/wordpress/admin-diagnostics.js';
 
     private static bool $booted = false;
 
@@ -34,6 +37,38 @@ final class AdminPage
 
         add_action('admin_menu', [self::class, 'registerMenu']);
         add_action('admin_menu', [self::class, 'moveMenuBeforeAcf'], 999);
+        add_action('admin_enqueue_scripts', [self::class, 'enqueueAssets']);
+    }
+
+    /**
+     * Enqueue the diagnostics module only on the Avenue UI administration page.
+     *
+     * @param string $hookSuffix Current WordPress administration page hook.
+     *
+     * @return void
+     */
+    public static function enqueueAssets(string $hookSuffix): void
+    {
+        if (
+            $hookSuffix !== self::PAGE_HOOK
+            || !function_exists('wp_enqueue_script_module')
+        ) {
+            return;
+        }
+
+        $moduleUrl = self::resolveScriptModuleUrl();
+
+        if ($moduleUrl === null) {
+            return;
+        }
+
+        wp_enqueue_script_module(
+            self::SCRIPT_MODULE_ID,
+            $moduleUrl,
+            [],
+            null,
+            ['in_footer' => true]
+        );
     }
 
     /**
@@ -332,7 +367,6 @@ final class AdminPage
         echo '</tbody>';
         echo '</table>';
 
-        self::renderOverviewScript();
     }
 
     /**
@@ -471,162 +505,26 @@ final class AdminPage
     }
 
     /**
-     * Render the client-side diagnostics and filtering script.
+     * Resolve the public URL for the generated administration module.
      *
-     * @return void
+     * @return string|null Public module URL, or null when unavailable.
      */
-    private static function renderOverviewScript(): void
+    private static function resolveScriptModuleUrl(): ?string
     {
-        echo '<script>';
-        echo '(function(){';
-        echo 'const search = document.getElementById("avenue-ui-component-search");';
-        echo 'const table = document.getElementById("avenue-ui-components-table");';
-        echo 'const copyBtn = document.getElementById("avenue-ui-copy-report");';
-        echo 'const copyStatus = document.getElementById("avenue-ui-copy-status");';
-        echo 'const report = document.getElementById("avenue-ui-report");';
-        echo 'const loaderScript = document.getElementById("avenue-ui-diagnostics-loader");';
-        echo 'const rows = Array.from(document.querySelectorAll(".avenue-component-row"));';
-        echo 'if (search && table) {';
-        echo 'search.addEventListener("input", function(){';
-        echo 'const value = String(search.value || "").toLowerCase();';
-        echo 'for (const row of table.tBodies[0].rows) {';
-        echo 'const text = row.textContent ? row.textContent.toLowerCase() : "";';
-        echo 'row.style.display = text.indexOf(value) !== -1 ? "" : "none";';
-        echo '}';
-        echo '});';
-        echo '}';
-        echo 'const tick = (value) => value ? "✓" : "✕";';
-        echo 'const cssMark = (value) => value ? "✓" : "—";';
-        echo 'const waitFrame = () => new Promise((resolve) => requestAnimationFrame(() => resolve()));';
-        echo 'const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));';
-        echo 'const waitForLoader = async () => {';
-        echo 'if (!loaderScript) return;';
-        echo 'if (loaderScript.dataset.loaded === "1") return;';
-        echo 'if (loaderScript.dataset.failed === "1") return;';
-        echo 'await new Promise((resolve) => {';
-        echo 'const onLoad = () => {';
-        echo 'loaderScript.dataset.loaded = "1";';
-        echo 'cleanup();';
-        echo 'resolve();';
-        echo '};';
-        echo 'const onError = () => {';
-        echo 'loaderScript.dataset.failed = "1";';
-        echo 'cleanup();';
-        echo 'resolve();';
-        echo '};';
-        echo 'const cleanup = () => {';
-        echo 'loaderScript.removeEventListener("load", onLoad);';
-        echo 'loaderScript.removeEventListener("error", onError);';
-        echo '};';
-        echo 'loaderScript.addEventListener("load", onLoad, { once: true });';
-        echo 'loaderScript.addEventListener("error", onError, { once: true });';
-        echo 'setTimeout(() => {';
-        echo 'cleanup();';
-        echo 'resolve();';
-        echo '}, 2000);';
-        echo '});';
-        echo '};';
-        echo 'const waitForDefinition = async (tag, maxMs) => {';
-        echo 'const start = Date.now();';
-        echo 'while ((Date.now() - start) < maxMs) {';
-        echo 'if (customElements.get(tag)) return true;';
-        echo 'await wait(100);';
-        echo '}';
-        echo 'return !!customElements.get(tag);';
-        echo '};';
-        echo 'const updateSummary = (row, jsDefined) => {';
-        echo 'const discovered = row.dataset.discovered === "1";';
-        echo 'const registered = row.dataset.registered === "1";';
-        echo 'const enqueued = row.dataset.enqueued === "1";';
-        echo 'const hasError = row.dataset.hasError === "1";';
-        echo 'const requestedMode = row.dataset.requestedMode || "none";';
-        echo 'let summary = "Healthy";';
-        echo 'if (!discovered) summary = "Unavailable";';
-        echo 'else if (hasError) summary = "Misconfigured";';
-        echo 'else if (requestedMode === "none") summary = "Unsupported in current context";';
-        echo 'else if (!registered || !enqueued || !jsDefined) summary = "Partially loaded";';
-        echo 'const summaryCell = row.querySelector(".avenue-cell-summary");';
-        echo 'if (summaryCell) summaryCell.textContent = summary;';
-        echo '};';
-        echo 'const probeRow = async (row) => {';
-        echo 'const tag = row.dataset.tag || "";';
-        echo 'const requestedMode = row.dataset.requestedMode || "none";';
-        echo 'const discovered = row.dataset.discovered === "1";';
-        echo 'const registered = row.dataset.registered === "1";';
-        echo 'const enqueued = row.dataset.enqueued === "1";';
-        echo 'const jsCell = row.querySelector(".avenue-cell-js-defined");';
-        echo 'const cssCell = row.querySelector(".avenue-cell-css");';
-        echo 'const modeCell = row.querySelector(".avenue-cell-mode");';
-        echo 'const discoveredCell = row.querySelector(".avenue-cell-discovered");';
-        echo 'const registeredCell = row.querySelector(".avenue-cell-registered");';
-        echo 'const enqueuedCell = row.querySelector(".avenue-cell-enqueued");';
-        echo 'if (discoveredCell) discoveredCell.textContent = tick(discovered);';
-        echo 'if (registeredCell) registeredCell.textContent = tick(registered);';
-        echo 'if (enqueuedCell) enqueuedCell.textContent = tick(enqueued);';
-        echo 'if (!tag) {';
-        echo 'if (jsCell) jsCell.textContent = "✕";';
-        echo 'if (cssCell) cssCell.textContent = "—";';
-        echo 'if (modeCell) modeCell.textContent = "Not loaded";';
-        echo 'updateSummary(row, false);';
-        echo 'return;';
-        echo '}';
-        echo 'let defined = !!customElements.get(tag);';
-        echo 'if (!defined && enqueued) {';
-        echo 'defined = await waitForDefinition(tag, 2500);';
-        echo '}';
-        echo 'let hasCss = false;';
-        echo 'let mode = requestedMode === "none" ? "Not loaded" : "Unknown";';
-        echo 'if (defined) {';
-        echo 'try {';
-        echo 'const element = document.createElement(tag);';
-        echo 'element.style.position = "fixed";';
-        echo 'element.style.left = "-9999px";';
-        echo 'element.style.top = "-9999px";';
-        echo 'document.body.appendChild(element);';
-        echo 'if (typeof customElements.whenDefined === "function") {';
-        echo 'await customElements.whenDefined(tag);';
-        echo '}';
-        echo 'await waitFrame();';
-        echo 'await waitFrame();';
-        echo 'const shadow = element.shadowRoot;';
-        echo 'if (shadow) {';
-        echo 'mode = "Shadow DOM";';
-        echo 'const hasAdopted = !!(shadow.adoptedStyleSheets && shadow.adoptedStyleSheets.length > 0);';
-        echo 'const hasInline = !!shadow.querySelector("style");';
-        echo 'hasCss = hasAdopted || hasInline;';
-        echo '} else {';
-        echo 'mode = "Light DOM";';
-        echo '}';
-        echo 'element.remove();';
-        echo '} catch (error) {';
-        echo 'mode = "Not loaded";';
-        echo '}';
-        echo '} else {';
-        echo 'mode = requestedMode === "none" ? "Not loaded" : "Not loaded";';
-        echo '}';
-        echo 'if (jsCell) jsCell.textContent = tick(defined);';
-        echo 'if (cssCell) cssCell.textContent = cssMark(hasCss);';
-        echo 'if (modeCell) modeCell.textContent = mode;';
-        echo 'updateSummary(row, defined);';
-        echo '};';
-        echo 'const runProbes = async () => {';
-        echo 'await waitForLoader();';
-        echo 'for (const row of rows) {';
-        echo 'await probeRow(row);';
-        echo '}';
-        echo '};';
-        echo 'runProbes();';
-        echo 'if (copyBtn && copyStatus && report) {';
-        echo 'copyBtn.addEventListener("click", async function(){';
-        echo 'try {';
-        echo 'await navigator.clipboard.writeText(report.textContent || "{}");';
-        echo 'copyStatus.textContent = "Copied";';
-        echo '} catch (error) {';
-        echo 'copyStatus.textContent = "Copy failed";';
-        echo '}';
-        echo '});';
-        echo '}';
-        echo '})();';
-        echo '</script>';
+        if (!function_exists('get_theme_file_path') || !function_exists('get_theme_file_uri')) {
+            return null;
+        }
+
+        $modulePath = get_theme_file_path(self::SCRIPT_MODULE_PATH);
+
+        if (!is_string($modulePath) || $modulePath === '' || !is_file($modulePath)) {
+            return null;
+        }
+
+        $moduleUrl = get_theme_file_uri(self::SCRIPT_MODULE_PATH);
+
+        return is_string($moduleUrl) && $moduleUrl !== ''
+            ? $moduleUrl
+            : null;
     }
 }

@@ -91,4 +91,30 @@ return [
             ],
         ],
     ],
+    'section' => [
+        'name' => 'section',
+        'displayName' => 'Section',
+        'description' => 'Section component',
+        'version' => '1.0.0',
+        'tag' => 'ave-section',
+        'docs' => [
+            'storybook' => 'http://localhost:6006/?path=/docs/organisms-section--docs',
+        ],
+        'schema' => 'components/section/section.schema.json',
+        'integrations' => [
+            'wordpress' => [
+                'acfFields' => [
+                    'supported' => true,
+                    'file' => 'components/section/section.acf.php',
+                    'groupKey' => 'group_section_component',
+                    'dependencies' => [
+                        'button',
+                    ],
+                ],
+                'acfBlock' => [
+                    'supported' => false,
+                ],
+            ],
+        ],
+    ],
 ];

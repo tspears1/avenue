@@ -37,11 +37,13 @@
     "scripts": {
         "test:adapters": "php tests/php/value-adapters.php",
         "test:acf-validation": "php tests/php/acf-required-validation.php",
+        "test:admin-assets": "php tests/php/admin-page-assets.php",
         "test:schema": "php tests/php/component-schema.php",
         "test:transport": "php tests/php/component-transport.php",
         "test:php": [
             "@test:adapters",
             "@test:acf-validation",
+            "@test:admin-assets",
             "@test:schema",
             "@test:transport"
         ]
