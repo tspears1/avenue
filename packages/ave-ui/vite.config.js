@@ -14,6 +14,7 @@ const loaderFile = path.resolve(dirname, "src/loader.ts");
 const wordpressEditorUiFile = path.resolve(dirname, "src/WordPress/editor-ui.ts");
 const wordpressEditorContentFile = path.resolve(dirname, "src/WordPress/editor-content.ts");
 const wordpressAdminDiagnosticsFile = path.resolve(dirname, "src/WordPress/GUI/assets/admin-diagnostics.ts");
+const wordpressAdminDiagnosticsStylesFile = path.resolve(dirname, "src/WordPress/GUI/assets/admin-diagnostics.css");
 const componentEntries = collectComponentEntries({
 	projectRoot: dirname,
 });
@@ -31,6 +32,7 @@ const buildPresets = {
 				index: entryFile,
 				loader: loaderFile,
 				'wordpress/admin-diagnostics': wordpressAdminDiagnosticsFile,
+				'wordpress/admin-diagnostics-styles': wordpressAdminDiagnosticsStylesFile,
 				'wordpress/editor-ui': wordpressEditorUiFile,
 				'wordpress/editor-content': wordpressEditorContentFile,
 				...componentEntries,
@@ -40,6 +42,15 @@ const buildPresets = {
 				format: "es",
 				entryFileNames: "[name].js",
 				chunkFileNames: "chunks/[name]-[hash].js",
+				assetFileNames: assetInfo => {
+					const isAdminDiagnosticsStyles = assetInfo.names.some(
+						name => name.includes("admin-diagnostics-styles"),
+					);
+
+					return isAdminDiagnosticsStyles
+						? "wordpress/admin-diagnostics-styles[extname]"
+						: "assets/[name]-[hash][extname]";
+				},
 			},
 		},
 		sourcemap: true,

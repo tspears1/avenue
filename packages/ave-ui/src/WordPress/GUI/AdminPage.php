@@ -11,6 +11,8 @@ final class AdminPage
     private const PAGE_HOOK = 'toplevel_page_avenue-ui';
     private const SCRIPT_MODULE_ID = 'avenue-ui/admin-diagnostics';
     private const SCRIPT_MODULE_PATH = 'vendor/bostonuniversity/ave-ui/dist/wordpress/admin-diagnostics.js';
+    private const STYLE_ID = 'avenue-ui-admin-diagnostics';
+    private const STYLE_PATH = 'vendor/bostonuniversity/ave-ui/dist/wordpress/admin-diagnostics-styles.css';
 
     private static bool $booted = false;
 
@@ -41,7 +43,7 @@ final class AdminPage
     }
 
     /**
-     * Enqueue the diagnostics module only on the Avenue UI administration page.
+     * Enqueue diagnostics assets only on the Avenue UI administration page.
      *
      * @param string $hookSuffix Current WordPress administration page hook.
      *
@@ -49,14 +51,26 @@ final class AdminPage
      */
     public static function enqueueAssets(string $hookSuffix): void
     {
-        if (
-            $hookSuffix !== self::PAGE_HOOK
-            || !function_exists('wp_enqueue_script_module')
-        ) {
+        if ($hookSuffix !== self::PAGE_HOOK) {
             return;
         }
 
-        $moduleUrl = self::resolveScriptModuleUrl();
+        $styleUrl = self::resolveAssetUrl(self::STYLE_PATH);
+
+        if ($styleUrl !== null && function_exists('wp_enqueue_style')) {
+            wp_enqueue_style(
+                self::STYLE_ID,
+                $styleUrl,
+                [],
+                null
+            );
+        }
+
+        if (!function_exists('wp_enqueue_script_module')) {
+            return;
+        }
+
+        $moduleUrl = self::resolveAssetUrl(self::SCRIPT_MODULE_PATH);
 
         if ($moduleUrl === null) {
             return;
@@ -260,17 +274,13 @@ final class AdminPage
         $loaderUrl = isset($environment['diagnosticsLoaderUrl']) && is_string($environment['diagnosticsLoaderUrl'])
             ? $environment['diagnosticsLoaderUrl']
             : null;
+        [$inUse, $available] = self::partitionComponents($components);
         $requestedComponents = [];
 
-        foreach ($components as $component) {
-            if (!is_array($component)) {
-                continue;
-            }
-
-            $requestedMode = $component['requestedMode'] ?? null;
+        foreach ($inUse as $component) {
             $name = $component['name'] ?? null;
 
-            if (is_string($requestedMode) && $requestedMode !== '' && is_string($name) && $name !== '') {
+            if (is_string($name) && $name !== '') {
                 $requestedComponents[] = $name;
             }
         }
@@ -288,85 +298,266 @@ final class AdminPage
         }
 
         echo '<h2>Components</h2>';
+        echo '<p>These status columns trace each component from server registration';
+        echo ' through browser initialization. Use the heading help buttons for details.</p>';
         echo '<p><label for="avenue-ui-component-search">Search:</label> ';
         echo '<input id="avenue-ui-component-search" type="search"';
-        echo ' placeholder="name, tag, status" style="min-width: 280px;" /></p>';
+        echo ' placeholder="name, tag, integration, status" style="min-width: 280px;" /></p>';
 
-        echo '<table id="avenue-ui-components-table" class="widefat striped">';
-        echo '<thead><tr>';
-        echo '<th>Component</th>';
-        echo '<th>Tag</th>';
-        echo '<th>Requested</th>';
-        echo '<th>Discovered</th>';
-        echo '<th>Registered</th>';
-        echo '<th>Enqueued</th>';
-        echo '<th>JS Defined</th>';
-        echo '<th>CSS</th>';
-        echo '<th>Mode</th>';
-        echo '<th>Version</th>';
-        echo '<th>Storybook</th>';
-        echo '<th>Errors</th>';
-        echo '<th>Summary</th>';
-        echo '</tr></thead>';
-        echo '<tbody>';
+        self::renderInUseComponents($inUse);
+        self::renderAvailableComponents($available);
+    }
+
+    /**
+     * Divide component metadata into requested and unrequested groups.
+     *
+     * Requested components remain in use even when registration fails, so
+     * integration problems stay visible in the diagnostics table.
+     *
+     * @param array<int, mixed> $components Component diagnostics metadata.
+     *
+     * @return array{
+     *     0: list<array<string, mixed>>,
+     *     1: list<array<string, mixed>>
+     * } In-use and available component groups.
+     */
+    private static function partitionComponents(array $components): array
+    {
+        $inUse = [];
+        $available = [];
 
         foreach ($components as $component) {
             if (!is_array($component)) {
                 continue;
             }
 
-            $nameKey = (string) ($component['name'] ?? '');
+            $requestedMode = $component['requestedMode'] ?? null;
+
+            if (
+                is_string($requestedMode)
+                && $requestedMode !== ''
+                && $requestedMode !== 'none'
+            ) {
+                $inUse[] = $component;
+                continue;
+            }
+
+            $available[] = $component;
+        }
+
+        return [$inUse, $available];
+    }
+
+    /**
+     * Render full runtime diagnostics for components used by the site.
+     *
+     * @param list<array<string, mixed>> $components Requested components.
+     *
+     * @return void
+     */
+    private static function renderInUseComponents(array $components): void
+    {
+        echo '<section class="avenue-ui-component-section">';
+        echo '<h3>In use <span class="count">(' . esc_html((string) count($components)) . ')</span></h3>';
+
+        if ($components === []) {
+            echo '<p>No Avenue components are currently requested by this site.</p>';
+            echo '</section>';
+            return;
+        }
+
+        echo '<table id="avenue-ui-components-table" class="widefat striped">';
+        echo '<thead><tr>';
+        echo '<th scope="col">Component</th>';
+        echo '<th scope="col">Tag</th>';
+        self::renderTableHeading(
+            'integration',
+            'Integration',
+            'Whether this site requested the component as fields-only or as a complete block integration.'
+        );
+        self::renderTableHeading(
+            'registered',
+            'Registered',
+            'Whether the requested PHP and ACF integration was successfully registered with WordPress.'
+        );
+        self::renderTableHeading(
+            'enqueued',
+            'Enqueued',
+            'Whether the component’s JavaScript was selected for loading on the current request.'
+        );
+        self::renderTableHeading(
+            'js-defined',
+            'JS Defined',
+            'Whether the browser ultimately registered the component’s custom-element tag.'
+        );
+        self::renderTableHeading(
+            'css',
+            'CSS',
+            'Whether the runtime probe found component styles in its shadow root. This verifies presence, not visual correctness.'
+        );
+        self::renderTableHeading(
+            'mode',
+            'Mode',
+            'Whether the running component renders with Shadow DOM, Light DOM, or is not loaded.'
+        );
+        echo '<th scope="col">Version</th>';
+        echo '<th scope="col">Storybook</th>';
+        echo '<th scope="col">Errors</th>';
+        echo '<th scope="col">Summary</th>';
+        echo '</tr></thead>';
+        echo '<tbody>';
+
+        foreach ($components as $component) {
+            self::renderInUseComponentRow($component);
+        }
+
+        echo '</tbody>';
+        echo '</table>';
+        echo '</section>';
+    }
+
+    /**
+     * Render one in-use component diagnostics row.
+     *
+     * @param array<string, mixed> $component Component diagnostics metadata.
+     *
+     * @return void
+     */
+    private static function renderInUseComponentRow(array $component): void
+    {
+        $nameKey = (string) ($component['name'] ?? '');
+        $name = (string) ($component['displayName'] ?? $component['name'] ?? '');
+        $tag = (string) ($component['tag'] ?? '');
+        $status = (string) ($component['status'] ?? 'Unavailable');
+        $requestedMode = (string) ($component['requestedMode'] ?? 'none');
+        $version = (string) ($component['version'] ?? '');
+        $storybookUrl = $component['storybookUrl'] ?? null;
+        $hasStorybook = is_string($storybookUrl) && $storybookUrl !== '';
+        $registered = self::checkMark((bool) ($component['registered'] ?? false));
+        $enqueued = self::checkMark((bool) ($component['enqueued'] ?? false));
+        $hasError = (bool) ($component['hasError'] ?? false);
+        $runtimeMode = self::initialModeLabel($requestedMode);
+
+        echo sprintf(
+            '<tr class="avenue-component-row" data-avenue-component-row'
+            . ' data-component="%s" data-tag="%s"'
+            . ' data-discovered="%s" data-registered="%s"'
+            . ' data-enqueued="%s" data-has-error="%s"'
+            . ' data-requested-mode="%s">',
+            esc_attr($nameKey),
+            esc_attr($tag),
+            ($component['discovered'] ?? false) ? '1' : '0',
+            ($component['registered'] ?? false) ? '1' : '0',
+            ($component['enqueued'] ?? false) ? '1' : '0',
+            $hasError ? '1' : '0',
+            esc_attr($requestedMode)
+        );
+        echo '<td><strong>' . esc_html($name) . '</strong></td>';
+        echo '<td><code>' . esc_html($tag !== '' ? $tag : 'n/a') . '</code></td>';
+        echo '<td>' . esc_html($runtimeMode) . '</td>';
+        echo '<td class="avenue-cell-registered">' . esc_html($registered) . '</td>';
+        echo '<td class="avenue-cell-enqueued">' . esc_html($enqueued) . '</td>';
+        echo '<td class="avenue-cell-js-defined">?</td>';
+        echo '<td class="avenue-cell-css">?</td>';
+        echo '<td class="avenue-cell-mode">' . esc_html($runtimeMode) . '</td>';
+        echo '<td>' . esc_html($version !== '' ? $version : 'n/a') . '</td>';
+
+        if ($hasStorybook) {
+            echo '<td><a href="' . esc_url((string) $storybookUrl) . '"';
+            echo ' target="_blank" rel="noopener noreferrer">Open docs</a></td>';
+        } else {
+            echo '<td>n/a</td>';
+        }
+
+        echo '<td>' . esc_html($hasError ? 'Yes' : 'No') . '</td>';
+        echo '<td class="avenue-cell-summary">' . esc_html($status) . '</td>';
+        echo '</tr>';
+    }
+
+    /**
+     * Render a collapsed catalog of components not requested by the site.
+     *
+     * @param list<array<string, mixed>> $components Available components.
+     *
+     * @return void
+     */
+    private static function renderAvailableComponents(array $components): void
+    {
+        echo '<details id="avenue-ui-available-components"';
+        echo ' class="avenue-ui-component-section avenue-ui-available-components">';
+        echo '<summary><strong>Available</strong> <span class="count">(';
+        echo esc_html((string) count($components)) . ')</span></summary>';
+        echo '<p>These components are present in Avenue but are not requested by this site.</p>';
+
+        if ($components === []) {
+            echo '<p>No additional components are available.</p>';
+            echo '</details>';
+            return;
+        }
+
+        echo '<table class="widefat striped avenue-ui-available-table">';
+        echo '<thead><tr>';
+        echo '<th scope="col">Component</th>';
+        echo '<th scope="col">Tag</th>';
+        echo '<th scope="col">Supported integration</th>';
+        echo '<th scope="col">Version</th>';
+        echo '<th scope="col">Storybook</th>';
+        echo '</tr></thead>';
+        echo '<tbody>';
+
+        foreach ($components as $component) {
             $name = (string) ($component['displayName'] ?? $component['name'] ?? '');
             $tag = (string) ($component['tag'] ?? '');
-            $status = (string) ($component['status'] ?? 'Unavailable');
-            $requestedMode = (string) ($component['requestedMode'] ?? 'none');
             $version = (string) ($component['version'] ?? '');
             $storybookUrl = $component['storybookUrl'] ?? null;
             $hasStorybook = is_string($storybookUrl) && $storybookUrl !== '';
-            $discovered = self::checkMark((bool) ($component['discovered'] ?? false));
-            $registered = self::checkMark((bool) ($component['registered'] ?? false));
-            $enqueued = self::checkMark((bool) ($component['enqueued'] ?? false));
-            $hasError = (bool) ($component['hasError'] ?? false);
-            $runtimeMode = self::initialModeLabel($requestedMode);
 
-            echo sprintf(
-                '<tr class="avenue-component-row"'
-                . ' data-component="%s" data-tag="%s"'
-                . ' data-discovered="%s" data-registered="%s"'
-                . ' data-enqueued="%s" data-has-error="%s"'
-                . ' data-requested-mode="%s">',
-                esc_attr($nameKey),
-                esc_attr($tag),
-                ($component['discovered'] ?? false) ? '1' : '0',
-                ($component['registered'] ?? false) ? '1' : '0',
-                ($component['enqueued'] ?? false) ? '1' : '0',
-                $hasError ? '1' : '0',
-                esc_attr($requestedMode)
-            );
+            echo '<tr data-avenue-component-row>';
             echo '<td><strong>' . esc_html($name) . '</strong></td>';
             echo '<td><code>' . esc_html($tag !== '' ? $tag : 'n/a') . '</code></td>';
-            echo '<td>' . esc_html($runtimeMode) . '</td>';
-            echo '<td class="avenue-cell-discovered">' . esc_html($discovered) . '</td>';
-            echo '<td class="avenue-cell-registered">' . esc_html($registered) . '</td>';
-            echo '<td class="avenue-cell-enqueued">' . esc_html($enqueued) . '</td>';
-            echo '<td class="avenue-cell-js-defined">?</td>';
-            echo '<td class="avenue-cell-css">?</td>';
-            echo '<td class="avenue-cell-mode">' . esc_html($runtimeMode) . '</td>';
+            echo '<td>' . esc_html(self::supportedIntegrationLabel($component)) . '</td>';
             echo '<td>' . esc_html($version !== '' ? $version : 'n/a') . '</td>';
+
             if ($hasStorybook) {
                 echo '<td><a href="' . esc_url((string) $storybookUrl) . '"';
                 echo ' target="_blank" rel="noopener noreferrer">Open docs</a></td>';
             } else {
                 echo '<td>n/a</td>';
             }
-            echo '<td>' . esc_html($hasError ? 'Yes' : 'No') . '</td>';
-            echo '<td class="avenue-cell-summary">' . esc_html($status) . '</td>';
+
             echo '</tr>';
         }
 
         echo '</tbody>';
         echo '</table>';
+        echo '</details>';
+    }
 
+    /**
+     * Describe the WordPress integration modes supported by a component.
+     *
+     * @param array<string, mixed> $component Component diagnostics metadata.
+     *
+     * @return string Supported integration label.
+     */
+    private static function supportedIntegrationLabel(array $component): string
+    {
+        $supportsFields = (bool) ($component['fieldsSupported'] ?? false);
+        $supportsBlock = (bool) ($component['blockSupported'] ?? false);
+
+        if ($supportsFields && $supportsBlock) {
+            return 'Fields + Block';
+        }
+
+        if ($supportsBlock) {
+            return 'Block';
+        }
+
+        if ($supportsFields) {
+            return 'Fields';
+        }
+
+        return 'None declared';
     }
 
     /**
@@ -473,6 +664,37 @@ final class AdminPage
     }
 
     /**
+     * Render an accessible component-lifecycle table heading and tooltip.
+     *
+     * @param string $id          Stable tooltip identifier suffix.
+     * @param string $label       Visible column heading.
+     * @param string $description Extended lifecycle description.
+     *
+     * @return void
+     */
+    private static function renderTableHeading(
+        string $id,
+        string $label,
+        string $description
+    ): void {
+        $tooltipId = 'avenue-ui-tooltip-' . $id;
+
+        echo '<th scope="col" class="avenue-ui-table-heading';
+        echo ' avenue-ui-table-heading--' . esc_attr($id) . '">';
+        echo '<span>' . esc_html($label) . '</span>';
+        echo '<button type="button" class="avenue-ui-tooltip-trigger"';
+        echo ' data-avenue-tooltip aria-describedby="' . esc_attr($tooltipId) . '"';
+        echo ' aria-label="' . esc_attr('About ' . $label) . '">';
+        echo '<span aria-hidden="true">?</span>';
+        echo '</button>';
+        echo '<span id="' . esc_attr($tooltipId) . '"';
+        echo ' class="avenue-ui-tooltip" role="tooltip" hidden>';
+        echo esc_html($description);
+        echo '</span>';
+        echo '</th>';
+    }
+
+    /**
      * Convert a boolean state to a visual status mark.
      *
      * @param bool $value State value.
@@ -505,26 +727,28 @@ final class AdminPage
     }
 
     /**
-     * Resolve the public URL for the generated administration module.
+     * Resolve the public URL for a generated administration asset.
      *
-     * @return string|null Public module URL, or null when unavailable.
+     * @param string $relativePath Theme-relative generated asset path.
+     *
+     * @return string|null Public asset URL, or null when unavailable.
      */
-    private static function resolveScriptModuleUrl(): ?string
+    private static function resolveAssetUrl(string $relativePath): ?string
     {
         if (!function_exists('get_theme_file_path') || !function_exists('get_theme_file_uri')) {
             return null;
         }
 
-        $modulePath = get_theme_file_path(self::SCRIPT_MODULE_PATH);
+        $assetPath = get_theme_file_path($relativePath);
 
-        if (!is_string($modulePath) || $modulePath === '' || !is_file($modulePath)) {
+        if (!is_string($assetPath) || $assetPath === '' || !is_file($assetPath)) {
             return null;
         }
 
-        $moduleUrl = get_theme_file_uri(self::SCRIPT_MODULE_PATH);
+        $assetUrl = get_theme_file_uri($relativePath);
 
-        return is_string($moduleUrl) && $moduleUrl !== ''
-            ? $moduleUrl
+        return is_string($assetUrl) && $assetUrl !== ''
+            ? $assetUrl
             : null;
     }
 }

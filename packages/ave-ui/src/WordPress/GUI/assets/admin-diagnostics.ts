@@ -1,11 +1,13 @@
 const SELECTORS = {
+   availableComponents: '#avenue-ui-available-components',
    copyButton: '#avenue-ui-copy-report',
    copyStatus: '#avenue-ui-copy-status',
    loaderScript: '#avenue-ui-diagnostics-loader',
    report: '#avenue-ui-report',
    row: '.avenue-component-row',
    search: '#avenue-ui-component-search',
-   table: '#avenue-ui-components-table',
+   searchRow: '[data-avenue-component-row]',
+   tooltipTrigger: '[data-avenue-tooltip]',
 } as const
 
 /**
@@ -18,6 +20,7 @@ const SELECTORS = {
 export async function initializeAdminDiagnostics(
    root: ParentNode = document,
 ): Promise<void> {
+   bindTooltips(root)
    bindSearch(root)
    bindCopyReport(root)
 
@@ -43,7 +46,57 @@ export async function initializeAdminDiagnostics(
 }
 
 /**
- * Bind component-table filtering when both search and table controls exist.
+ * Bind hover, focus, and Escape-key behavior to lifecycle tooltips.
+ *
+ * @param root Document subtree containing tooltip triggers.
+ * @returns Nothing.
+ */
+function bindTooltips(root: ParentNode): void {
+   const triggers = root.querySelectorAll<HTMLButtonElement>(
+      SELECTORS.tooltipTrigger,
+   )
+
+   for (const trigger of triggers) {
+      if (trigger.dataset.avenueBound === '1') {
+         continue
+      }
+
+      const tooltipId = trigger.getAttribute(
+         'aria-describedby',
+      )
+      const tooltip = tooltipId
+         ? document.getElementById(tooltipId)
+         : null
+
+      if (!tooltip) {
+         continue
+      }
+
+      const show = () => {
+         tooltip.hidden = false
+      }
+      const hide = () => {
+         tooltip.hidden = true
+      }
+
+      trigger.dataset.avenueBound = '1'
+      trigger.addEventListener('mouseenter', show)
+      trigger.addEventListener('mouseleave', hide)
+      trigger.addEventListener('focus', show)
+      trigger.addEventListener('blur', hide)
+      trigger.addEventListener('keydown', event => {
+         if (event.key !== 'Escape') {
+            return
+         }
+
+         hide()
+         trigger.blur()
+      })
+   }
+}
+
+/**
+ * Bind filtering across in-use and available component tables.
  *
  * @param root Document subtree containing the overview controls.
  * @returns Nothing.
@@ -52,13 +105,17 @@ function bindSearch(root: ParentNode): void {
    const search = root.querySelector<HTMLInputElement>(
       SELECTORS.search,
    )
-   const table = root.querySelector<HTMLTableElement>(
-      SELECTORS.table,
+   const rows = Array.from(
+      root.querySelectorAll<HTMLTableRowElement>(
+         SELECTORS.searchRow,
+      ),
+   )
+   const availableComponents = root.querySelector<HTMLDetailsElement>(
+      SELECTORS.availableComponents,
    )
 
    if (
       !search
-      || !table
       || search.dataset.avenueBound === '1'
    ) {
       return
@@ -67,17 +124,41 @@ function bindSearch(root: ParentNode): void {
    search.dataset.avenueBound = '1'
    search.addEventListener('input', () => {
       const value = search.value.toLowerCase()
-      const body = table.tBodies.item(0)
+      let hasAvailableMatch = false
 
-      if (!body) {
+      for (const row of rows) {
+         const text = row.textContent?.toLowerCase() ?? ''
+         const matches = text.includes(value)
+
+         row.style.display = matches
+            ? ''
+            : 'none'
+
+         if (
+            matches
+            && value !== ''
+            && availableComponents?.contains(row)
+         ) {
+            hasAvailableMatch = true
+         }
+      }
+
+      if (!availableComponents) {
          return
       }
 
-      for (const row of body.rows) {
-         const text = row.textContent?.toLowerCase() ?? ''
-         row.style.display = text.includes(value)
-            ? ''
-            : 'none'
+      if (hasAvailableMatch) {
+         if (!availableComponents.open) {
+            availableComponents.dataset.openedBySearch = '1'
+            availableComponents.open = true
+         }
+
+         return
+      }
+
+      if (availableComponents.dataset.openedBySearch === '1') {
+         availableComponents.open = false
+         delete availableComponents.dataset.openedBySearch
       }
    })
 }
@@ -179,17 +260,12 @@ async function probeRow(
 ): Promise<void> {
    const tag = row.dataset.tag ?? ''
    const requestedMode = row.dataset.requestedMode ?? 'none'
-   const discovered = row.dataset.discovered === '1'
    const registered = row.dataset.registered === '1'
    const enqueued = row.dataset.enqueued === '1'
    const jsCell = cell(row, '.avenue-cell-js-defined')
    const cssCell = cell(row, '.avenue-cell-css')
    const modeCell = cell(row, '.avenue-cell-mode')
 
-   setText(
-      cell(row, '.avenue-cell-discovered'),
-      tick(discovered),
-   )
    setText(
       cell(row, '.avenue-cell-registered'),
       tick(registered),

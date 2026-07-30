@@ -1,0 +1,82 @@
+.avenue-ui-table-heading {
+    position: relative;
+    white-space: nowrap;
+}
+
+.avenue-ui-table-heading--registered,
+.avenue-ui-table-heading--enqueued,
+.avenue-ui-table-heading--js-defined,
+.avenue-ui-table-heading--css,
+.avenue-cell-registered,
+.avenue-cell-enqueued,
+.avenue-cell-js-defined,
+.avenue-cell-css {
+    text-align: center;
+}
+
+.avenue-ui-component-section + .avenue-ui-component-section {
+    margin-top: 24px;
+}
+
+.avenue-ui-component-section > h3 {
+    margin-top: 0;
+}
+
+.avenue-ui-available-components > summary {
+    cursor: pointer;
+    font-size: 1.3em;
+    padding: 8px 0;
+}
+
+.avenue-ui-available-table {
+    margin-top: 12px;
+}
+
+.avenue-ui-tooltip-trigger {
+    align-items: center;
+    background: transparent;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    color: #646970;
+    cursor: help;
+    display: inline-flex;
+    font-size: 10px;
+    font-weight: 700;
+    height: 14px;
+    justify-content: center;
+    line-height: 1;
+    margin-left: 6px;
+    padding: 0;
+    vertical-align: 1px;
+    width: 14px;
+}
+
+.avenue-ui-tooltip-trigger:hover,
+.avenue-ui-tooltip-trigger:focus-visible {
+    color: #135e96;
+    outline: 2px solid #2271b1;
+    outline-offset: 1px;
+}
+
+.avenue-ui-tooltip {
+    background: #1d2327;
+    border-radius: 3px;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 25%);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 400;
+    left: 0;
+    line-height: 1.45;
+    max-width: 280px;
+    padding: 8px 10px;
+    position: absolute;
+    text-align: left;
+    top: calc(100% + 6px);
+    white-space: normal;
+    width: max-content;
+    z-index: 100;
+}
+
+.avenue-ui-tooltip[hidden] {
+    display: none;
+}

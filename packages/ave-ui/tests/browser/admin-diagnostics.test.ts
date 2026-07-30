@@ -35,15 +35,55 @@ afterEach(() => {
 })
 
 describe('Admin diagnostics', () => {
+   it('shows lifecycle help on focus and dismisses it with Escape', async () => {
+      document.body.innerHTML = `
+         <button
+            type="button"
+            data-avenue-tooltip
+            aria-describedby="requested-help"
+         >
+            ?
+         </button>
+         <span id="requested-help" role="tooltip" hidden>
+            How this component was requested.
+         </span>
+      `
+
+      await initializeAdminDiagnostics()
+
+      const trigger = document.querySelector<HTMLButtonElement>(
+         '[data-avenue-tooltip]',
+      )
+      const tooltip = document.querySelector<HTMLElement>(
+         '#requested-help',
+      )
+
+      trigger?.focus()
+      expect(tooltip?.hidden).toBe(false)
+
+      trigger?.dispatchEvent(
+         new KeyboardEvent('keydown', {
+            key: 'Escape',
+         }),
+      )
+      expect(tooltip?.hidden).toBe(true)
+   })
+
    it('filters component rows by their rendered content', async () => {
       document.body.innerHTML = `
          <input id="avenue-ui-component-search" type="search">
          <table id="avenue-ui-components-table">
             <tbody>
-               <tr class="avenue-component-row">
+               <tr
+                  class="avenue-component-row"
+                  data-avenue-component-row
+               >
                   <td>Button</td>
                </tr>
-               <tr class="avenue-component-row">
+               <tr
+                  class="avenue-component-row"
+                  data-avenue-component-row
+               >
                   <td>Card</td>
                </tr>
             </tbody>
@@ -72,12 +112,59 @@ describe('Admin diagnostics', () => {
       expect(rows[1]?.style.display).toBe('')
    })
 
+   it('reveals available components when they match a search', async () => {
+      document.body.innerHTML = `
+         <input id="avenue-ui-component-search" type="search">
+         <table>
+            <tbody>
+               <tr data-avenue-component-row>
+                  <td>Button</td>
+               </tr>
+            </tbody>
+         </table>
+         <details id="avenue-ui-available-components">
+            <summary>Available</summary>
+            <table>
+               <tbody>
+                  <tr data-avenue-component-row>
+                     <td>Accordion</td>
+                  </tr>
+               </tbody>
+            </table>
+         </details>
+      `
+
+      await initializeAdminDiagnostics()
+
+      const search = document.querySelector<HTMLInputElement>(
+         '#avenue-ui-component-search',
+      )
+      const available = document.querySelector<HTMLDetailsElement>(
+         '#avenue-ui-available-components',
+      )
+
+      if (!search || !available) {
+         return
+      }
+
+      search.value = 'accordion'
+      search.dispatchEvent(new Event('input'))
+
+      expect(available.open).toBe(true)
+
+      search.value = ''
+      search.dispatchEvent(new Event('input'))
+
+      expect(available.open).toBe(false)
+   })
+
    it('reports custom-element and shadow-style runtime health', async () => {
       document.body.innerHTML = `
          <table id="avenue-ui-components-table">
             <tbody>
                <tr
                   class="avenue-component-row"
+                  data-avenue-component-row
                   data-tag="${testTag}"
                   data-discovered="1"
                   data-registered="1"
@@ -85,7 +172,6 @@ describe('Admin diagnostics', () => {
                   data-has-error="0"
                   data-requested-mode="block"
                >
-                  <td class="avenue-cell-discovered"></td>
                   <td class="avenue-cell-registered"></td>
                   <td class="avenue-cell-enqueued"></td>
                   <td class="avenue-cell-js-defined"></td>
@@ -99,7 +185,6 @@ describe('Admin diagnostics', () => {
 
       await initializeAdminDiagnostics()
 
-      expect(text('.avenue-cell-discovered')).toBe('✓')
       expect(text('.avenue-cell-registered')).toBe('✓')
       expect(text('.avenue-cell-enqueued')).toBe('✓')
       expect(text('.avenue-cell-js-defined')).toBe('✓')
