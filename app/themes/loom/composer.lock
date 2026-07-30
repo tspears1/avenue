@@ -12,7 +12,7 @@
             "dist": {
                 "type": "path",
                 "url": "../../../packages/ave-acf",
-                "reference": "4baaf1419ef331e5858eca2e195e210c3eb835f9"
+                "reference": "d9545ab422b546a1640821c90f355f9b364a78c6"
             },
             "require": {
                 "php": ">=8.0"
@@ -22,6 +22,14 @@
                 "psr-4": {
                     "Avenue\\ACF\\": "src/"
                 }
+            },
+            "scripts": {
+                "test:field-builder": [
+                    "php tests/php/field-builder.php"
+                ],
+                "test:php": [
+                    "@test:field-builder"
+                ]
             },
             "license": [
                 "MIT"

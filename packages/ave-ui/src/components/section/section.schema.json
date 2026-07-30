@@ -5,9 +5,63 @@
    "type": "component",
    "props": {
       "root": {
-         "label": {
+         "elementId": {
+            "type": "string"
+         },
+         "appearance": {
             "type": "string",
-            "required": true
+            "enum": [
+               "light",
+               "dark"
+            ],
+            "default": "light"
+         },
+         "additionalClasses": {
+            "type": "string"
+         },
+         "header": {
+            "type": "object",
+            "attribute": false,
+            "transport": "property",
+            "properties": {
+               "heading": {
+                  "type": "string"
+               },
+               "intro": {
+                  "type": "string"
+               },
+               "buttons": {
+                  "type": "array",
+                  "items": {
+                     "type": "object",
+                     "contract": {
+                        "component": "button"
+                     }
+                  }
+               }
+            }
+         },
+         "footer": {
+            "type": "object",
+            "attribute": false,
+            "transport": "property",
+            "properties": {
+               "heading": {
+                  "type": "string"
+               },
+               "outro": {
+                  "type": "string"
+               },
+               "buttons": {
+                  "type": "array",
+                  "items": {
+                     "type": "object",
+                     "contract": {
+                        "component": "button"
+                     }
+                  }
+               }
+            }
          }
       }
    },

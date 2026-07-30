@@ -19,19 +19,19 @@ const tags: Record<string, unknown> = {
  * @property {string} link - The URL to link to when the heading is clicked.
  * @property {string} target - The target to link to when the heading is clicked.
  */
-const Heading = (label: string, level = 'h1', link = null, target = null ) => {
+const Heading = (label: string | undefined, level = 'h1', link = null, target = null, offset = 0, part = 'heading') => {
    const tag = tags[level]
    return html`
-      <${tag} part="heading">
+      <${tag} part="${part}" headingoffset=${offset}>
          ${when(
             link,
             () => html`
-               <a href="${ifDefined(link)}" target="${ifDefined(target)}" part="heading-link">
+               <a href="${ifDefined(link)}" target="${ifDefined(target)}" part="${part}-link">
                   ${label}
                </a>
             `,
             () => html`
-               <span part="heading-text">${label}</span>
+               <span part="${part}-text">${label}</span>
             `
          )}
       </${tag}>

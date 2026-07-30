@@ -14,12 +14,36 @@ const meta = {
         return component
     },
     argTypes: {
-        label: {
-            description: 'Fallback text rendered when no slot content is provided.',
+        appearance: {
+            control: 'select',
+            options: [
+                'light',
+                'dark',
+            ],
+            description: 'Visual appearance of the section.',
+        },
+        header: {
+            description: 'Header heading, introduction, and action buttons.',
+        },
+        footer: {
+            description: 'Footer heading, closing text, and action buttons.',
         },
     },
     args: {
-        label: 'Section',
+        appearance: 'light',
+        header: {
+            heading: 'Section heading',
+            intro: 'Introductory content for this section.',
+            buttons: [
+                {
+                    label: 'Primary action',
+                    href: '#',
+                },
+            ],
+        },
+        footer: {
+            outro: 'Closing content for this section.',
+        },
     },
 } satisfies Meta<SectionProps>
 
@@ -27,7 +51,5 @@ export default meta
 type Story = StoryObj<SectionProps>
 
 export const Default: Story = {
-    args: {
-        label: 'Section',
-    },
+    args: {},
 }

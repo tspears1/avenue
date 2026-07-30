@@ -220,6 +220,69 @@ avenue_schema_assert_same(
    'Nested Image defaults should come from the Image schema.',
 );
 
+$compositeSchema = ComponentSchema::fromFile(
+   __DIR__ . '/fixtures/components/composite/composite.schema.json',
+);
+$composite = $compositeSchema->safeParse([
+   'name' => 'Example',
+   'content' => [
+      'heading' => 'Related actions',
+      'actions' => [
+         [
+            'label' => 'First action',
+         ],
+      ],
+   ],
+]);
+
+avenue_schema_assert_same(
+   true,
+   $composite->success(),
+   'Structured props should validate arrays of referenced contracts.',
+);
+avenue_schema_assert_same(
+   [
+      'attributes' => [
+         'name' => 'Example',
+         'appearance' => 'standard',
+      ],
+      'properties' => [
+         'content' => [
+            'heading' => 'Related actions',
+            'actions' => [
+               [
+                  'label' => 'First action',
+               ],
+            ],
+         ],
+      ],
+   ],
+   $compositeSchema->partitionProps($composite->data()),
+   'Transport should partition generic primitive and structured props.',
+);
+
+$invalidComposite = $compositeSchema->safeParse([
+   'name' => 'Example',
+   'content' => [
+      'actions' => [
+         [
+            'unexpected' => true,
+         ],
+      ],
+   ],
+]);
+
+avenue_schema_assert_same(
+   false,
+   $invalidComposite->success(),
+   'Array items should enforce their referenced contract.',
+);
+avenue_schema_assert_same(
+   '$.content.actions[0].unexpected',
+   $invalidComposite->errors()[0]->path ?? null,
+   'Nested contract errors should retain their complete generic path.',
+);
+
 $rejectedStructuralOverride = false;
 
 try {

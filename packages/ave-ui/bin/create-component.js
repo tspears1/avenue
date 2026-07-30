@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 
 import { prompts as p, utils } from "ave-cli";
+import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
+import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
 
 const binDirectory = path.dirname(fileURLToPath(import.meta.url));
@@ -12,6 +14,7 @@ const packageRoot = path.resolve(binDirectory, "..");
 const sourceRoot = path.join(packageRoot, "src");
 const componentsRoot = path.join(sourceRoot, "components");
 const componentsIndexFile = path.join(componentsRoot, "index.ts");
+const execFileAsync = promisify(execFile);
 
 const {
     bold,
@@ -66,6 +69,12 @@ function splitCsv(value, mapper = (entry) => entry) {
         .map((entry) => entry.trim())
         .filter(Boolean)
         .map(mapper);
+}
+
+function escapePhpSingleQuoted(value) {
+    return String(value)
+        .replace(/\\/g, "\\\\")
+        .replace(/'/g, "\\'");
 }
 
 function createManifest({
@@ -364,6 +373,14 @@ function createBlockTemplate({
     icon,
     keywords,
 }) {
+    const safeComponentName = escapePhpSingleQuoted(componentName);
+    const safeDisplayName = escapePhpSingleQuoted(displayName);
+    const safeDescription = escapePhpSingleQuoted(description);
+    const safeIcon = escapePhpSingleQuoted(icon);
+    const safeKeywords = keywords.map(
+        (keyword) => `'${escapePhpSingleQuoted(keyword)}'`,
+    );
+
     return `<?php
 
 declare(strict_types=1);
@@ -374,28 +391,265 @@ use Avenue\\ACF\\FieldBuilder;
 use AvenueUI\\Components\\${className};
 
 return [
-\t'name' => '${componentName}',
-\t'title' => '${displayName}',
-\t'description' => '${description}',
-\t'field_group_key' => FieldBuilder::build_group_key('${componentName}', 'component'),
-\t'category' => 'ave-components',
-\t'icon' => '${icon}',
-\t'keywords' => [${keywords.map((keyword) => `'${keyword}'`).join(", ")}],
-\t'component' => ${className}::class,
-\t'preview_props' => [
-\t\t'label' => '${displayName}',
-\t],
-\t'supports' => [
-\t\t'align' => true,
-\t\t'anchor' => true,
-\t\t'mode' => true,
-\t\t'jsx' => false,
-\t\t'html' => false,
-\t\t'customClassName' => true,
-\t\t'className' => true,
-\t],
+    'name' => '${safeComponentName}',
+    'title' => '${safeDisplayName}',
+    'description' => '${safeDescription}',
+    'field_group_key' => FieldBuilder::build_group_key('${safeComponentName}', 'component'),
+    'category' => 'ave-components',
+    'icon' => '${safeIcon}',
+    'keywords' => [${safeKeywords.join(", ")}],
+    'component' => ${className}::class,
+    'preview_props' => [
+        'label' => '${safeDisplayName}',
+    ],
+    'supports' => [
+        'align' => true,
+        'anchor' => true,
+        'mode' => true,
+        'jsx' => false,
+        'html' => false,
+        'customClassName' => true,
+        'className' => true,
+    ],
 ];
 `;
+}
+
+async function rebuildRegistry() {
+    await execFileAsync(
+        process.execPath,
+        [path.join(binDirectory, "build-registry.js")],
+        {
+            cwd: packageRoot,
+        },
+    );
+}
+
+async function validateRegistryBlock(componentName) {
+    await rebuildRegistry();
+
+    const metadataFile = path.join(
+        sourceRoot,
+        "generated",
+        "components.php",
+    );
+    const safeMetadataFile = escapePhpSingleQuoted(metadataFile);
+    const safeComponentName = escapePhpSingleQuoted(componentName);
+    const php = [
+        `$registry = require '${safeMetadataFile}';`,
+        `echo json_encode($registry['${safeComponentName}'] ?? null);`,
+    ].join(" ");
+    const { stdout } = await execFileAsync(
+        "php",
+        ["-r", php],
+        {
+            cwd: packageRoot,
+        },
+    );
+    const component = JSON.parse(stdout);
+    const block = component?.integrations?.wordpress?.acfBlock;
+
+    if (
+        block?.supported !== true
+        || block.name !== `avenue/${componentName}`
+    ) {
+        throw new Error(
+            `Registry validation did not retain block integration for "${componentName}".`,
+        );
+    }
+}
+
+export async function addBlockIntegration({
+    componentName,
+    root = componentsRoot,
+    validate = validateRegistryBlock,
+    recover = async () => {},
+}) {
+    const normalizedName = toKebabCase(componentName);
+
+    if (
+        normalizedName !== componentName
+        || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(componentName)
+    ) {
+        throw new Error(
+            `Invalid component name "${componentName}". Use lowercase kebab-case.`,
+        );
+    }
+
+    const componentDirectory = path.join(root, componentName);
+    const manifestFile = path.join(
+        componentDirectory,
+        `${componentName}.component.json`,
+    );
+    const blockFileName = `${componentName}.block.php`;
+    const blockFile = path.join(componentDirectory, blockFileName);
+
+    if (!existsSync(componentDirectory) || !existsSync(manifestFile)) {
+        throw new Error(
+            `Component manifest not found: ${componentName}`,
+        );
+    }
+
+    const originalManifest = await readFile(manifestFile, "utf8");
+    let manifest;
+
+    try {
+        manifest = JSON.parse(originalManifest);
+    } catch (error) {
+        throw new Error(
+            `Invalid component manifest JSON: ${manifestFile}`,
+            {
+                cause: error,
+            },
+        );
+    }
+
+    if (
+        !manifest
+        || typeof manifest !== "object"
+        || manifest.name !== componentName
+    ) {
+        throw new Error(
+            `Component manifest name does not match "${componentName}".`,
+        );
+    }
+
+    const wordpress = manifest.integrations?.wordpress;
+    const acfFields = wordpress?.acfFields;
+
+    if (
+        !acfFields
+        || acfFields.supported !== true
+        || typeof acfFields.file !== "string"
+        || !existsSync(path.join(componentDirectory, acfFields.file))
+    ) {
+        throw new Error(
+            `Component "${componentName}" must provide ACF fields before block integration can be added.`,
+        );
+    }
+
+    const existingBlock = wordpress.acfBlock;
+    const blockFileExists = existsSync(blockFile);
+
+    if (existingBlock || blockFileExists) {
+        const isComplete = (
+            existingBlock?.supported === true
+            && existingBlock.file === blockFileName
+            && existingBlock.name === `avenue/${componentName}`
+            && blockFileExists
+        );
+
+        if (isComplete) {
+            return {
+                status: "unchanged",
+                files: [],
+            };
+        }
+
+        throw new Error(
+            `Component "${componentName}" has incomplete or conflicting block integration.`,
+        );
+    }
+
+    const classFile = path.join(
+        componentDirectory,
+        `${componentName}.class.php`,
+    );
+
+    if (!existsSync(classFile)) {
+        throw new Error(
+            `Component PHP class not found: ${componentName}.class.php`,
+        );
+    }
+
+    const className = toPascalCase(componentName);
+    const displayName = typeof manifest.displayName === "string"
+        ? manifest.displayName
+        : toTitleCase(componentName);
+    const description = typeof manifest.description === "string"
+        ? manifest.description
+        : `${displayName} component`;
+    const blockContent = createBlockTemplate({
+        componentName,
+        className,
+        displayName,
+        description,
+        icon: "admin-generic",
+        keywords: [componentName],
+    });
+
+    manifest.integrations.wordpress.acfBlock = {
+        supported: true,
+        file: blockFileName,
+        name: `avenue/${componentName}`,
+    };
+
+    let blockCreated = false;
+
+    try {
+        await writeFile(blockFile, blockContent, {
+            flag: "wx",
+        });
+        blockCreated = true;
+        await writeFile(
+            manifestFile,
+            `${JSON.stringify(manifest, null, 3)}\n`,
+        );
+        await validate(componentName);
+    } catch (error) {
+        await writeFile(manifestFile, originalManifest);
+
+        if (blockCreated) {
+            await unlink(blockFile).catch(() => {});
+        }
+
+        await recover().catch(() => {});
+
+        throw error;
+    }
+
+    return {
+        status: "created",
+        files: [
+            blockFileName,
+            `${componentName}.component.json`,
+        ],
+    };
+}
+
+async function runAddBlockCommand(componentName) {
+    intro("Add ave-ui Block Integration", "◆");
+
+    const spinner = p.spinner();
+    spinner.start(`Adding block integration to ${componentName}`);
+
+    try {
+        const result = await addBlockIntegration({
+            componentName,
+            recover: rebuildRegistry,
+        });
+
+        if (result.status === "unchanged") {
+            spinner.stop(
+                `Block integration already exists for ${success(componentName)}`,
+            );
+            outroSuccess("No changes required");
+            return;
+        }
+
+        spinner.stop(
+            `Added block integration to ${success(componentName)}`,
+        );
+        noteBox(
+            "Block integration added",
+            `${bold("Files:")}\n`
+                + `${formatFileList(result.files)}\n\n`
+                + `${bold("Registry:")} ${success("rebuilt and validated")}`,
+        );
+        outroSuccess("Block augmentation complete");
+    } catch (error) {
+        handleError(error, spinner);
+    }
 }
 
 async function updateComponentsIndex({ componentName, className }) {
@@ -421,6 +675,30 @@ async function updateComponentsIndex({ componentName, className }) {
 }
 
 async function main() {
+    const args = process.argv.slice(2);
+
+    if (args[0] === "--add-block") {
+        const componentName = args[1];
+
+        if (
+            !componentName
+            || args.length !== 2
+        ) {
+            throw new Error(
+                "Usage: pnpm create:component --add-block <component>",
+            );
+        }
+
+        await runAddBlockCommand(componentName);
+        return;
+    }
+
+    if (args.length > 0) {
+        throw new Error(
+            `Unknown create-component option: ${args[0]}`,
+        );
+    }
+
     intro("Create ave-ui Component", "◆");
 
     const answers = await p.group(
@@ -485,6 +763,10 @@ async function main() {
                             label: "Organisms",
                         },
                         {
+                            value: "Pattern",
+                            label: "Pattern"
+                        }
+                        {
                             value: "__custom__",
                             label: "Custom",
                         },
@@ -513,7 +795,7 @@ async function main() {
             includeBlock: ({ results }) =>
                 results.includeAcf
                     ? p.confirm({
-                            message: "Include WordPress ACF block registration?",
+                            message: "Generate WordPress ACF block integration?",
                             initialValue: true,
                         })
                     : undefined,
@@ -711,7 +993,14 @@ async function main() {
     }
 }
 
-main().catch((error) => {
-    p.log.error(error instanceof Error ? error.message : String(error));
-    process.exit(1);
-});
+const isDirectExecution = (
+    process.argv[1]
+    && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+);
+
+if (isDirectExecution) {
+    main().catch((error) => {
+        p.log.error(error instanceof Error ? error.message : String(error));
+        process.exit(1);
+    });
+}

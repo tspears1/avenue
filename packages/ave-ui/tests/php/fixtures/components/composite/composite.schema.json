@@ -1,0 +1,35 @@
+{
+   "title": "Composite fixture",
+   "type": "component",
+   "props": {
+      "root": {
+         "name": {
+            "type": "string",
+            "required": true
+         },
+         "appearance": {
+            "type": "string",
+            "default": "standard"
+         },
+         "content": {
+            "type": "object",
+            "attribute": false,
+            "transport": "property",
+            "properties": {
+               "heading": {
+                  "type": "string"
+               },
+               "actions": {
+                  "type": "array",
+                  "items": {
+                     "type": "object",
+                     "contract": {
+                        "component": "button"
+                     }
+                  }
+               }
+            }
+         }
+      }
+   }
+}

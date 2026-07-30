@@ -11,6 +11,12 @@
          "Avenue\\ACF\\": "src/"
       }
    },
+   "scripts": {
+      "test:field-builder": "php tests/php/field-builder.php",
+      "test:php": [
+         "@test:field-builder"
+      ]
+   },
    "minimum-stability": "stable",
    "prefer-stable": true
 }

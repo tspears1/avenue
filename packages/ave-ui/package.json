@@ -16,6 +16,7 @@
       "watch": "tsc && vite build --watch",
       "preview": "vite preview",
       "test:browser": "vitest run --project browser",
+      "test:generator": "node --test tests/node/create-component.test.js",
       "storybook": "storybook dev -p 6006",
       "build-storybook": "storybook build",
       "create:component": "node bin/create-component.js"

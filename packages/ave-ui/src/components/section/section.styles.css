@@ -1,14 +1,42 @@
 @layer component {
 
     :host {
-        display: block;
+        --_section-align:               var(--section-align, start);
+        --_section-background-color:    var(--section-background-color, oklch(var(--color-neutral-50-oklch)));
+        --_section-color:               var(--section-color, oklch(var(--color-neutral-950-oklch)));
+        align-items: start;
+        background: var(--_section-background-color);
+        border-block: var(--border-size-1) solid var(--_section-color);
+        color: var(--_section-color);
+        display: grid;
+        gap: var(--size-fluid-4);
+        inline-size: stretch;
+        justify-items: var(--_section-align);
+        padding-block: var(--size-fluid-6);
+        padding-inline: var(--size-fluid-2);
     }
 
-    [part="root"] {
-        display: block;
+    :is(.section__header, .section__foot) {
+        align-items: start;
+        display: grid;
+        font-family: var(--font-family);
+        gap: var(--size-fluid-2);
+        justify-items: var(--_section-align);
+        text-align: var(--section-align);
     }
 
-    .section {
-        display: contents;
+    :is(.section__heading, .section__intro) {
+        margin-block: 0;
     }
+
+    .section__buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--size-fluid-1);
+    }
+
+    .section__content:empty {
+        display: none;
+    }
+
 }
