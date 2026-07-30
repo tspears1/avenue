@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8fa356c08c1313cec3c82a3f48faa3ad",
+    "content-hash": "b93f6ce4e3722c06be7e149bfcf61619",
     "packages": [
         {
             "name": "bostonuniversity/ave-acf",
@@ -12,7 +12,7 @@
             "dist": {
                 "type": "path",
                 "url": "../../../packages/ave-acf",
-                "reference": "195b7a2154b9e99c40541b86f7b68b71b8e3b7d7"
+                "reference": "4baaf1419ef331e5858eca2e195e210c3eb835f9"
             },
             "require": {
                 "php": ">=8.0"
@@ -28,7 +28,6 @@
             ],
             "description": "Reusable ACF helpers for Avenue projects.",
             "transport-options": {
-                "symlink": true,
                 "relative": true
             }
         },
@@ -38,7 +37,7 @@
             "dist": {
                 "type": "path",
                 "url": "../../../packages/ave-ui",
-                "reference": "8663d065ab36afaba8195a829361217b6f545740"
+                "reference": "6755134aa2ea7db9dc87a9a16c89ca3121e1ed97"
             },
             "require": {
                 "bostonuniversity/ave-acf": "dev-main",
@@ -58,11 +57,30 @@
                     "AvenueUI\\": "src/"
                 },
                 "classmap": [
-                    "src/components",
-                    "src/wordpress/rendering"
+                    "src/components"
                 ],
                 "files": [
-                    "src/wordpress/index.php"
+                    "src/WordPress/index.php"
+                ]
+            },
+            "scripts": {
+                "test:adapters": [
+                    "php tests/php/value-adapters.php"
+                ],
+                "test:acf-validation": [
+                    "php tests/php/acf-required-validation.php"
+                ],
+                "test:schema": [
+                    "php tests/php/component-schema.php"
+                ],
+                "test:transport": [
+                    "php tests/php/component-transport.php"
+                ],
+                "test:php": [
+                    "@test:adapters",
+                    "@test:acf-validation",
+                    "@test:schema",
+                    "@test:transport"
                 ]
             },
             "license": [
@@ -76,7 +94,6 @@
             ],
             "description": "Web components library built with Lit for WordPress integration - PHP/Twig templates",
             "transport-options": {
-                "symlink": true,
                 "relative": true
             }
         },

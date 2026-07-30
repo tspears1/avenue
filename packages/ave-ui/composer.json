@@ -28,11 +28,10 @@
             "AvenueUI\\": "src/"
         },
         "classmap": [
-            "src/components",
-            "src/wordpress/rendering"
+            "src/components"
         ],
         "files": [
-            "src/wordpress/index.php"
+            "src/WordPress/index.php"
         ]
     },
     "scripts": {

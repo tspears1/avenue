@@ -1,7 +1,7 @@
 # WordPress Optimization Backlog
 
 Deferred after the behavior-preserving cleanup of
-`packages/ave-ui/src/wordpress`.
+`packages/ave-ui/src/WordPress`.
 
 ## Opportunities
 
@@ -14,14 +14,16 @@ Deferred after the behavior-preserving cleanup of
 3. Cache normalized ACF required-field metadata for the duration of each
    request.
 
-4. Normalize the lowercase `wordpress` directory structure and
-   `AvenueUI\WordPress` namespace casing in a dedicated PSR-4 migration. Treat
-   this as an autoload-sensitive change and verify it on a case-sensitive
-   filesystem.
-
-5. Allow adapter registration to accept a provider map once enough adapters
+4. Allow adapter registration to accept a provider map once enough adapters
    exist to justify the abstraction. Keep the current explicit registration
    while only a small number of adapters exist.
+
+## Completed
+
+- Normalized the source layout to `Core` and `WordPress`, including the
+  `ACF`, `Adapters`, `GUI`, and `Utils` namespace directories. Composer's
+  strict PSR validation, the Git index, and Loom's package autoloader verify
+  the exact casing.
 
 ## Guardrails
 

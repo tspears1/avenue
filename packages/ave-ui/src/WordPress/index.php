@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace AvenueUI\WordPress;
 
-require_once __DIR__ . '/rendering/ComponentRegistry.php';
+require_once __DIR__ . '/ComponentRegistry.php';
 require_once __DIR__ . '/EditorModules.php';
 require_once __DIR__ . '/ValueAdapters.php';
-require_once __DIR__ . '/acf/required-validation.php';
-require_once __DIR__ . '/gui/DiagnosticsStore.php';
-require_once __DIR__ . '/gui/OverviewSnapshot.php';
-require_once __DIR__ . '/gui/AdminPage.php';
+require_once __DIR__ . '/ACF/required-validation.php';
+require_once __DIR__ . '/GUI/DiagnosticsStore.php';
+require_once __DIR__ . '/GUI/OverviewSnapshot.php';
+require_once __DIR__ . '/GUI/AdminPage.php';
 
 ValueAdapters::boot();
 GUI\DiagnosticsStore::boot();

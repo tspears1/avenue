@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AvenueUI\WordPress;
 
 use Avenue\ACF\AdapterRegistry;
-use AvenueUI\wordpress\adapters\WordPressImageAdapter;
+use AvenueUI\WordPress\Adapters\WordPressImageAdapter;
 
 /**
  * Registers Avenue's canonical component contracts for WordPress input.

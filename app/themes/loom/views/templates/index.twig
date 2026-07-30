@@ -1,8 +1,10 @@
 {% extends 'layouts/base.twig' %}
 
 {% block content %}
-    <h1>{{ post.title }} - Updated on {{ post.date|date("F j, Y") }}</h1>
-    <section style="display: grid; gap: 2rem;">
+    <h1>{{ post.title }}</h1>
+    <small>Updated on {{ post.date|date("F j, Y") }}</small>
+
+    <section style="display: grid; gap: 2rem; margin-block-start: 2rem;">
         {{ post.content }}
     </section>
 {% endblock %}

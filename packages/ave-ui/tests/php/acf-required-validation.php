@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-use AvenueUI\WordPress\AcfFieldInspector;
-use AvenueUI\WordPress\RequiredFieldValidator;
+use AvenueUI\WordPress\ACF\AcfFieldInspector;
+use AvenueUI\WordPress\ACF\RequiredFieldValidator;
 use AvenueUI\WordPress\Utils\NestedArray;
 
-require_once __DIR__ . '/../../src/wordpress/utils/NestedArray.php';
-require_once __DIR__ . '/../../src/wordpress/acf/AcfFieldInspector.php';
-require_once __DIR__ . '/../../src/wordpress/acf/RequiredFieldValidator.php';
+require_once __DIR__ . '/../../src/WordPress/Utils/NestedArray.php';
+require_once __DIR__ . '/../../src/WordPress/ACF/AcfFieldInspector.php';
+require_once __DIR__ . '/../../src/WordPress/ACF/RequiredFieldValidator.php';
 
 /**
  * Assert that two values are strictly equal.

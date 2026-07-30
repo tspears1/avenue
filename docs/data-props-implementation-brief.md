@@ -685,13 +685,13 @@ components/button/button.acf.php
 components/button/button.class.php
 - component-specific ACF-to-prop normalization
 
-wordpress/acf/BlockFactory.php
+packages/ave-acf/src/BlockFactory.php
 - validate block/ACF integration, resolve dependencies, pass schema metadata
 
-wordpress/rendering/ComponentRenderer.php
+Core/ComponentRenderer.php
 - split mapped props by transport, validate values, render the element
 
-wordpress/rendering/AttributeHelper.php
+Core/AttributeHelper.php
 - boolean/string/data attributes, JSON encoding, and escaping
 
 internal/mixins/serialized-props.mixin.ts

@@ -5,13 +5,13 @@ declare(strict_types=1);
 use AvenueUI\Components\Card;
 use AvenueUI\Components\Image;
 
-require_once __DIR__ . '/../../src/wordpress/rendering/HtmlString.php';
-require_once __DIR__ . '/../../src/wordpress/rendering/ClassNames.php';
-require_once __DIR__ . '/../../src/wordpress/rendering/AttributeRenderer.php';
-require_once __DIR__ . '/../../src/wordpress/rendering/SchemaValidationIssue.php';
-require_once __DIR__ . '/../../src/wordpress/rendering/SchemaParseResult.php';
-require_once __DIR__ . '/../../src/wordpress/rendering/ComponentSchema.php';
-require_once __DIR__ . '/../../src/wordpress/rendering/AvenueElement.php';
+require_once __DIR__ . '/../../src/Core/HtmlString.php';
+require_once __DIR__ . '/../../src/Core/ClassNames.php';
+require_once __DIR__ . '/../../src/Core/AttributeRenderer.php';
+require_once __DIR__ . '/../../src/Core/SchemaValidationIssue.php';
+require_once __DIR__ . '/../../src/Core/SchemaParseResult.php';
+require_once __DIR__ . '/../../src/Core/ComponentSchema.php';
+require_once __DIR__ . '/../../src/Core/AvenueElement.php';
 require_once __DIR__ . '/../../src/components/card/card.class.php';
 require_once __DIR__ . '/../../src/components/image/image.class.php';
 

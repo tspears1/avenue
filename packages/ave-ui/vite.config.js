@@ -11,8 +11,8 @@ import {
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const entryFile = path.resolve(dirname, "src/index.ts");
 const loaderFile = path.resolve(dirname, "src/loader.ts");
-const wordpressEditorUiFile = path.resolve(dirname, "src/wordpress/editor-ui.ts");
-const wordpressEditorContentFile = path.resolve(dirname, "src/wordpress/editor-content.ts");
+const wordpressEditorUiFile = path.resolve(dirname, "src/WordPress/editor-ui.ts");
+const wordpressEditorContentFile = path.resolve(dirname, "src/WordPress/editor-content.ts");
 const componentEntries = collectComponentEntries({
 	projectRoot: dirname,
 });

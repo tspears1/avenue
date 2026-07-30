@@ -16,8 +16,8 @@ require_once __DIR__ . '/../../../ave-acf/src/TransformRegistry.php';
 require_once __DIR__ . '/../../../ave-acf/src/BooleanMapTransform.php';
 require_once __DIR__ . '/../../../ave-acf/src/DefaultTransforms.php';
 require_once __DIR__ . '/../../../ave-acf/src/BlockFactory.php';
-require_once __DIR__ . '/../../src/wordpress/adapters/WordPressImageAdapter.php';
-require_once __DIR__ . '/../../src/wordpress/ValueAdapters.php';
+require_once __DIR__ . '/../../src/WordPress/Adapters/WordPressImageAdapter.php';
+require_once __DIR__ . '/../../src/WordPress/ValueAdapters.php';
 
 if (!function_exists('wp_get_attachment_image_src')) {
    function wp_get_attachment_image_src(int $attachment_id, string $size): array|false
@@ -121,7 +121,7 @@ ValueAdapters::boot();
 avenue_assert_same(
    [
       'wordpress' => [
-         'avenue/image' => AvenueUI\wordpress\adapters\WordPressImageAdapter::class,
+         'avenue/image' => AvenueUI\WordPress\Adapters\WordPressImageAdapter::class,
       ],
    ],
    AdapterRegistry::get_registered(),

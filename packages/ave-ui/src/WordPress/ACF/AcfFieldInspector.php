@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AvenueUI\WordPress;
+namespace AvenueUI\WordPress\ACF;
 
 /**
  * Resolve Avenue component metadata from ACF fields and field groups.

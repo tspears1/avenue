@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AvenueUI\wordpress\adapters;
+namespace AvenueUI\WordPress\Adapters;
 
 use Avenue\ACF\AdapterContext;
 use Avenue\ACF\ValueAdapter;
