@@ -65,6 +65,35 @@ return [
             ],
         ],
     ],
+    'card-section' => [
+        'name' => 'card-section',
+        'displayName' => 'Card Section',
+        'description' => 'A Section pattern containing a collection of Cards.',
+        'version' => '1.0.0',
+        'tag' => 'ave-card-section',
+        'docs' => [
+            'storybook' => 'http://localhost:6006/?path=/docs/pattern-card-section--docs',
+        ],
+        'schema' => 'components/card-section/card-section.schema.json',
+        'integrations' => [
+            'wordpress' => [
+                'acfFields' => [
+                    'supported' => true,
+                    'file' => 'components/card-section/card-section.acf.php',
+                    'groupKey' => 'group_card_section_component',
+                    'dependencies' => [
+                        'card',
+                        'section',
+                    ],
+                ],
+                'acfBlock' => [
+                    'supported' => true,
+                    'file' => 'components/card-section/card-section.block.php',
+                    'name' => 'avenue/card-section',
+                ],
+            ],
+        ],
+    ],
     'image' => [
         'name' => 'image',
         'displayName' => 'Image',

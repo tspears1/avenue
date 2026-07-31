@@ -1,0 +1,46 @@
+{
+   "$schema": "https://github.com/bostonuniversity/avenue/schemas/component.schema.json",
+   "$id": "https://github.com/bostonuniversity/avenue/packages/ave-ui/src/components/card-section/card-section.schema.json",
+   "title": "Card Section",
+   "type": "component",
+   "props": {
+      "root": {
+         "section": {
+            "type": "object",
+            "attribute": false,
+            "transport": "property",
+            "contract": {
+               "component": "section"
+            },
+            "required": true
+         },
+         "cards": {
+            "type": "array",
+            "attribute": false,
+            "transport": "property",
+            "items": {
+               "type": "object",
+               "contract": {
+                  "component": "card"
+               }
+            },
+            "required": true
+         }
+      }
+   },
+   "attributes": {
+      "root": {
+         "allowGlobal": true,
+         "allowData": true,
+         "allowAria": true
+      }
+   },
+   "slots": {
+      "root": {}
+   },
+   "classes": {
+      "root": {
+         "allow": true
+      }
+   }
+}

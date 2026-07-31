@@ -765,7 +765,7 @@ async function main() {
                         {
                             value: "Pattern",
                             label: "Pattern"
-                        }
+                        },
                         {
                             value: "__custom__",
                             label: "Custom",

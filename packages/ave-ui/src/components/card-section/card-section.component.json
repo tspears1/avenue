@@ -1,0 +1,38 @@
+{
+   "$schema": "https://github.com/bostonuniversity/avenue/schemas/component-manifest.schema.json",
+   "name": "card-section",
+   "displayName": "Card Section",
+   "description": "A Section pattern containing a collection of Cards.",
+   "version": "1.0.0",
+   "tag": "ave-card-section",
+   "schema": "./card-section.schema.json",
+   "docs": {
+      "storybook": "http://localhost:6006/?path=/docs/pattern-card-section--docs"
+   },
+   "exports": {
+      "php": [
+         "card-section.class.php"
+      ],
+      "acf": [
+         "card-section.acf.php"
+      ]
+   },
+   "integrations": {
+      "wordpress": {
+         "acfFields": {
+            "supported": true,
+            "file": "card-section.acf.php",
+            "groupKey": "group_card_section_component",
+            "dependencies": [
+               "card",
+               "section"
+            ]
+         },
+         "acfBlock": {
+            "supported": true,
+            "file": "card-section.block.php",
+            "name": "avenue/card-section"
+         }
+      }
+   }
+}

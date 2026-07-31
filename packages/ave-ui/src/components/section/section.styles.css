@@ -4,6 +4,9 @@
         --_section-align:               var(--section-align, start);
         --_section-background-color:    var(--section-background-color, oklch(var(--color-neutral-50-oklch)));
         --_section-color:               var(--section-color, oklch(var(--color-neutral-950-oklch)));
+    }
+
+    [part=root] {
         align-items: start;
         background: var(--_section-background-color);
         border-block: var(--border-size-1) solid var(--_section-color);
@@ -16,27 +19,26 @@
         padding-inline: var(--size-fluid-2);
     }
 
-    :is(.section__header, .section__foot) {
+    :is([part="header"], [part="footer"]) {
         align-items: start;
         display: grid;
-        font-family: var(--font-family);
         gap: var(--size-fluid-2);
         justify-items: var(--_section-align);
-        text-align: var(--section-align);
+        text-align: var(--_section-align);
     }
 
-    :is(.section__heading, .section__intro) {
+    :is([part="heading"], [part="intro"]) {
         margin-block: 0;
     }
 
-    .section__buttons {
+    [part="content"] {
+        inline-size: 100%;
+    }
+
+    :is([part="header-actions"], [part="footer-actions"]) {
         display: flex;
         flex-wrap: wrap;
         gap: var(--size-fluid-1);
-    }
-
-    .section__content:empty {
-        display: none;
     }
 
 }

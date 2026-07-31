@@ -18,6 +18,7 @@ class Components
       ComponentRegistry::register([
          'button' => 'block',
          'card' => 'block',
+         'card-section' => 'block',
       ]);
    }
 }
