@@ -37,16 +37,11 @@ final class CardSectionFields extends ComponentFields
         );
 
         return [
-            Field::build_group(
+            Field::build_tab(
                 $component,
-                'section',
-                $sectionFields,
-                [
-                    'label' => 'Section',
-                    'required' => 1,
-                ],
+                'card',
+                ['label' => 'Cards']
             ),
-
             Field::build_repeater(
                 $component,
                 'cards',
@@ -55,8 +50,23 @@ final class CardSectionFields extends ComponentFields
                     'label' => 'Cards',
                     'button_label' => 'Add Card',
                     'layout' => 'block',
+                    'collapsed' => 'card_title',
                     'required' => 1,
                     'min' => 1,
+                ],
+            ),
+            Field::build_tab(
+                $component,
+                'section',
+                ['label' => 'Section']
+            ),
+            Field::build_group(
+                $component,
+                'section',
+                $sectionFields,
+                [
+                    'label' => 'Section',
+                    'required' => 1,
                 ],
             ),
         ];

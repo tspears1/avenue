@@ -268,11 +268,35 @@ final class BlockFactory
             $value = $values[$name];
             $sub_fields = $definition['sub_fields'] ?? null;
 
+            if (
+                self::is_repeating_field($definition) &&
+                $value === false
+            ) {
+                $value = [];
+            }
+
             if (is_array($value) && is_array($sub_fields)) {
-                $value = self::transform_values_from_definitions(
-                    $value,
-                    array_values(array_filter($sub_fields, 'is_array')),
+                $nested_definitions = array_values(
+                    array_filter($sub_fields, 'is_array')
                 );
+
+                if (self::is_repeating_field($definition)) {
+                    foreach ($value as $index => $row) {
+                        if (!is_array($row)) {
+                            continue;
+                        }
+
+                        $value[$index] = self::transform_values_from_definitions(
+                            $row,
+                            $nested_definitions,
+                        );
+                    }
+                } else {
+                    $value = self::transform_values_from_definitions(
+                        $value,
+                        $nested_definitions,
+                    );
+                }
             }
 
             $transform = $definition['avenue_transform'] ?? null;
@@ -478,59 +502,281 @@ final class BlockFactory
             ? self::normalize_block_name($config['name'])
             : 'component';
 
-        foreach ($definitions as $prop_name => $definition) {
+        return self::adapt_schema_values(
+            $props,
+            $definitions,
+            (string) ($schema['path'] ?? ''),
+            $field_definitions,
+            $component_name,
+            $is_preview,
+            $post_id,
+        );
+    }
+
+    /**
+     * Recursively adapt values described by component property definitions.
+     *
+     * @param array<string, mixed>              $values            Source values keyed by property name.
+     * @param array<string, array<string, mixed>> $definitions     Component property definitions.
+     * @param string                            $schema_path        Schema containing the definitions.
+     * @param array<int, array<string, mixed>>  $field_definitions Matching ACF field definitions.
+     * @param string                            $component_name     Root component name.
+     * @param bool                              $is_preview         Preview mode flag.
+     * @param int|string                        $post_id            Post ID/context.
+     * @param string                            $property_path      Nested property path.
+     *
+     * @return array<string, mixed> Recursively adapted values.
+     */
+    private static function adapt_schema_values(
+        array $values,
+        array $definitions,
+        string $schema_path,
+        array $field_definitions,
+        string $component_name,
+        bool $is_preview,
+        $post_id,
+        string $property_path = ''
+    ): array {
+        foreach ($definitions as $name => $definition) {
             if (
-                !is_string($prop_name) ||
+                !is_string($name) ||
                 !is_array($definition) ||
-                !array_key_exists($prop_name, $props)
+                !array_key_exists($name, $values)
             ) {
                 continue;
             }
 
-            $contract = $definition['contract'] ?? null;
-            $contract_component = is_array($contract)
-                ? ($contract['component'] ?? null)
-                : null;
-
-            if (
-                !is_string($contract_component) ||
-                $contract_component === ''
-            ) {
-                continue;
-            }
-
-            $adapter_contract = 'avenue/' . $contract_component;
-
-            if (!AdapterRegistry::has('wordpress', $adapter_contract)) {
-                continue;
-            }
-
+            $path = $property_path === ''
+                ? $name
+                : $property_path . '.' . $name;
             $field_definition = self::find_field_definition(
                 $field_definitions,
-                $prop_name
+                $name
             );
-            $options = isset($definition['adapterOptions'])
-                && is_array($definition['adapterOptions'])
-                ? $definition['adapterOptions']
-                : [];
 
-            $props[$prop_name] = AdapterRegistry::adapt(
-                $adapter_contract,
-                $props[$prop_name],
+            $values[$name] = self::adapt_schema_value(
+                $values[$name],
                 $definition,
-                new AdapterContext(
-                    platform: 'wordpress',
-                    component: $component_name,
-                    prop: $prop_name,
-                    is_preview: $is_preview,
-                    post_id: $post_id,
-                    field_definition: $field_definition,
-                    options: $options,
-                ),
+                $schema_path,
+                $field_definition,
+                $component_name,
+                $is_preview,
+                $post_id,
+                $path,
             );
         }
 
-        return $props;
+        return $values;
+    }
+
+    /**
+     * Adapt one schema value and recurse through contracts, objects, and arrays.
+     *
+     * @param mixed                $value            Source value.
+     * @param array<string, mixed> $definition       Property definition.
+     * @param string               $schema_path      Schema containing the definition.
+     * @param array<string, mixed> $field_definition Matching ACF field definition.
+     * @param string               $component_name   Root component name.
+     * @param bool                 $is_preview       Preview mode flag.
+     * @param int|string           $post_id          Post ID/context.
+     * @param string               $property_path    Nested property path.
+     *
+     * @return mixed Adapted value.
+     */
+    private static function adapt_schema_value(
+        mixed $value,
+        array $definition,
+        string $schema_path,
+        array $field_definition,
+        string $component_name,
+        bool $is_preview,
+        $post_id,
+        string $property_path
+    ): mixed {
+        $contract = $definition['contract'] ?? null;
+        $contract_component = is_array($contract)
+            ? ($contract['component'] ?? null)
+            : null;
+
+        if (
+            is_string($contract_component) &&
+            $contract_component !== ''
+        ) {
+            $adapter_contract = 'avenue/' . $contract_component;
+
+            if (AdapterRegistry::has('wordpress', $adapter_contract)) {
+                $options = isset($definition['adapterOptions'])
+                    && is_array($definition['adapterOptions'])
+                    ? $definition['adapterOptions']
+                    : [];
+
+                $value = AdapterRegistry::adapt(
+                    $adapter_contract,
+                    $value,
+                    $definition,
+                    new AdapterContext(
+                        platform: 'wordpress',
+                        component: $component_name,
+                        prop: self::normalize_adapter_property_path(
+                            $property_path
+                        ),
+                        is_preview: $is_preview,
+                        post_id: $post_id,
+                        field_definition: $field_definition,
+                        options: $options,
+                    ),
+                );
+            }
+
+            if ($value === null || !is_array($value)) {
+                return $value;
+            }
+
+            $contract_schema = self::inspect_contract_schema(
+                $schema_path,
+                $contract_component
+            );
+            $contract_definitions = $contract_schema['prop_definitions'] ?? [];
+
+            if (!is_array($contract_definitions)) {
+                return $value;
+            }
+
+            $overrides = $contract['overrides'] ?? null;
+
+            if (is_array($overrides)) {
+                foreach ($overrides as $name => $override) {
+                    if (
+                        is_string($name) &&
+                        isset($contract_definitions[$name]) &&
+                        is_array($override)
+                    ) {
+                        $contract_definitions[$name] = array_replace(
+                            $contract_definitions[$name],
+                            $override,
+                        );
+                    }
+                }
+            }
+
+            return self::adapt_schema_values(
+                $value,
+                $contract_definitions,
+                (string) ($contract_schema['path'] ?? $schema_path),
+                self::nested_field_definitions($field_definition),
+                $component_name,
+                $is_preview,
+                $post_id,
+                $property_path,
+            );
+        }
+
+        $properties = $definition['properties'] ?? null;
+
+        if (is_array($properties) && is_array($value)) {
+            return self::adapt_schema_values(
+                $value,
+                $properties,
+                $schema_path,
+                self::nested_field_definitions($field_definition),
+                $component_name,
+                $is_preview,
+                $post_id,
+                $property_path,
+            );
+        }
+
+        $items = $definition['items'] ?? null;
+
+        if (
+            ($definition['type'] ?? null) === 'array' &&
+            is_array($items) &&
+            is_array($value)
+        ) {
+            $item_field_definition = [
+                'sub_fields' => self::nested_field_definitions(
+                    $field_definition
+                ),
+            ];
+
+            foreach ($value as $index => $item) {
+                $value[$index] = self::adapt_schema_value(
+                    $item,
+                    $items,
+                    $schema_path,
+                    $item_field_definition,
+                    $component_name,
+                    $is_preview,
+                    $post_id,
+                    sprintf('%s[%s]', $property_path, (string) $index),
+                );
+            }
+        }
+
+        return $value;
+    }
+
+    /**
+     * Convert an indexed schema path into an AdapterContext identifier.
+     *
+     * @param string $property_path Nested schema property path.
+     *
+     * @return string Dot-delimited adapter property path.
+     */
+    private static function normalize_adapter_property_path(
+        string $property_path
+    ): string {
+        return preg_replace(
+            '/\[([0-9]+)\]/',
+            '.$1',
+            $property_path,
+        ) ?? $property_path;
+    }
+
+    /**
+     * Resolve a component contract schema relative to its consuming schema.
+     *
+     * @param string $schema_path Schema declaring the contract.
+     * @param string $component   Referenced component name.
+     *
+     * @return array<string, mixed> Referenced schema metadata.
+     */
+    private static function inspect_contract_schema(
+        string $schema_path,
+        string $component
+    ): array {
+        if (
+            $schema_path === '' ||
+            preg_match('/^[a-z0-9][a-z0-9-]*$/', $component) !== 1
+        ) {
+            return [];
+        }
+
+        $contract_path = sprintf(
+            '%s/%s/%s.schema.json',
+            dirname(dirname($schema_path)),
+            $component,
+            $component,
+        );
+
+        return self::inspect_schema_file($contract_path);
+    }
+
+    /**
+     * Return nested ACF field definitions from a structural field.
+     *
+     * @param array<string, mixed> $definition ACF field definition.
+     *
+     * @return array<int, array<string, mixed>> Nested field definitions.
+     */
+    private static function nested_field_definitions(
+        array $definition
+    ): array {
+        $sub_fields = $definition['sub_fields'] ?? null;
+
+        return is_array($sub_fields)
+            ? array_values(array_filter($sub_fields, 'is_array'))
+            : [];
     }
 
     /**
@@ -622,7 +868,8 @@ final class BlockFactory
 
         return self::merge_preview_field_values(
             $preview_props,
-            $fields
+            $fields,
+            self::resolve_field_definitions($config),
         );
     }
 
@@ -631,13 +878,23 @@ final class BlockFactory
      *
      * @param array<string, mixed> $defaults
      * @param array<string, mixed> $fields
+     * @param array<int, array<string, mixed>> $definitions
      * @return array<string, mixed>
      */
     private static function merge_preview_field_values(
         array $defaults,
-        array $fields
+        array $fields,
+        array $definitions = []
     ): array {
         foreach ($fields as $key => $value) {
+            $definition = is_string($key)
+                ? self::find_field_definition($definitions, $key)
+                : [];
+
+            if (self::is_empty_structural_field($value, $definition)) {
+                continue;
+            }
+
             if (is_array($value)) {
                 if (!isset($defaults[$key]) || !is_array($defaults[$key])) {
                     if ($value !== []) {
@@ -647,10 +904,23 @@ final class BlockFactory
                     continue;
                 }
 
-                $defaults[$key] = self::merge_preview_field_values(
-                    $defaults[$key],
-                    $value
+                $nested_definitions = self::nested_field_definitions(
+                    $definition
                 );
+
+                if (self::is_repeating_field($definition)) {
+                    $defaults[$key] = self::merge_preview_repeater_rows(
+                        $defaults[$key],
+                        $value,
+                        $nested_definitions,
+                    );
+                } else {
+                    $defaults[$key] = self::merge_preview_field_values(
+                        $defaults[$key],
+                        $value,
+                        $nested_definitions,
+                    );
+                }
                 continue;
             }
 
@@ -662,6 +932,93 @@ final class BlockFactory
         }
 
         return $defaults;
+    }
+
+    /**
+     * Merge populated repeater rows with corresponding preview rows.
+     *
+     * @param array<int|string, mixed>          $defaults    Preview rows.
+     * @param array<int|string, mixed>          $rows        Current ACF rows.
+     * @param array<int, array<string, mixed>> $definitions Repeater sub-fields.
+     *
+     * @return array<int|string, mixed> Merged repeater rows.
+     */
+    private static function merge_preview_repeater_rows(
+        array $defaults,
+        array $rows,
+        array $definitions
+    ): array {
+        foreach ($rows as $index => $row) {
+            if (!is_array($row)) {
+                if (self::should_override_preview_value($row)) {
+                    $defaults[$index] = $row;
+                }
+
+                continue;
+            }
+
+            $default_row = isset($defaults[$index]) && is_array($defaults[$index])
+                ? $defaults[$index]
+                : [];
+            $defaults[$index] = self::merge_preview_field_values(
+                $default_row,
+                $row,
+                $definitions,
+            );
+        }
+
+        return $defaults;
+    }
+
+    /**
+     * Determine whether ACF supplied an empty structural field value.
+     *
+     * @param mixed                $value      Current field value.
+     * @param array<string, mixed> $definition ACF field definition.
+     *
+     * @return bool Whether the value should preserve preview defaults.
+     */
+    private static function is_empty_structural_field(
+        mixed $value,
+        array $definition
+    ): bool {
+        if (!self::is_structural_field($definition)) {
+            return false;
+        }
+
+        return $value === false || $value === null || $value === '' || $value === [];
+    }
+
+    /**
+     * Determine whether an ACF field contains nested field definitions.
+     *
+     * @param array<string, mixed> $definition ACF field definition.
+     *
+     * @return bool Whether the field is structural.
+     */
+    private static function is_structural_field(array $definition): bool
+    {
+        return in_array(
+            $definition['type'] ?? null,
+            ['group', 'repeater', 'flexible_content', 'clone'],
+            true
+        );
+    }
+
+    /**
+     * Determine whether an ACF field contains a list of nested rows.
+     *
+     * @param array<string, mixed> $definition ACF field definition.
+     *
+     * @return bool Whether the field repeats its sub-fields.
+     */
+    private static function is_repeating_field(array $definition): bool
+    {
+        return in_array(
+            $definition['type'] ?? null,
+            ['repeater', 'flexible_content'],
+            true
+        );
     }
 
     /**
@@ -973,60 +1330,7 @@ final class BlockFactory
                 return null;
             }
 
-            $resolved_path = realpath($schema_path);
-
-            if ($resolved_path === false || !is_file($resolved_path)) {
-                return [
-                    'path' => $schema_path,
-                    'allowed_props' => [],
-                    'required_props' => [],
-                    'error' => 'Schema file not found.',
-                ];
-            }
-
-            $contents = file_get_contents($resolved_path);
-
-            if ($contents === false) {
-                return [
-                    'path' => $resolved_path,
-                    'allowed_props' => [],
-                    'required_props' => [],
-                    'error' => 'Schema file could not be read.',
-                ];
-            }
-
-            $decoded = json_decode($contents, true);
-
-            if (!is_array($decoded)) {
-                return [
-                    'path' => $resolved_path,
-                    'allowed_props' => [],
-                    'required_props' => [],
-                    'error' => 'Schema JSON is invalid.',
-                ];
-            }
-
-            $definitions = $decoded['props']['root'] ?? [];
-
-            if (!is_array($definitions)) {
-                $definitions = [];
-            }
-
-            $allowed_props = array_keys($definitions);
-            $required_props = [];
-
-            foreach ($definitions as $name => $definition) {
-                if (is_array($definition) && (($definition['required'] ?? false) === true)) {
-                    $required_props[] = $name;
-                }
-            }
-
-            return [
-                'path' => $resolved_path,
-                'allowed_props' => $allowed_props,
-                'required_props' => $required_props,
-                'prop_definitions' => $definitions,
-            ];
+            return self::inspect_schema_file($schema_path);
         } catch (\Throwable $exception) {
             return [
                 'path' => '',
@@ -1035,6 +1339,79 @@ final class BlockFactory
                 'error' => $exception->getMessage(),
             ];
         }
+    }
+
+    /**
+     * Read component property metadata from a schema file.
+     *
+     * @param string $schema_path Component schema path.
+     *
+     * @return array<string, mixed> Schema metadata or an error description.
+     */
+    private static function inspect_schema_file(string $schema_path): array
+    {
+        static $cache = [];
+
+        $resolved_path = realpath($schema_path);
+
+        if ($resolved_path === false || !is_file($resolved_path)) {
+            return [
+                'path' => $schema_path,
+                'allowed_props' => [],
+                'required_props' => [],
+                'error' => 'Schema file not found.',
+            ];
+        }
+
+        if (isset($cache[$resolved_path])) {
+            return $cache[$resolved_path];
+        }
+
+        $contents = file_get_contents($resolved_path);
+
+        if ($contents === false) {
+            return [
+                'path' => $resolved_path,
+                'allowed_props' => [],
+                'required_props' => [],
+                'error' => 'Schema file could not be read.',
+            ];
+        }
+
+        $decoded = json_decode($contents, true);
+
+        if (!is_array($decoded)) {
+            return [
+                'path' => $resolved_path,
+                'allowed_props' => [],
+                'required_props' => [],
+                'error' => 'Schema JSON is invalid.',
+            ];
+        }
+
+        $definitions = $decoded['props']['root'] ?? [];
+
+        if (!is_array($definitions)) {
+            $definitions = [];
+        }
+
+        $required_props = [];
+
+        foreach ($definitions as $name => $definition) {
+            if (
+                is_array($definition) &&
+                (($definition['required'] ?? false) === true)
+            ) {
+                $required_props[] = $name;
+            }
+        }
+
+        return $cache[$resolved_path] = [
+            'path' => $resolved_path,
+            'allowed_props' => array_keys($definitions),
+            'required_props' => $required_props,
+            'prop_definitions' => $definitions,
+        ];
     }
 
     /**

@@ -85,16 +85,16 @@ export class Button extends AvenueElement {
             <div class="button__text" part="text">${this.label}</div>
 
             ${when(
-         this.icon,
-         () => html`
+               this.icon,
+               () => html`
                   <div class="button__icon" part="icon">
                         <svg>
                            <use href=${`#icon-${this.icon}`}></use>
                         </svg>
                   </div>
                `,
-         () => nothing
-      )}
+               () => nothing
+            )}
 
             <slot name="suffix" part="suffix"></slot>
 

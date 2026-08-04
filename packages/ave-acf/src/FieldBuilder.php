@@ -240,6 +240,11 @@ final class FieldBuilder
       $component_key = self::normalize_token($component_name);
       $repeater_key = self::normalize_token($repeater_name);
 
+      // Allow a short collapsed value (e.g. "card_title") and resolve it to a field key.
+      if (isset($args['collapsed']) && is_string($args['collapsed']) && strpos($args['collapsed'], 'field_') !== 0) {
+         $args['collapsed'] = self::build_field_key($component_key, $args['collapsed']);
+      }
+
       $defaults = [
          'key' => self::build_field_key($component_key, 'repeater_' . $repeater_key),
          'name' => $repeater_key,

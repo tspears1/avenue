@@ -6,6 +6,7 @@ use Avenue\ACF\AdapterContext;
 use Avenue\ACF\AdapterRegistry;
 use Avenue\ACF\DefaultTransforms;
 use Avenue\ACF\TransformRegistry;
+use AvenueUI\Core\ComponentSchema;
 use AvenueUI\WordPress\ValueAdapters;
 
 require_once __DIR__ . '/../../../ave-acf/src/AdapterContext.php';
@@ -15,7 +16,12 @@ require_once __DIR__ . '/../../../ave-acf/src/ValueTransform.php';
 require_once __DIR__ . '/../../../ave-acf/src/TransformRegistry.php';
 require_once __DIR__ . '/../../../ave-acf/src/BooleanMapTransform.php';
 require_once __DIR__ . '/../../../ave-acf/src/DefaultTransforms.php';
+require_once __DIR__ . '/../../../ave-acf/src/Helper.php';
 require_once __DIR__ . '/../../../ave-acf/src/BlockFactory.php';
+require_once __DIR__ . '/../../src/Core/AttributeRenderer.php';
+require_once __DIR__ . '/../../src/Core/SchemaValidationIssue.php';
+require_once __DIR__ . '/../../src/Core/SchemaParseResult.php';
+require_once __DIR__ . '/../../src/Core/ComponentSchema.php';
 require_once __DIR__ . '/../../src/WordPress/Adapters/WordPressImageAdapter.php';
 require_once __DIR__ . '/../../src/WordPress/ValueAdapters.php';
 
@@ -232,10 +238,242 @@ avenue_assert_same(
    'BlockFactory should recursively apply transforms declared on nested ACF fields.',
 );
 
+$composite_field_definitions = [
+   [
+      'name' => 'section',
+      'type' => 'group',
+      'sub_fields' => [
+         [
+            'name' => 'appearance',
+            'type' => 'select',
+         ],
+         [
+            'name' => 'header',
+            'type' => 'group',
+            'sub_fields' => [
+               [
+                  'name' => 'heading',
+                  'type' => 'text',
+               ],
+               [
+                  'name' => 'buttons',
+                  'type' => 'repeater',
+                  'sub_fields' => [
+                     [
+                        'name' => 'label',
+                        'type' => 'text',
+                     ],
+                  ],
+               ],
+            ],
+         ],
+         [
+            'name' => 'footer',
+            'type' => 'group',
+            'sub_fields' => [
+               [
+                  'name' => 'outro',
+                  'type' => 'textarea',
+               ],
+               [
+                  'name' => 'buttons',
+                  'type' => 'repeater',
+                  'sub_fields' => [
+                     [
+                        'name' => 'label',
+                        'type' => 'text',
+                     ],
+                  ],
+               ],
+            ],
+         ],
+      ],
+   ],
+   [
+      'name' => 'cards',
+      'type' => 'repeater',
+      'sub_fields' => [
+         [
+            'name' => 'title',
+            'type' => 'text',
+         ],
+         [
+            'name' => 'text',
+            'type' => 'textarea',
+         ],
+         [
+            'name' => 'image',
+            'type' => 'image',
+         ],
+         [
+            'name' => 'link',
+            'type' => 'group',
+            'sub_fields' => [
+               [
+                  'name' => 'label',
+                  'type' => 'text',
+               ],
+               [
+                  'name' => 'href',
+                  'type' => 'url',
+               ],
+               [
+                  'name' => 'target',
+                  'type' => 'true_false',
+                  'avenue_transform' => [
+                     'type' => 'boolean-map',
+                     'true' => '_blank',
+                     'false' => null,
+                  ],
+               ],
+            ],
+         ],
+      ],
+   ],
+];
+
+avenue_assert_same(
+   [
+      'cards' => [
+         [
+            'title' => 'Nested Card',
+            'link' => [
+               'label' => 'Read more',
+               'href' => '/nested/',
+               'target' => '_blank',
+            ],
+         ],
+      ],
+   ],
+   $transform_method->invoke(
+      null,
+      [
+         'field_definitions' => $composite_field_definitions,
+      ],
+      [
+         'cards' => [
+            [
+               'title' => 'Nested Card',
+               'link' => [
+                  'label' => 'Read more',
+                  'href' => '/nested/',
+                  'target' => 1,
+               ],
+            ],
+         ],
+      ],
+   ),
+   'BlockFactory should apply transforms within every repeater row.',
+);
+
+avenue_assert_same(
+   [
+      'section' => [
+         'appearance' => 'light',
+         'header' => [
+            'heading' => 'Featured Stories',
+            'buttons' => [],
+         ],
+         'footer' => [
+            'outro' => '',
+            'buttons' => [],
+         ],
+      ],
+      'cards' => [],
+      'featured' => false,
+   ],
+   $transform_method->invoke(
+      null,
+      [
+         'field_definitions' => [
+            ...$composite_field_definitions,
+            [
+               'name' => 'featured',
+               'type' => 'true_false',
+            ],
+         ],
+      ],
+      [
+         'section' => [
+            'appearance' => 'light',
+            'header' => [
+               'heading' => 'Featured Stories',
+               'buttons' => false,
+            ],
+            'footer' => [
+               'outro' => '',
+               'buttons' => false,
+            ],
+         ],
+         'cards' => false,
+         'featured' => false,
+      ],
+   ),
+   'Empty repeaters should normalize to arrays without changing Boolean fields.',
+);
+
+$merge_preview_method = new ReflectionMethod(
+   Avenue\ACF\BlockFactory::class,
+   'merge_preview_props',
+);
+$merge_preview_method->setAccessible(true);
+
+avenue_assert_same(
+   [
+      'section' => [
+         'appearance' => 'dark',
+      ],
+      'cards' => [
+         [
+            'title' => 'Preview Card',
+         ],
+      ],
+      'featured' => false,
+   ],
+   $merge_preview_method->invoke(
+      null,
+      [
+         'preview_props' => [
+            'section' => [
+               'appearance' => 'light',
+            ],
+            'cards' => [
+               [
+                  'title' => 'Preview Card',
+               ],
+            ],
+            'featured' => true,
+         ],
+         'field_definitions' => [
+            ...$composite_field_definitions,
+            [
+               'name' => 'featured',
+               'type' => 'true_false',
+            ],
+         ],
+      ],
+      [
+         'section' => [
+            'appearance' => 'dark',
+         ],
+         'cards' => false,
+         'featured' => false,
+      ],
+      true,
+   ),
+   'Empty structural fields should preserve preview data without swallowing primitive false values.',
+);
+
 final class AvenueAdapterCardFixture
 {
    protected static string $schema =
       __DIR__ . '/../../src/components/card/card.schema.json';
+}
+
+final class AvenueAdapterCardSectionFixture
+{
+   protected static string $schema =
+      __DIR__ . '/../../src/components/card-section/card-section.schema.json';
 }
 
 $adapt_method = new ReflectionMethod(
@@ -287,6 +525,159 @@ avenue_assert_same(
       99,
    ),
    'BlockFactory should automatically adapt props with registered component contracts.',
+);
+
+avenue_assert_same(
+   [
+      'section' => [
+         'appearance' => 'light',
+      ],
+      'cards' => [
+         [
+            'title' => 'Nested Card',
+            'text' => '',
+            'image' => [
+               'src' => 'https://example.test/nested-card.jpg',
+               'alt' => 'Nested Card image',
+               'width' => '1200',
+               'height' => '675',
+            ],
+            'link' => [
+               'label' => 'Read more',
+               'href' => '/nested/',
+               'target' => '_blank',
+            ],
+         ],
+      ],
+   ],
+   $adapt_method->invoke(
+      null,
+      [
+         'name' => 'card-section',
+         'component' => AvenueAdapterCardSectionFixture::class,
+         'field_definitions' => $composite_field_definitions,
+      ],
+      [
+         'section' => [
+            'appearance' => 'light',
+         ],
+         'cards' => [
+            [
+               'title' => 'Nested Card',
+               'text' => '',
+               'image' => [
+                  'url' => 'https://example.test/nested-card.jpg',
+                  'alt' => 'Nested Card image',
+                  'width' => 1200,
+                  'height' => 675,
+               ],
+               'link' => [
+                  'label' => 'Read more',
+                  'href' => '/nested/',
+                  'target' => '_blank',
+               ],
+            ],
+         ],
+      ],
+      true,
+      99,
+   ),
+   'BlockFactory should adapt source values inside array-item component contracts.',
+);
+
+$with_empty_nested_image = $adapt_method->invoke(
+   null,
+   [
+      'name' => 'card-section',
+      'component' => AvenueAdapterCardSectionFixture::class,
+      'field_definitions' => $composite_field_definitions,
+   ],
+   [
+      'section' => [
+         'appearance' => 'light',
+      ],
+      'cards' => [
+         [
+            'title' => 'Nested Card',
+            'image' => false,
+         ],
+      ],
+   ],
+   true,
+   99,
+);
+
+avenue_assert_same(
+   true,
+   array_key_exists('image', $with_empty_nested_image['cards'][0]),
+   'Nested adapters should retain explicitly adapted null values.',
+);
+avenue_assert_same(
+   null,
+   $with_empty_nested_image['cards'][0]['image'],
+   'Nested adapters should normalize empty WordPress image values.',
+);
+
+$normalized_preview_fields = $transform_method->invoke(
+   null,
+   [
+      'field_definitions' => $composite_field_definitions,
+   ],
+   [
+      'section' => [
+         'appearance' => 'light',
+         'header' => [
+            'heading' => 'Edited heading',
+            'buttons' => false,
+         ],
+         'footer' => [
+            'outro' => '',
+            'buttons' => false,
+         ],
+      ],
+      'cards' => false,
+   ],
+);
+$merged_preview_props = $merge_preview_method->invoke(
+   null,
+   [
+      'preview_props' => [
+         'section' => [
+            'header' => [
+               'heading' => 'Featured Stories',
+               'intro' => 'Preview introduction.',
+            ],
+         ],
+         'cards' => [
+            [
+               'title' => 'Preview Card',
+            ],
+         ],
+      ],
+      'field_definitions' => $composite_field_definitions,
+   ],
+   $normalized_preview_fields,
+   true,
+);
+$adapted_preview_props = $adapt_method->invoke(
+   null,
+   [
+      'name' => 'card-section',
+      'component' => AvenueAdapterCardSectionFixture::class,
+      'field_definitions' => $composite_field_definitions,
+   ],
+   $merged_preview_props,
+   true,
+   99,
+);
+$card_section_preview = ComponentSchema::fromFile(
+   __DIR__ . '/../../src/components/card-section/card-section.schema.json',
+)->safeParse($adapted_preview_props);
+
+avenue_assert_same(
+   true,
+   $card_section_preview->success(),
+   'Edited Card Section previews should satisfy nested repeater contracts.',
 );
 
 $image_context = new AdapterContext(
