@@ -7,12 +7,12 @@
     "scripts": {
         "local-symlink": "bash ./bin/localdev-symlink.sh",
         "build": "pnpm -r build",
+        "build:storybook": "pnpm build:cli && pnpm build:css && pnpm --filter ave-ui build:storybook",
         "build:cli": "pnpm --filter ave-cli build",
         "build:css": "pnpm --filter ave-css build",
         "build:ui": "pnpm --filter ave-ui build",
         "build:loom": "pnpm --filter loom build",
-        "build:storybook": "pnpm build:cli && pnpm build:css && pnpm --filter ave-ui build:storybook",
-        "build:production": "pnpm build:css && pnpm build:ui && pnpm build:loom"
+        "build:production": "pnpm build:cli && pnpm build:css && pnpm build:ui && pnpm build:loom"
     },
     "keywords": [],
     "author": "",
