@@ -10,7 +10,9 @@
         "build:cli": "pnpm --filter ave-cli build",
         "build:css": "pnpm --filter ave-css build",
         "build:ui": "pnpm --filter ave-ui build",
-        "build:storybook": "pnpm build:cli && pnpm build:css && pnpm --filter ave-ui build:storybook"
+        "build:loom": "pnpm --filter loom build",
+        "build:storybook": "pnpm build:cli && pnpm build:css && pnpm --filter ave-ui build:storybook",
+        "build:production": "pnpm build:css && pnpm build:ui && pnpm build:loom"
     },
     "keywords": [],
     "author": "",
