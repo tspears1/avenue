@@ -122,7 +122,9 @@ final class RequiredFieldValidator
             return $preparedPost;
         }
 
-        $required = AcfFieldInspector::requiredFieldsByComponent();
+        $required = AcfFieldInspector::requiredFieldsByComponent(
+            includeNested: false
+        );
 
         if ($required === []) {
             return $preparedPost;

@@ -97,23 +97,22 @@ final class AcfFieldInspector
      */
     public static function componentNameForField(array $field): string
     {
+        $parent = isset($field['parent']) && is_string($field['parent'])
+            ? $field['parent']
+            : '';
+        $fromParent = $parent !== ''
+            ? self::componentNameFromParent($parent)
+            : '';
+
+        if ($fromParent !== '') {
+            return $fromParent;
+        }
+
         $fieldKey = isset($field['key']) && is_string($field['key'])
             ? $field['key']
             : '';
 
-        $fromFieldKey = self::componentNameFromFieldKey($fieldKey);
-
-        if ($fromFieldKey !== '') {
-            return $fromFieldKey;
-        }
-
-        $parent = isset($field['parent']) && is_string($field['parent'])
-            ? $field['parent']
-            : '';
-
-        return $parent !== ''
-            ? self::componentNameFromParent($parent)
-            : '';
+        return self::componentNameFromFieldKey($fieldKey);
     }
 
     /**
@@ -146,15 +145,6 @@ final class AcfFieldInspector
                 return '';
             }
 
-            $fieldKey = isset($parentField['key']) && is_string($parentField['key'])
-                ? $parentField['key']
-                : '';
-            $fromFieldKey = self::componentNameFromFieldKey($fieldKey);
-
-            if ($fromFieldKey !== '') {
-                return $fromFieldKey;
-            }
-
             $parentIdentifier = isset($parentField['parent']) && is_string($parentField['parent'])
                 ? $parentField['parent']
                 : '';
@@ -165,7 +155,11 @@ final class AcfFieldInspector
             }
 
             if (!str_starts_with($parentIdentifier, 'field_')) {
-                return '';
+                $fieldKey = isset($parentField['key']) && is_string($parentField['key'])
+                    ? $parentField['key']
+                    : '';
+
+                return self::componentNameFromFieldKey($fieldKey);
             }
 
             $current = $parentIdentifier;
@@ -183,8 +177,8 @@ final class AcfFieldInspector
      */
     public static function componentNameFromGroupKey(string $groupKey): string
     {
-        if (preg_match('/^group_ave_([^_]+)_/', $groupKey, $matches)) {
-            return (string) $matches[1];
+        if (preg_match('/^group_ave_(.+)_component$/', $groupKey, $matches)) {
+            return str_replace('_', '-', (string) $matches[1]);
         }
 
         return '';
@@ -240,14 +234,17 @@ final class AcfFieldInspector
      */
     public static function componentNameFromGroup(array $group): string
     {
+        $fromLocation = self::componentNameFromGroupLocation($group);
+
+        if ($fromLocation !== '') {
+            return $fromLocation;
+        }
+
         $groupKey = isset($group['key']) && is_string($group['key'])
             ? $group['key']
             : '';
-        $fromGroupKey = self::componentNameFromGroupKey($groupKey);
 
-        return $fromGroupKey !== ''
-            ? $fromGroupKey
-            : self::componentNameFromGroupLocation($group);
+        return self::componentNameFromGroupKey($groupKey);
     }
 
     /**
@@ -269,10 +266,14 @@ final class AcfFieldInspector
     /**
      * Collect normalized required fields for every registered component.
      *
+     * @param bool $includeNested Whether nested sub-fields should be included.
+     *
      * @return array<string, array<string, array{name: string, key: string, label: string}>>
      *     Required field metadata keyed by component name.
      */
-    public static function requiredFieldsByComponent(): array
+    public static function requiredFieldsByComponent(
+        bool $includeNested = true
+    ): array
     {
         if (!function_exists('acf_get_field_groups') || !function_exists('acf_get_fields')) {
             return [];
@@ -303,7 +304,11 @@ final class AcfFieldInspector
                 continue;
             }
 
-            foreach (self::flattenFields($fields) as $field) {
+            $candidateFields = $includeNested
+                ? self::flattenFields($fields)
+                : array_values(array_filter($fields, 'is_array'));
+
+            foreach ($candidateFields as $field) {
                 if (empty($field['required'])) {
                     continue;
                 }
