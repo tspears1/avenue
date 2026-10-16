@@ -9,6 +9,8 @@
         "build": "pnpm -r build",
         "build:storybook": "pnpm build:cli && pnpm build:css && pnpm --filter ave-ui build:storybook",
         "build:cli": "pnpm --filter ave-cli build",
+        "build:tokens": "pnpm --filter ave-tokens... build",
+        "build:tokens-plugin": "pnpm --filter ave-tokens-figma-plugin build",
         "build:css": "pnpm --filter ave-css build",
         "build:ui": "pnpm --filter ave-ui build",
         "build:loom": "pnpm --filter loom build",

@@ -1,0 +1,31 @@
+breakpoint:
+  xs: 360px
+  sm: 576px
+  md: 768px
+  lg: 1024px
+  xl: 1280px
+  xxl: 1536px
+
+container:
+  text: 65ch
+  narrow: 60rem
+  standard: 75rem
+  wide: 90rem
+  full: 1
+
+zIndex:
+  sticky: 4000
+  drawer: 5000
+  dialog: 6000
+  dropdown: 7000
+  alert: 8000
+  tooltip: 9000
+  max: 9999
+
+layout:
+  space:
+    xs: { min: 1.5rem, max: 3rem }
+    sm: { min: 2rem, max: 4rem }
+    md: { min: 3rem, max: 6rem }
+    lg: { min: 4rem, max: 8rem }
+    xl: { min: 6rem, max: 12rem }

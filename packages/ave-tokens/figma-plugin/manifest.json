@@ -1,0 +1,1 @@
+{"api":"1.0.0","editorType":["figma"],"id":"000000000000000000","name":"Avenue Tokens","main":"build/main.js","ui":"build/ui.js","documentAccess":"dynamic-page","networkAccess":{"allowedDomains":["https://*.github.io","https://raw.githubusercontent.com"],"reasoning":"Load generated Avenue Figma token artifacts from GitHub Pages or a raw GitHub URL."}}

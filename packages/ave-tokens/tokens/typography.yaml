@@ -1,0 +1,48 @@
+fontSize:
+  display:
+    "1": { min: 4rem, max: 8rem }
+    "2": { min: 3.5rem, max: 7rem }
+    "3": { min: 3rem, max: 6rem }
+  heading:
+    "1": { min: 2.5rem, max: 4.5rem }
+    "2": { min: 2.25rem, max: 4rem }
+    "3": { min: 2rem, max: 3.5rem }
+    "4": { min: 1.75rem, max: 3rem }
+    "5": { min: 1.5rem, max: 2.25rem }
+    "6": { min: 1.25rem, max: 1.75rem }
+  text:
+    xs: { min: 0.75rem, max: 0.8125rem }
+    sm: { min: 0.875rem, max: 0.9375rem }
+    md: { min: 1rem, max: 1.125rem }
+    lg: { min: 1.125rem, max: 1.25rem }
+    xl: { min: 1.25rem, max: 1.5rem }
+    xxl: { min: 1.5rem, max: 1.75rem }
+
+fontWeight:
+  thin: 100
+  regular: 400
+  medium: 500
+  semibold: 600
+  bold: 700
+  black: 900
+
+fontFamily:
+  heading: [Inter, sans-serif]
+  text: [Inter, sans-serif]
+  mono: [Roboto Mono, monospace]
+
+lineHeight:
+  tight: 1
+  snug: 1.25
+  normal: 1.5
+  relaxed: 1.75
+  loose: 2
+
+letterSpacing:
+  tightest: -0.075em
+  tighter: -0.05em
+  tight: -0.025em
+  normal: 0em
+  wide: 0.025em
+  wider: 0.05em
+  widest: 0.1em

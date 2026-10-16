@@ -1,0 +1,17 @@
+{
+   "$schema": "https://github.com/bostonuniversity/avenue/schemas/component-manifest.schema.json",
+   "name": "test-thing",
+   "displayName": "Test Thing",
+   "description": "Test Thing component",
+   "version": "1.0.0",
+   "tag": "ave-test-thing",
+   "schema": "./test-thing.schema.json",
+   "docs": {
+      "storybook": "http://localhost:6006/?path=/docs/organisms-test-thing--docs"
+   },
+   "exports": {
+      "php": [
+         "test-thing.class.php"
+      ]
+   }
+}

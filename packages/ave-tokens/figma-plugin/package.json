@@ -1,0 +1,39 @@
+{
+  "name": "ave-tokens-figma-plugin",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Idempotent Avenue token importer for Figma Variables.",
+  "type": "module",
+  "figma-plugin": {
+    "id": "000000000000000000",
+    "name": "Avenue Tokens",
+    "main": "src/main.ts",
+    "ui": "src/ui.tsx",
+    "editorType": ["figma"],
+    "documentAccess": "dynamic-page",
+    "networkAccess": {
+      "allowedDomains": [
+        "https://*.github.io",
+        "https://raw.githubusercontent.com"
+      ],
+      "reasoning": "Load generated Avenue Figma token artifacts from GitHub Pages or a raw GitHub URL."
+    }
+  },
+  "scripts": {
+    "build": "build-figma-plugin --typecheck --minify",
+    "watch": "build-figma-plugin --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test ./tests/*.test.ts"
+  },
+  "dependencies": {
+    "@create-figma-plugin/ui": "^4.0.3",
+    "@create-figma-plugin/utilities": "^4.0.3",
+    "preact": "^10.27.2"
+  },
+  "devDependencies": {
+    "@create-figma-plugin/build": "^4.0.3",
+    "@figma/plugin-typings": "^1.133.0",
+    "@types/node": "^24.10.0",
+    "typescript": "^5.9.3"
+  }
+}

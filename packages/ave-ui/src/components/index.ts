@@ -9,3 +9,6 @@ export { Card } from './card/card.lit'
 export { CardSection } from './card-section/card-section.lit'
 export { Image } from './image/image.lit'
 export { Section } from './section/section.lit'
+import './test-thing/test-thing.lit'
+
+export { TestThing } from './test-thing/test-thing.lit'

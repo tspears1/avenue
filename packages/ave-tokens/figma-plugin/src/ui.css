@@ -1,0 +1,166 @@
+:root {
+  color: var(--figma-color-text);
+  font: 11px/1.45 Inter, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--figma-color-bg);
+}
+
+.plugin {
+  min-height: 640px;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  padding: 20px 16px 12px;
+  border-bottom: 1px solid var(--figma-color-border);
+}
+
+.header h1,
+.section-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.header p,
+.muted {
+  margin: 4px 0 0;
+  color: var(--figma-color-text-secondary);
+}
+
+.content {
+  flex: 1;
+  overflow: auto;
+}
+
+.source-panel,
+.preview-panel,
+.result-panel {
+  padding: 16px;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.actions,
+.footer-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.actions > *,
+.footer-actions > * {
+  flex: 1;
+}
+
+.footer-actions {
+  padding: 12px 16px 16px;
+  border-top: 1px solid var(--figma-color-border);
+}
+
+.summary {
+  margin: 12px 0;
+  overflow: hidden;
+  border: 1px solid var(--figma-color-border);
+  border-radius: 6px;
+}
+
+.summary-row {
+  display: grid;
+  grid-template-columns: 1fr repeat(4, minmax(42px, auto));
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--figma-color-border);
+}
+
+.summary-row:last-child {
+  border-bottom: 0;
+}
+
+.summary-row strong {
+  font-weight: 600;
+}
+
+.summary-number {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.summary-labels {
+  color: var(--figma-color-text-secondary);
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+.meta {
+  display: grid;
+  gap: 6px;
+  margin: 12px 0;
+  padding: 10px;
+  border-radius: 6px;
+  background: var(--figma-color-bg-secondary);
+}
+
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.meta-row span:first-child {
+  color: var(--figma-color-text-secondary);
+}
+
+.meta-row span:last-child {
+  overflow: hidden;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.conflicts {
+  max-height: 150px;
+  margin: 10px 0 0;
+  padding: 0 0 0 18px;
+  overflow: auto;
+  color: var(--figma-color-text-danger);
+}
+
+.file-name {
+  margin-top: 8px;
+  color: var(--figma-color-text-secondary);
+  text-align: center;
+}
+
+.last-import {
+  margin-top: 12px;
+  color: var(--figma-color-text-secondary);
+  text-align: center;
+}
+
+.success-mark {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  margin: 12px auto;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--figma-color-bg-success);
+  color: var(--figma-color-icon-success);
+}
+
+.result-panel {
+  text-align: center;
+}

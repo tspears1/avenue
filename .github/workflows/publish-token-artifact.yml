@@ -1,0 +1,125 @@
+name: Publish token artifact
+
+on:
+  pull_request:
+    paths: &token_paths
+      - .github/workflows/publish-token-artifact.yml
+      - pnpm-workspace.yaml
+      - packages/ave-cli/src/**
+      - packages/ave-cli/*.config.*
+      - packages/ave-cli/package.json
+      - packages/ave-tokens/tests/**
+      - packages/ave-tokens/tokens/**
+      - packages/ave-tokens/tokens.json
+      - packages/ave-tokens/schemas/**
+      - packages/ave-tokens/src/**
+      - packages/ave-tokens/bin/**
+      - packages/ave-tokens/*.config.*
+      - packages/ave-tokens/package.json
+      - package.json
+      - pnpm-lock.yaml
+  push:
+    paths: *token_paths
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-token-artifact-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: package.json
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install ave-tokens dependency closure
+        run: pnpm install --filter ave-tokens... --frozen-lockfile
+
+      - name: Build ave-cli
+        run: pnpm --filter ave-cli build
+
+      - name: Test ave-tokens
+        run: pnpm --filter ave-tokens test
+
+      - name: Check committed source tokens
+        run: pnpm --filter ave-tokens check:source
+
+      - name: Build Figma artifact
+        run: pnpm --filter ave-tokens build:figma
+
+      - name: Check generated Figma artifact
+        run: pnpm --filter ave-tokens check:figma
+
+      - name: Stage Pages artifact
+        run: |
+          node --input-type=module <<'EOF'
+          import { mkdir, readFile, writeFile } from "node:fs/promises";
+
+          const artifactPath = "packages/ave-tokens/dist/figma-tokens.json";
+          const sourcePath = "packages/ave-tokens/tokens.json";
+          const artifact = JSON.parse(await readFile(artifactPath, "utf8"));
+          const source = JSON.parse(await readFile(sourcePath, "utf8"));
+          const generatedAt = source.$extensions?.["com.avenue.tokens"]?.generatedAt;
+
+          if (typeof generatedAt !== "string" || generatedAt.length === 0) {
+            throw new Error(`Missing generatedAt in ${sourcePath}`);
+          }
+
+          artifact.generatedAt = generatedAt;
+          const manifest = {
+            format: "avenue-token-feed",
+            version: "0.1.0",
+            generatedAt: artifact.generatedAt,
+            figma: "./figma-tokens.json",
+          };
+
+          await mkdir("pages-artifact", { recursive: true });
+          await writeFile(
+            "pages-artifact/figma-tokens.json",
+            `${JSON.stringify(artifact, null, 2)}\n`,
+          );
+          await writeFile(
+            "pages-artifact/manifest.json",
+            `${JSON.stringify(manifest, null, 2)}\n`,
+          );
+          EOF
+
+      - name: Configure GitHub Pages
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        uses: actions/configure-pages@v5
+
+      - name: Upload GitHub Pages artifact
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: pages-artifact
+
+  deploy:
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

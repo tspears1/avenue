@@ -1,0 +1,10 @@
+ratio:
+  square: 1
+  photo: 1.333
+  film: 1.5
+  widescreen: 1.778
+  ultrawide: 2.333
+  photo-y: 0.75
+  film-y: 0.667
+  widescreen-y: 0.5625
+  ultrawide-y: 0.4375

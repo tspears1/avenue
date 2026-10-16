@@ -1,0 +1,6 @@
+duration:
+  instant: 0ms
+  fast: 150ms
+  normal: 300ms
+  slow: 500ms
+  sluggish: 1000ms

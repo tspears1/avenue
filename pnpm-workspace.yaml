@@ -1,6 +1,7 @@
 # pnpm-workspace.yaml
 packages:
   - 'packages/*'
+  - 'packages/ave-tokens/figma-plugin'
   - 'extensions/*'
   - 'app/themes/*'
 allowBuilds:

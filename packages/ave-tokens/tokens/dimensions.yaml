@@ -1,0 +1,50 @@
+border:
+  width:
+    thin: 1px
+    normal: 2px
+    thick: 4px
+  radius:
+    none: 0px
+    sm: 4px
+    md: 8px
+    lg: 16px
+    round: 9999px
+
+icon:
+  size:
+    xs: "{size.1}"
+    sm: "{size.2}"
+    md: "{size.3}"
+    lg: "{size.4}"
+    xl: "{size.5}"
+
+control:
+  size:
+    sm: "{size.4}"
+    md: "{size.5}"
+    lg: "{size.6}"
+    xl: "{size.7}"
+
+size:
+  "0": 0.5rem
+  "1": 1rem
+  "2": 1.25rem
+  "3": 1.5rem
+  "4": 2rem
+  "5": 2.5rem
+  "6": 3rem
+  "7": 4rem
+  "8": 5rem
+  "9": 6rem
+  "10": 8rem
+  "11": 10rem
+  "12": 12rem
+
+space:
+  2xs: "{size.0}"
+  xs: "{size.1}"
+  sm: "{size.2}"
+  md: "{size.3}"
+  lg: "{size.4}"
+  xl: "{size.5}"
+  xxl: "{size.6}"

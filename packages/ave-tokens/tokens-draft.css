@@ -1,0 +1,181 @@
+:root {
+    /* Aspect Ratio */
+    --ratio-square: 1;
+    --ratio-photo: 1.333;
+    --ratio-film: 1.5;
+    --ratio-widescreen: 1.778;
+    --ratio-ultrawide: 2.333;
+
+    --ratio-photo-y: 0.75;
+    --ratio-film-y: 0.667;
+    --ratio-widescreen-y: 0.5625;
+    --ratio-ultrawide-y: 0.4375;
+
+    /* Color - oklch */
+    --color-neutral-0: oklch(100% 0 0);
+    --color-neutral-50: oklch(98% 0.002 270);
+    --color-neutral-100: oklch(95% 0.003 270);
+    --color-neutral-200: oklch(89% 0.004 270);
+    --color-neutral-300: oklch(81% 0.005 270);
+    --color-neutral-400: oklch(70% 0.006 270);
+    --color-neutral-500: oklch(58% 0.007 270);
+    --color-neutral-600: oklch(48% 0.007 270);
+    --color-neutral-700: oklch(39% 0.006 270);
+    --color-neutral-800: oklch(30% 0.005 270);
+    --color-neutral-900: oklch(22% 0.004 270);
+    --color-neutral-950: oklch(14% 0.003 270);
+    --color-neutral-1000: oklch(0% 0 0);
+
+    /* Font Size fluid using clamp() */
+    --display-size-1: clamp(4rem, 2.5rem + 6vw, 8rem);
+    --display-size-2: clamp(3.5rem, 2.25rem + 5vw, 7rem);
+    --display-size-3: clamp(3rem, 2rem + 4vw, 6rem);
+
+    --heading-size-1: clamp(2.5rem, 1.75rem + 3vw, 4.5rem);
+    --heading-size-2: clamp(2.25rem, 1.625rem + 2.5vw, 4rem);
+    --heading-size-3: clamp(2rem, 1.5rem + 2vw, 3.5rem);
+    --heading-size-4: clamp(1.75rem, 1.375rem + 1.5vw, 3rem);
+    --heading-size-5: clamp(1.5rem, 1.25rem + 1vw, 2.25rem);
+    --heading-size-6: clamp(1.25rem, 1.125rem + 0.5vw, 1.75rem);
+
+    --text-size-xs: clamp(0.75rem, 0.72rem + 0.125vw, 0.8125rem);
+    --text-size-sm: clamp(0.875rem, 0.845rem + 0.125vw, 0.9375rem);
+    --text-size-md: clamp(1rem, 0.94rem + 0.25vw, 1.125rem);
+    --text-size-lg: clamp(1.125rem, 1.065rem + 0.25vw, 1.25rem);
+    --text-size-xl: clamp(1.25rem, 1.13rem + 0.5vw, 1.5rem);
+    --text-size-xxl: clamp(1.5rem, 1.38rem + 0.5vw, 1.75rem);
+
+    /* Font Weight - hundreds */
+    --font-weight-thin: 100;
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --font-weight-black: 900;
+
+    /* Font Family - string */
+    --font-family-heading: "Inter", sans-serif;
+    --font-family-text: "Inter", sans-serif;
+    --font-family-mono: "Roboto Mono", monospace;
+
+    /* Line Height - integers */
+    --line-height-tight: 1;
+    --line-height-snug: 1.25;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.75;
+    --line-height-loose: 2;
+
+    /* Letter Spacing - ems */
+    --tracking-tightest: -0.075em;
+    --tracking-tighter: -0.05em;
+    --tracking-tight: -0.025em;
+    --tracking-normal: 0em;
+    --tracking-wide: 0.025em;
+    --tracking-wider: 0.05em;
+    --tracking-widest: 0.1em;
+
+    /* Border Size - px */
+    --border-size-thin: 1px;
+    --border-size-normal: 2px;
+    --border-size-thick: 4px;
+
+    /* Border Raidus - px */
+    --radius-none: 0;
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 16px;
+    --radius-round: 9999px;
+
+    /* Elevation - px px px oklch */
+    --elevation-lowest: 0 1px 2px oklch(0% 0 0 / 0.08);
+    --elevation-low: 0 2px 4px oklch(0% 0 0 / 0.1);
+    --elevation-medium: 0 4px 12px oklch(0% 0 0 / 0.12);
+    --elevation-high: 0 8px 24px oklch(0% 0 0 / 0.14);
+    --elevation-highest: 0 16px 48px oklch(0% 0 0 / 0.18);
+
+    /* Icon Size */
+    --icon-size-xs: var(--size-1);
+    --icon-size-sm: var(--size-2);
+    --icon-size-md: var(--size-3);
+    --icon-size-lg: var(--size-4);
+    --icon-size-xl: var(--size-5);
+
+    /* Control Sizes */
+    --control-size-sm: var(--size-4);
+    --control-size-md: var(--size-5);
+    --control-size-lg: var(--size-6);
+
+    /* Breakpoints */
+    --breakpoint-xs: 360px;
+    --breakpoint-sm: 576px;
+    --breakpoint-md: 768px;
+    --breakpoint-lg: 1024px;
+    --breakpoint-xl: 1280px;
+    --breakpoint-xxl: 1536px;
+
+    /* Container Size */
+    --container-text: min(100%, 65ch);
+    --container-narrow: min(100%, 60rem);
+    --container-standard: min(100%, 75rem);
+    --container-wide: min(100%, 90rem);
+    --container-full: 100%;
+
+    /* Duration ms */
+    --duration-instant: 0ms;
+    --duration-fast: 150ms;
+    --duration-normal: 300ms;
+    --duration-slow: 500ms;
+    --duration-sluggish: 1000ms;
+
+    /* Z-Index */
+    --z-sticky: 4000;
+    --z-drawer: 5000;
+    --z-dialog: 6000;
+    --z-dropdown: 7000;
+    --z-alert: 8000;
+    --z-tooltip: 9000;
+    --z-max: 9999;
+
+    /* Size */
+    --size-0: 0.5rem;
+    --size-1: 1rem;
+    --size-2: 1.25rem;
+    --size-3: 1.5rem;
+    --size-4: 2rem;
+    --size-5: 2.5rem;
+    --size-6: 3rem;
+    --size-7: 4rem;
+    --size-8: 5rem;
+    --size-9: 6rem;
+    --size-10: 8rem;
+    --size-11: 10rem;
+    --size-12: 12rem;
+
+    /* Space - gap, padding, margin */
+    --space-2xs: var(--size-0);
+    --space-xs: var(--size-1);
+    --space-sm: var(--size-2);
+    --space-md: var(--size-3);
+    --space-lg: var(--size-4);
+    --space-xl: var(--size-5);
+    --space-xxl: var(--size-6);
+
+    /* Layout Space - section spacing, gutters */
+    --layout-space-xs: clamp(1.5rem, 1rem + 2vw, 3rem);
+    --layout-space-sm: clamp(2rem, 1.25rem + 3vw, 4rem);
+    --layout-space-md: clamp(3rem, 2rem + 4vw, 6rem);
+    --layout-space-lg: clamp(4rem, 2.5rem + 6vw, 8rem);
+    --layout-space-xl: clamp(6rem, 3rem + 10vw, 12rem);
+
+
+    /*Semantic Color Naming */
+    --color-primary-hint: #;
+    --color-primary-faint: #;
+    --color-primary-subtle: #;
+    --color-primary-soft: #;
+    --color-primary-mid: #;
+    --color-primary-firm: #;
+    --color-primary-bold: #;
+    --color-primary-strong: #;
+    --color-primary-intense: #;
+}

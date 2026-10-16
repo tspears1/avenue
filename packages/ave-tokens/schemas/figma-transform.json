@@ -1,0 +1,187 @@
+{
+  "$schemaVersion": "1.1.0",
+  "$description": "Routing rules for transforming canonical Avenue tokens into importable Figma variables.",
+  "source": "../tokens.json",
+  "output": "../dist/figma-tokens.json",
+  "artifact": {
+    "format": "avenue-figma-variables",
+    "version": "0.3.0"
+  },
+  "naming": {
+    "separator": "/"
+  },
+  "fluid": {
+    "precision": 2,
+    "modes": [
+      { "name": "sm", "breakpoint": "{breakpoint.sm}" },
+      { "name": "md", "breakpoint": "{breakpoint.md}" },
+      { "name": "lg", "breakpoint": "{breakpoint.lg}" },
+      { "name": "xl", "breakpoint": "{breakpoint.xl}" }
+    ]
+  },
+  "collections": [
+    {
+      "name": "Primitives / Color",
+      "modes": ["Default"],
+      "rules": [
+        {
+          "match": {
+            "paths": ["color.**"],
+            "types": ["color"]
+          },
+          "type": "COLOR",
+          "scopes": ["ALL_SCOPES"]
+        }
+      ]
+    },
+    {
+      "name": "Primitives / Dimension",
+      "modes": ["Default"],
+      "rules": [
+        {
+          "match": {
+            "paths": ["size.*", "icon.size.*", "control.size.*"],
+            "types": ["dimension"]
+          },
+          "type": "FLOAT",
+          "scopes": ["WIDTH_HEIGHT"]
+        },
+        {
+          "match": {
+            "paths": ["space.*"],
+            "types": ["dimension"]
+          },
+          "type": "FLOAT",
+          "scopes": ["GAP"]
+        },
+        {
+          "match": {
+            "paths": ["border.width.*"],
+            "types": ["dimension"]
+          },
+          "type": "FLOAT",
+          "scopes": ["STROKE_FLOAT"]
+        },
+        {
+          "match": {
+            "paths": ["border.radius.*"],
+            "types": ["dimension"]
+          },
+          "type": "FLOAT",
+          "scopes": ["CORNER_RADIUS"]
+        }
+      ]
+    },
+    {
+      "name": "Primitives / Typography",
+      "modes": ["Default"],
+      "rules": [
+        {
+          "match": {
+            "paths": ["fontWeight.*"],
+            "types": ["fontWeight"]
+          },
+          "type": "FLOAT",
+          "scopes": ["FONT_WEIGHT"]
+        },
+        {
+          "match": {
+            "paths": ["fontFamily.*"],
+            "types": ["fontFamily"]
+          },
+          "type": "STRING",
+          "scopes": ["FONT_FAMILY"]
+        }
+      ]
+    },
+    {
+      "name": "Responsive",
+      "modes": ["sm", "md", "lg", "xl"],
+      "rules": [
+        {
+          "match": {
+            "paths": ["fontSize.**"],
+            "types": ["dimension"],
+            "hasExtension": "com.avenue.tokens.fluid"
+          },
+          "type": "FLOAT",
+          "scopes": ["FONT_SIZE"],
+          "values": "fluid"
+        },
+        {
+          "match": {
+            "paths": ["fontSize.**"],
+            "types": ["dimension"],
+            "withoutExtension": "com.avenue.tokens.fluid"
+          },
+          "type": "FLOAT",
+          "scopes": ["FONT_SIZE"],
+          "values": "duplicate"
+        },
+        {
+          "match": {
+            "paths": ["layout.space.*"],
+            "types": ["dimension"],
+            "hasExtension": "com.avenue.tokens.fluid"
+          },
+          "type": "FLOAT",
+          "scopes": ["GAP"],
+          "values": "fluid"
+        },
+        {
+          "match": {
+            "paths": ["layout.space.*"],
+            "types": ["dimension"],
+            "withoutExtension": "com.avenue.tokens.fluid"
+          },
+          "type": "FLOAT",
+          "scopes": ["GAP"],
+          "values": "duplicate"
+        }
+      ]
+    }
+  ],
+  "styles": {
+    "effects": [
+      {
+        "match": {
+          "paths": ["elevation.*"],
+          "types": ["shadow"]
+        }
+      }
+    ]
+  },
+  "exclusions": [
+    {
+      "match": { "paths": ["ratio.*"] },
+      "reason": "Figma has no bindable aspect-ratio variable property."
+    },
+    {
+      "match": { "paths": ["lineHeight.*"] },
+      "reason": "Unitless source values represent percentages, but Figma variables cannot preserve or bind the percentage unit correctly.",
+      "futureTarget": "text-style"
+    },
+    {
+      "match": { "paths": ["letterSpacing.*"] },
+      "reason": "Relative em values require font-size context and cannot be represented faithfully as reusable Figma FLOAT variables.",
+      "futureTarget": "text-style"
+    },
+
+    {
+      "match": { "paths": ["breakpoint.*"] },
+      "reason": "Breakpoints are transformation inputs and have no bindable Figma property."
+    },
+    {
+      "match": { "paths": ["container.*"] },
+      "reason": "Responsive max-width expressions have no equivalent bindable Figma variable property."
+    },
+    {
+      "match": { "paths": ["duration.*"] },
+      "reason": "Figma variables cannot be bound to prototype transition durations."
+    },
+    {
+      "match": { "paths": ["zIndex.*"] },
+      "reason": "Figma has no z-index property or equivalent variable binding."
+    }
+  ]
+}

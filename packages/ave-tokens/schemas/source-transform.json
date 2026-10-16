@@ -1,0 +1,89 @@
+{
+  "$schemaVersion": "2.0.0",
+  "$description": "Routing rules for compiling designer-facing YAML sources into canonical Avenue tokens.",
+  "output": "../tokens.json",
+  "settings": {
+    "source": "../tokens/settings.yaml"
+  },
+  "sources": [
+    {
+      "file": "../tokens/ratio.yaml",
+      "mappings": [
+        { "group": "ratio", "namespace": "ratio", "type": "number" }
+      ]
+    },
+    {
+      "file": "../tokens/color.yaml",
+      "mappings": [
+        { "group": "color", "namespace": "color", "type": "color" }
+      ]
+    },
+    {
+      "file": "../tokens/typography.yaml",
+      "mappings": [
+        {
+          "group": "fontSize",
+          "namespace": "fontSize",
+          "type": "dimension",
+          "behavior": "fluidDimension"
+        },
+        { "group": "fontWeight", "namespace": "fontWeight", "type": "fontWeight" },
+        { "group": "fontFamily", "namespace": "fontFamily", "type": "fontFamily" },
+        { "group": "lineHeight", "namespace": "lineHeight", "type": "number" },
+        { "group": "letterSpacing", "namespace": "letterSpacing", "type": "dimension" }
+      ]
+    },
+    {
+      "file": "../tokens/dimensions.yaml",
+      "mappings": [
+        { "group": "border", "namespace": "border", "type": "dimension" },
+        { "group": "icon", "namespace": "icon", "type": "dimension" },
+        { "group": "control", "namespace": "control", "type": "dimension" },
+        { "group": "size", "namespace": "size", "type": "dimension" },
+        { "group": "space", "namespace": "space", "type": "dimension" }
+      ]
+    },
+    {
+      "file": "../tokens/layout.yaml",
+      "mappings": [
+        { "group": "breakpoint", "namespace": "breakpoint", "type": "dimension" },
+        {
+          "group": "container",
+          "namespace": "container",
+          "type": "dimension",
+          "behavior": {
+            "name": "responsiveDimension",
+            "strategy": "min",
+            "available": "100%"
+          },
+          "overrides": [
+            {
+              "path": "full",
+              "type": "number",
+              "behavior": { "name": "percentage", "responsive": false }
+            }
+          ]
+        },
+        { "group": "zIndex", "namespace": "zIndex", "type": "number" },
+        {
+          "group": "layout",
+          "namespace": "layout",
+          "type": "dimension",
+          "behavior": "fluidDimension"
+        }
+      ]
+    },
+    {
+      "file": "../tokens/effects.yaml",
+      "mappings": [
+        { "group": "elevation", "namespace": "elevation", "type": "shadow" }
+      ]
+    },
+    {
+      "file": "../tokens/motion.yaml",
+      "mappings": [
+        { "group": "duration", "namespace": "duration", "type": "duration" }
+      ]
+    }
+  ]
+}
