@@ -44,14 +44,14 @@ jobs:
       - name: Build ave-cli
         run: pnpm --filter ave-cli build
 
-      - name: Test token pipeline and REST sync
-        run: pnpm --filter ave-tokens test
-
       - name: Check committed source tokens
         run: pnpm --filter ave-tokens check:source
 
       - name: Build Figma artifact
         run: pnpm --filter ave-tokens build:figma
+
+      - name: Test token pipeline and REST sync
+        run: pnpm --filter ave-tokens test
 
       - name: Check sandbox configuration
         env:
