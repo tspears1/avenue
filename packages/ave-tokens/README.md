@@ -140,6 +140,50 @@ GitHub Actions validates token changes on relevant pull requests and branch push
 
 The Pages feed is a public URL. It does not provide authenticated access to private repository contents, and the Figma importer does not support private raw GitHub URLs. Repositories that must keep token artifacts private need a separately authenticated hosting mechanism rather than GitHub Pages or a private `raw.githubusercontent.com` URL.
 
+## REST sync: sandbox
+
+The manual **Sync Figma sandbox** workflow (`.github/workflows/sync-figma-sandbox.yml`) updates variables directly through the Enterprise Variables REST API. It does not use GitHub Pages. Node.js 24+ is required for the shared TypeScript reconciliation core.
+
+### GitHub setup and first run
+
+Configure the repository environment **`figma-sandbox`**:
+
+- Secret `FIGMA_ACCESS_TOKEN`: a personal access token with `file_variables:read` and `file_variables:write`. Its owner must have the required Enterprise membership, Full seat, and edit access. Never commit the token. Assign an owner for expiration/rotation.
+- Variable `FIGMA_FILE_KEY`: `gJwI7pwpT3hMfZAKk0X48h` (the Avenue sandbox). Use the key, not the full URL. The workflow validates this destination before making API calls.
+
+After the workflow is merged to `main`:
+
+1. Open **Actions → Sync Figma sandbox → Run workflow** on `main`.
+2. Leave **Write changes to the sandbox** unchecked for the first run. This performs authenticated reads and shows the planned creates/updates without writing.
+3. Review the job summary and `figma-sandbox-sync-reports` artifact, including `plan.json` and `payload.json`.
+4. Run again with the checkbox enabled to create/update variables. Apply mode rechecks the snapshot before writing and verifies the result with another read.
+5. Run another dry run: it should report no changes.
+
+The workflow has no push/PR triggers, only runs on `main`, and serializes runs without canceling in-flight writes. Automatic sync and a production destination are intentionally not enabled. Changing the sandbox destination requires updating its guard; a future production workflow should use a separate GitHub environment and approval policy.
+
+### Behavior and boundaries
+
+- YAML remains the source of truth. Managed Figma edits are overwritten by an applicable sync; edits made only in Figma are not exported to YAML.
+- Missing collections, modes, and variables are created. Existing IDs are preserved. Removed tokens and unrelated content are not deleted.
+- Source identity is stored in each variable description as `[avenue:sourcePath=<URI-encoded-path>]`. Do not edit/remove these markers. Variable display-name changes can preserve IDs; source-path changes require an explicit migration. A changed path with a different name creates a new variable and preserves the old one; a conflicting name blocks the sync. Collection moves and type changes are blocked rather than silently recreating bindings.
+- Ambiguous names/identities, unsupported snapshots (including extended collections, deleted-but-referenced entities, or composed colors), and oversized payloads fail closed. The adapter does not silently skip unsupported state.
+- Effect Styles, including shadows, are **not** written by the Variables REST API. The report states how many were omitted; use the plugin for them.
+- Library publishing and updates to consuming files remain separate Figma steps. Updating the library's local variables does not publish them.
+- The pre-write state check is best-effort, not a lock. Avoid simultaneous manual/plugin edits to the destination while syncing.
+- POST requests are not automatically retried: if the response is lost, the write might have succeeded. Rerun a dry run before retrying.
+
+Reports include the pre-write GET snapshot (`before.json`), requested payload, plan, and successful result. They contain design/file data, never the credential; GitHub retains them for seven days. Local `.figma-sync/` reports are gitignored. The snapshot is an audit/recovery aid, not an automatic rollback tool. Reapplying a previous token revision can restore managed values, but no destructive rollback or ID recreation is performed.
+
+For local use, build the artifact first and supply `FIGMA_FILE_KEY` and `FIGMA_ACCESS_TOKEN` through your shell/secret manager (there is no automatic `.env` loading):
+
+```bash
+pnpm --filter ave-cli build
+pnpm --filter ave-tokens check:source
+pnpm --filter ave-tokens build:figma
+pnpm --filter ave-tokens sync:figma          # dry run
+pnpm --filter ave-tokens sync:figma --apply  # explicit write
+```
+
 ## Figma importer
 
 The non-destructive Variables and local Styles importer lives in `figma-plugin/`. It creates or updates routed variables and Effect Styles while preserving unmentioned Figma content. Build it with:

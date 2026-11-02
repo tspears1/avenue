@@ -16,6 +16,7 @@
   },
   "files": [
     "dist",
+    "figma-plugin/src/core",
     "schemas",
     "src",
     "tokens",
@@ -28,7 +29,8 @@
     "check": "pnpm run check:source && pnpm run check:figma",
     "check:source": "node ./bin/compile-tokens.js --check",
     "check:figma": "node ./bin/build-figma.js --check",
-    "test": "node --test ./tests/*.test.js"
+    "test": "node --test ./tests/*.test.js",
+    "sync:figma": "node ./bin/sync-figma.js"
   },
   "dependencies": {
     "ave-cli": "workspace:*",

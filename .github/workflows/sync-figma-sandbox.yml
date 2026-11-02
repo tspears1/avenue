@@ -1,0 +1,84 @@
+name: Sync Figma sandbox
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: Write changes to the sandbox (false = dry run)
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+# One writer per destination. Do not cancel a request that may already be writing.
+concurrency:
+  group: figma-sandbox-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: figma-sandbox
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: package.json
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install ave-tokens dependency closure
+        run: pnpm install --filter ave-tokens... --frozen-lockfile
+
+      - name: Build ave-cli
+        run: pnpm --filter ave-cli build
+
+      - name: Test token pipeline and REST sync
+        run: pnpm --filter ave-tokens test
+
+      - name: Check committed source tokens
+        run: pnpm --filter ave-tokens check:source
+
+      - name: Build Figma artifact
+        run: pnpm --filter ave-tokens build:figma
+
+      - name: Check sandbox configuration
+        env:
+          FIGMA_FILE_KEY: ${{ vars.FIGMA_FILE_KEY }}
+        run: node --input-type=module -e 'if (process.env.FIGMA_FILE_KEY !== "gJwI7pwpT3hMfZAKk0X48h") throw new Error("FIGMA_FILE_KEY must point to the approved Avenue sandbox. Set it as a figma-sandbox environment variable.")'
+
+      - name: Plan or apply sandbox sync
+        env:
+          FIGMA_FILE_KEY: ${{ vars.FIGMA_FILE_KEY }}
+          FIGMA_ACCESS_TOKEN: ${{ secrets.FIGMA_ACCESS_TOKEN }}
+          APPLY: ${{ inputs.apply }}
+        run: |
+          node --input-type=module <<'EOF'
+          import { spawnSync } from "node:child_process";
+          const args = ["packages/ave-tokens/bin/sync-figma.js"];
+          if (process.env.APPLY === "true") args.push("--apply");
+          const result = spawnSync(process.execPath, args, { stdio: "inherit", env: process.env });
+          process.exit(result.status ?? 1);
+          EOF
+
+      # These reports contain design-token/file data, but never the credential.
+      - name: Upload sync plan and pre-write snapshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: figma-sandbox-sync-reports
+          path: packages/ave-tokens/.figma-sync/
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 7

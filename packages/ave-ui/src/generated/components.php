@@ -146,4 +146,16 @@ return [
             ],
         ],
     ],
+    'test-thing' => [
+        'name' => 'test-thing',
+        'displayName' => 'Test Thing',
+        'description' => 'Test Thing component',
+        'version' => '1.0.0',
+        'tag' => 'ave-test-thing',
+        'docs' => [
+            'storybook' => 'http://localhost:6006/?path=/docs/organisms-test-thing--docs',
+        ],
+        'schema' => 'components/test-thing/test-thing.schema.json',
+        'integrations' => [],
+    ],
 ];

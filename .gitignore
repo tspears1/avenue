@@ -2,6 +2,7 @@
 node_modules/
 .pnpm-store/
 dist/
+packages/ave-tokens/.figma-sync/
 
 # PHP artifacts
 vendor/
