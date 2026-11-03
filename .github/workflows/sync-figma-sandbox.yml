@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       apply:
-        description: Write changes to the sandbox? (Leave unchecked for a Dry Run.)
+        description: Write changes to the sandbox? </br><small>(Leave unchecked for a Dry Run.)</small>
         required: true
         default: false
         type: boolean
