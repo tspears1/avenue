@@ -12,6 +12,7 @@ function stableJson(value) {
 export async function syncFigma({
   artifact, fileKey, token, apply = false, fetchImpl = fetch,
   onSnapshot = async () => {}, onPlan = async () => {},
+  onReadback = async () => {}, onVerification = async () => {},
 }) {
   if (!/^[a-zA-Z0-9_-]+$/.test(fileKey ?? "")) throw new Error("FIGMA_FILE_KEY must be a file key, not a URL.");
   if (typeof token !== "string" || !token.trim()) throw new Error("FIGMA_ACCESS_TOKEN is required.");
@@ -62,7 +63,13 @@ export async function syncFigma({
   await onSnapshot(current);
   await request("POST", "", planned.payload);
   const actual = await request("GET", "/local");
+  await onReadback(actual);
   const verification = verifyRestSync(artifact, actual);
-  if (!verification.matches) throw new Error("Figma accepted the write, but read-back verification found remaining changes. Rerun a dry run; do not assume synchronization completed.");
+  await onVerification(verification);
+  if (!verification.matches) {
+    const kinds = {};
+    for (const operation of verification.plan.operations) kinds[operation.kind] = (kinds[operation.kind] ?? 0) + 1;
+    throw new Error(`Figma accepted the write, but read-back verification found ${verification.plan.operations.length} remaining operations (${Object.entries(kinds).map(([kind, count]) => `${kind}: ${count}`).join(", ")}). Review after.json and verification.json, then rerun a dry run; do not assume synchronization completed.`);
+  }
   return { ...planned, applied: true, verified: true };
 }

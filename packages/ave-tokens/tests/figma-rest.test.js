@@ -111,6 +111,52 @@ test('RGBA and aliases use temp targets, preserve alpha, and round-trip', () => 
   assert.equal(verifyRestSync(input, after).matches, false, 'non-byte colors must not round to a false match');
 });
 
+test('float32 color storage round-trips every byte including alpha without broad quantization', () => {
+  const input = artifact(Array.from({ length: 256 }, (_, byte) => {
+    const hex = byte.toString(16).padStart(2, '0');
+    return variable({ name: `color/${byte}`, sourcePath: `color.${byte}`, resolvedType: 'COLOR', valuesByMode: { Light: `#${hex}${hex}${hex}${hex}` } });
+  }));
+  const after = apply(empty(), planRestSync(input, empty()).payload);
+  for (const entry of Object.values(after.variables)) {
+    for (const value of Object.values(entry.valuesByMode)) {
+      for (const channel of ['r', 'g', 'b', 'a']) value[channel] = Math.fround(value[channel]);
+    }
+  }
+  assert.equal(verifyRestSync(input, after).matches, true);
+  const first = Object.values(after.variables)[1];
+  first.valuesByMode[Object.keys(first.valuesByMode)[0]].a += 1e-9;
+  assert.equal(verifyRestSync(input, after).matches, false, 'even a tiny non-float32-equivalent change must be detected');
+});
+
+test('float32 dimensions from Figma compare unchanged while authored payload precision is preserved', () => {
+  const values = [81.45, 104.73, 71.27, 91.64, 61.09, 78.55, 48.73, 60.36, 43.64, -1.23, 0.01];
+  const input = artifact(values.map((value, index) => variable({ name: `size/${index}`, sourcePath: `size.${index}`, valuesByMode: { Light: value } })));
+  const { payload } = planRestSync(input, empty());
+  assert.deepEqual(payload.variableModeValues.map((entry) => entry.value), values);
+  const after = apply(empty(), payload);
+  for (const entry of Object.values(after.variables)) {
+    for (const [mode, value] of Object.entries(entry.valuesByMode)) entry.valuesByMode[mode] = Math.fround(value);
+  }
+  const original = structuredClone(after);
+  assert.equal(verifyRestSync(input, after).matches, true);
+  assert.deepEqual(after, original, 'comparison must not mutate the caller snapshot');
+  const first = Object.values(after.variables)[0];
+  first.valuesByMode[Object.keys(first.valuesByMode)[0]] += 1e-9;
+  const remaining = planRestSync(input, after);
+  assert.equal(remaining.payload.variableModeValues.length, 1);
+  assert.equal(remaining.payload.variableModeValues[0].value, 81.45);
+});
+
+test('float32 equivalence does not hide metadata differences', () => {
+  const input = artifact([variable({ valuesByMode: { Light: 81.45 }, scopes: ['FONT_WEIGHT'] })]);
+  const after = state([existingVariable({ valuesByMode: { m1: Math.fround(81.45) }, description: '', scopes: ['FONT_STYLE'] })]);
+  const { plan, payload } = planRestSync(input, after);
+  assert.equal(plan.operations.length, 1);
+  assert.equal(payload.variableModeValues.length, 0);
+  assert.deepEqual(payload.variables[0].scopes, ['FONT_WEIGHT']);
+  assert.equal(payload.variables[0].description, marker('spacing.base'));
+});
+
 test('updates keep IDs, marker supports variable name changes and preserves artifact description', () => {
   const meta = state();
   const before = structuredClone(meta);

@@ -21,6 +21,17 @@ if (args.includes("--help")) {
       fileKey: process.env.FIGMA_FILE_KEY,
       token: process.env.FIGMA_ACCESS_TOKEN,
       onSnapshot: (snapshot) => save("before.json", snapshot),
+      onReadback: (snapshot) => save("after.json", snapshot),
+      onVerification: async (verification) => {
+        await save("verification.json", verification);
+        if (!verification.matches) {
+          const kinds = {};
+          for (const operation of verification.plan.operations) kinds[operation.kind] = (kinds[operation.kind] ?? 0) + 1;
+          const detail = `Read-back verification: ${verification.plan.operations.length} remaining operations (${Object.entries(kinds).map(([kind, count]) => `${kind}: ${count}`).join(", ")}). See after.json and verification.json in the reports artifact.`;
+          console.log(detail);
+          if (process.env.GITHUB_STEP_SUMMARY) await appendFile(process.env.GITHUB_STEP_SUMMARY, `\n${detail}\n`);
+        }
+      },
       onPlan: async ({ plan, payload, ignoredEffectStyles }) => {
         await save("plan.json", { fileKey: process.env.FIGMA_FILE_KEY, commit: process.env.GITHUB_SHA, counts: plan.counts, operations: plan.operations, ignoredEffectStyles });
         await save("payload.json", payload);

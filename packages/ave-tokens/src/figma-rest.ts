@@ -60,8 +60,12 @@ function readValue(value: unknown, type: string, label: string): SnapshotValue {
         if (typeof channel !== "number" || !Number.isFinite(channel) || channel < 0 || channel > 1) fail(`${label}.${key} must be in [0, 1].`);
         return channel;
       });
-      // Do not quantize arbitrary API colors into a false unchanged match.
-      if (channels.some((channel) => Math.abs(channel * 255 - Math.round(channel * 255)) > 1e-8)) {
+      // Figma returns float32 channel values. Only accept the exact byte value
+      // or its float32 representation; nearby arbitrary colors must still differ.
+      if (channels.some((channel) => {
+        const byteValue = Math.round(channel * 255) / 255;
+        return channel !== byteValue && channel !== Math.fround(byteValue);
+      })) {
         return `rgba(${channels.join(",")})`;
       }
       return `#${channels.map((channel) => Math.round(channel * 255).toString(16).padStart(2, "0")).join("")}`;
@@ -197,6 +201,26 @@ export function planRestSync(artifactInput: unknown, restMeta: unknown): {
       const occupant = current.find((entry) => entry.name === variable.name);
       const oldPath = occupant ? identity(occupant.description ?? "") : undefined;
       if (oldPath !== undefined && oldPath !== variable.sourcePath) fail(`Name "${variable.name}" belongs to sourcePath "${oldPath}", not "${variable.sourcePath}". sourcePath rename is not supported.`);
+    }
+  }
+  // Compare against Figma's storage precision without changing authored values
+  // or the outgoing payload. This is exact float32 equivalence, not an epsilon.
+  for (const collection of desired.collections) {
+    const owner = snapshot.collections.find((entry) => entry.name === collection.name);
+    for (const variable of collection.variables) {
+      if (variable.resolvedType !== "FLOAT" || variable.aliasOf) continue;
+      const existing = snapshot.variables.find((entry) =>
+        Object.hasOwn(identities, variable.sourcePath)
+          ? entry.id === identities[variable.sourcePath]
+          : entry.collectionId === owner?.id && entry.name === variable.name);
+      if (!existing || existing.resolvedType !== "FLOAT") continue;
+      for (const mode of collection.modes) {
+        const modeId = owner?.modes.find((entry) => entry.name === mode.name)?.id;
+        const expected = variable.valuesByMode[mode.name];
+        if (modeId && typeof expected === "number" && existing.valuesByMode[modeId] === Math.fround(expected)) {
+          existing.valuesByMode[modeId] = expected;
+        }
+      }
     }
   }
   const plan = planReconciliation(desired, snapshot, identities);

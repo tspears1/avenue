@@ -231,7 +231,16 @@ test('array reordering remains a snapshot change even when the write payload is 
 
 test('accepted POST with remaining read-back changes fails verification without another write', async () => {
   const network = scriptedFetch([read(state()), read(state()), ['POST', accepted], read(state())]);
-  await assert.rejects(syncFigma(options({ apply: true, fetchImpl: network.fetchImpl })), /accepted the write.*verification found remaining changes.*do not assume synchronization completed/);
+  const reports = [];
+  await assert.rejects(syncFigma(options({
+    apply: true, fetchImpl: network.fetchImpl,
+    onReadback: async (snapshot) => { reports.push(['after', snapshot]); },
+    onVerification: async (verification) => { reports.push(['verification', verification]); },
+  })), /accepted the write.*verification found 1 remaining operations \(setValue: 1\).*do not assume synchronization completed/);
+  assert.deepEqual(reports.map(([kind]) => kind), ['after', 'verification']);
+  assert.deepEqual(reports[0][1], envelope(state()));
+  assert.equal(reports[1][1].matches, false);
+  assert.equal(reports[1][1].plan.operations[0].sourcePath, 'spacing.base');
   network.done();
   assert.equal(network.calls.filter((call) => call.method === 'POST').length, 1);
 });
