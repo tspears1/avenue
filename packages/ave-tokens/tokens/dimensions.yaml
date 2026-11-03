@@ -6,7 +6,7 @@ border:
   radius:
     none: 0px
     sm: 4px
-    md: 9px
+    md: 8px
     lg: 16px
     round: 9999px
 
