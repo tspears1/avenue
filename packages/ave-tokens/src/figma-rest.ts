@@ -203,17 +203,24 @@ export function planRestSync(artifactInput: unknown, restMeta: unknown): {
       if (oldPath !== undefined && oldPath !== variable.sourcePath) fail(`Name "${variable.name}" belongs to sourcePath "${oldPath}", not "${variable.sourcePath}". sourcePath rename is not supported.`);
     }
   }
-  // Compare against Figma's storage precision without changing authored values
-  // or the outgoing payload. This is exact float32 equivalence, not an epsilon.
+  // Normalize observed REST representations only for comparison. Authored
+  // values and outgoing CREATE/UPDATE scopes retain the documented API spelling.
   for (const collection of desired.collections) {
     const owner = snapshot.collections.find((entry) => entry.name === collection.name);
     for (const variable of collection.variables) {
-      if (variable.resolvedType !== "FLOAT" || variable.aliasOf) continue;
+      if (variable.resolvedType !== "FLOAT") continue;
       const existing = snapshot.variables.find((entry) =>
         Object.hasOwn(identities, variable.sourcePath)
           ? entry.id === identities[variable.sourcePath]
           : entry.collectionId === owner?.id && entry.name === variable.name);
       if (!existing || existing.resolvedType !== "FLOAT") continue;
+      // GET can return FONT_STYLE for a FLOAT written with FONT_WEIGHT. Do not
+      // treat STRING font styles or unrelated scope differences as equivalent.
+      if (variable.scopes.includes("FONT_WEIGHT")) {
+        existing.scopes = [...new Set(existing.scopes.map((scope) => scope === "FONT_STYLE" ? "FONT_WEIGHT" : scope))];
+      }
+      if (variable.aliasOf) continue;
+      // Exact float32 equivalence, not an epsilon.
       for (const mode of collection.modes) {
         const modeId = owner?.modes.find((entry) => entry.name === mode.name)?.id;
         const expected = variable.valuesByMode[mode.name];

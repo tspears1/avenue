@@ -149,12 +149,46 @@ test('float32 dimensions from Figma compare unchanged while authored payload pre
 
 test('float32 equivalence does not hide metadata differences', () => {
   const input = artifact([variable({ valuesByMode: { Light: 81.45 }, scopes: ['FONT_WEIGHT'] })]);
-  const after = state([existingVariable({ valuesByMode: { m1: Math.fround(81.45) }, description: '', scopes: ['FONT_STYLE'] })]);
+  const after = state([existingVariable({ valuesByMode: { m1: Math.fround(81.45) }, description: '', scopes: ['ALL_SCOPES'] })]);
   const { plan, payload } = planRestSync(input, after);
   assert.equal(plan.operations.length, 1);
   assert.equal(payload.variableModeValues.length, 0);
   assert.deepEqual(payload.variables[0].scopes, ['FONT_WEIGHT']);
   assert.equal(payload.variables[0].description, marker('spacing.base'));
+});
+
+test('REST FONT_STYLE read-back is equivalent only to requested FLOAT FONT_WEIGHT', () => {
+  const input = artifact([variable({ scopes: ['FONT_WEIGHT'] })]);
+  const after = state([existingVariable({ scopes: ['FONT_STYLE'] })]);
+  const original = structuredClone(after);
+  assert.equal(verifyRestSync(input, after).matches, true);
+  assert.deepEqual(after, original, 'comparison must not mutate the API response');
+  assert.deepEqual(planRestSync(input, empty()).payload.variables[0].scopes, ['FONT_WEIGHT'], 'writes retain the documented scope');
+
+  for (const scopes of [['ALL_SCOPES'], ['FONT_SIZE'], ['FONT_STYLE', 'FONT_SIZE']]) {
+    assert.equal(verifyRestSync(input, state([existingVariable({ scopes })])).matches, false, 'other scope differences must remain visible');
+  }
+  const stringInput = artifact([variable({ resolvedType: 'STRING', scopes: ['FONT_STYLE'], valuesByMode: { Light: 'Regular' } })]);
+  const stringState = state([existingVariable({ resolvedType: 'STRING', scopes: ['FONT_WEIGHT'], valuesByMode: { m1: 'Regular' } })]);
+  assert.equal(verifyRestSync(stringInput, stringState).matches, false, 'STRING font style scopes are not normalized');
+});
+
+test('FONT_WEIGHT read-back compatibility preserves metadata and alias verification', () => {
+  const input = artifact([
+    variable({ scopes: ['FONT_WEIGHT'] }),
+    variable({ name: 'weight/alias', sourcePath: 'weight.alias', scopes: ['FONT_WEIGHT'], aliasOf: 'spacing.base' }),
+  ]);
+  const after = apply(empty(), planRestSync(input, empty()).payload);
+  for (const entry of Object.values(after.variables)) entry.scopes = ['FONT_STYLE'];
+  assert.equal(verifyRestSync(input, after).matches, true);
+  const alias = Object.values(after.variables).find((entry) => entry.name === 'weight/alias');
+  alias.description = '';
+  const { payload } = planRestSync(input, after);
+  assert.equal(payload.variables.length, 1);
+  assert.equal(payload.variables[0].description, marker('weight.alias'));
+  alias.description = marker('weight.alias');
+  alias.valuesByMode[Object.keys(alias.valuesByMode)[0]] = 8;
+  assert.equal(verifyRestSync(input, after).matches, false, 'lost aliases must still fail verification');
 });
 
 test('updates keep IDs, marker supports variable name changes and preserves artifact description', () => {
